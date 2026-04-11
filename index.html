@@ -1,1 +1,279 @@
-<html><body style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0a0a0a;color:#fff;font-family:sans-serif;font-size:3rem;font-weight:bold;">study hard for UPSC</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Locked</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%; background: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  #passcode {
+    display: flex; flex-direction: column;
+    align-items: center;
+    width: 100%; max-width: 340px;
+    padding: 0 20px;
+  }
+
+  /* Lock icon */
+  .lock-icon {
+    width: 24px; height: 24px; margin-bottom: 10px; opacity: 0.85;
+  }
+  .lock-icon svg { width: 100%; height: 100%; }
+
+  .title {
+    font-size: 17px; font-weight: 400; color: #fff;
+    margin-bottom: 22px; letter-spacing: 0.2px;
+    min-height: 22px; text-align: center;
+    transition: color 0.3s ease;
+  }
+  .title.error { color: #ff3b30; }
+
+  /* Dots */
+  .dots {
+    display: flex; gap: 16px; margin-bottom: 44px;
+  }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    background: transparent;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+  }
+  .dot.filled {
+    background: #fff; border-color: #fff; transform: scale(1.08);
+  }
+  .dot.success {
+    background: #34c759; border-color: #34c759;
+  }
+  .dots.shake { animation: shake 0.5s ease; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    10%,50%,90%{transform:translateX(-8px)}
+    30%,70%{transform:translateX(8px)}
+  }
+
+  /* Numpad */
+  .numpad {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; width: 100%; max-width: 285px;
+  }
+  .key {
+    width: 78px; height: 78px; border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; border: none; outline: none;
+    transition: background 0.08s ease, transform 0.06s ease;
+    justify-self: center;
+    -webkit-appearance: none;
+  }
+  .key:active, .key.pressed {
+    background: rgba(255,255,255,0.35);
+    transform: scale(0.94);
+  }
+  .key-num {
+    font-size: 31px; font-weight: 300; color: #fff; line-height: 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  }
+  .key-sub {
+    font-size: 9.5px; font-weight: 500; color: #fff;
+    letter-spacing: 2.2px; margin-top: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  }
+
+  .action {
+    width: 78px; height: 78px;
+    background: transparent; border: none; outline: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15.5px; font-weight: 400;
+    color: #fff; justify-self: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    letter-spacing: 0.2px; opacity: 0.9;
+  }
+  .action:active { opacity: 0.4; }
+
+  /* ─── REVEAL ─── */
+  #reveal {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #000;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.5s ease;
+  }
+  #reveal.active { opacity: 1; pointer-events: all; }
+
+  .r-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 300; font-size: clamp(2.2rem, 6vw, 4rem);
+    color: rgba(255,255,255,0); letter-spacing: 0.05em;
+    text-align: center; line-height: 1.2;
+  }
+  .r-name em { font-style: italic; color: #c97d3e; }
+  .r-name.go { animation: nameIn 3s ease 0.5s forwards; }
+  @keyframes nameIn {
+    0%{color:rgba(255,255,255,0);letter-spacing:0.25em;filter:blur(8px)}
+    100%{color:rgba(255,255,255,0.9);letter-spacing:0.05em;filter:blur(0)}
+  }
+
+  .r-triad {
+    font-family: 'Azeret Mono', 'SF Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(201,125,62,0);
+    margin-top: 1.2rem;
+  }
+  .r-triad .sep { margin: 0 0.6rem; opacity: 0.3; }
+  .r-triad.go { animation: fin 2s ease 2.5s forwards; }
+
+  .r-frags {
+    margin-top: 2.5rem; display: flex; flex-direction: column;
+    gap: 0.6rem; align-items: center;
+  }
+  .rf {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 300; font-style: italic;
+    font-size: 0.95rem; color: rgba(255,255,255,0);
+    text-align: center; max-width: 440px; line-height: 1.6;
+  }
+  .rf.go { animation: fin 2s ease forwards; }
+  @keyframes fin { to { color: rgba(255,255,255,0.4); } }
+
+  .r-foot {
+    position: absolute; bottom: 7%;
+    font-family: 'Azeret Mono', 'SF Mono', monospace;
+    font-size: 0.42rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: rgba(201,125,62,0);
+  }
+  .r-foot.go { animation: fin 2s ease 9s forwards; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Azeret+Mono:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="passcode">
+  <div class="lock-icon">
+    <svg viewBox="0 0 24 24" fill="white"><path d="M18 10.5V8c0-3.31-2.69-6-6-6S6 4.69 6 8v2.5C4.9 10.5 4 11.4 4 12.5v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zM8.5 8c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2.5h-7V8zm3.5 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+  </div>
+  <div class="title" id="title">Enter Passcode</div>
+  <div class="dots" id="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="numpad">
+    <div class="key" data-n="1"><span class="key-num">1</span><span class="key-sub">&nbsp;</span></div>
+    <div class="key" data-n="2"><span class="key-num">2</span><span class="key-sub">A B C</span></div>
+    <div class="key" data-n="3"><span class="key-num">3</span><span class="key-sub">D E F</span></div>
+    <div class="key" data-n="4"><span class="key-num">4</span><span class="key-sub">G H I</span></div>
+    <div class="key" data-n="5"><span class="key-num">5</span><span class="key-sub">J K L</span></div>
+    <div class="key" data-n="6"><span class="key-num">6</span><span class="key-sub">M N O</span></div>
+    <div class="key" data-n="7"><span class="key-num">7</span><span class="key-sub">P Q R S</span></div>
+    <div class="key" data-n="8"><span class="key-num">8</span><span class="key-sub">T U V</span></div>
+    <div class="key" data-n="9"><span class="key-num">9</span><span class="key-sub">W X Y Z</span></div>
+    <div class="action"></div>
+    <div class="key" data-n="0"><span class="key-num">0</span><span class="key-sub">&nbsp;</span></div>
+    <div class="action" id="del">Delete</div>
+  </div>
+</div>
+
+<div id="reveal">
+  <div class="r-name" id="rn">Suyash <em>Gunjal</em></div>
+  <div class="r-triad" id="rt">Physician<span class="sep">/</span>AI<span class="sep">/</span>Builder</div>
+  <div class="r-frags">
+    <div class="rf" id="f1">Radiologist who chose the frontier.</div>
+    <div class="rf" id="f2">Leading AI evaluation at xAI — medicine meets machine.</div>
+    <div class="rf" id="f3">Building healthcare institutions in Maharashtra.</div>
+    <div class="rf" id="f4">Published in Radiology: AI & BMJ Digital Health.</div>
+  </div>
+  <div class="r-foot" id="rf">this is only the first layer</div>
+</div>
+
+<script>
+const CODE = '777777';
+let input = '';
+let attempts = 0;
+const dots = document.querySelectorAll('.dot');
+const dotsBox = document.getElementById('dots');
+const title = document.getElementById('title');
+const passcode = document.getElementById('passcode');
+const reveal = document.getElementById('reveal');
+
+function press(n) {
+  if (input.length >= 6) return;
+  if (navigator.vibrate) navigator.vibrate(8);
+  input += n;
+  dots[input.length - 1].classList.add('filled');
+  if (input.length === 6) setTimeout(check, 280);
+}
+
+function del() {
+  if (!input.length) return;
+  input = input.slice(0, -1);
+  dots[input.length].classList.remove('filled');
+}
+
+function check() {
+  if (input === CODE) {
+    // Success
+    dots.forEach(d => { d.classList.remove('filled'); d.classList.add('success'); });
+    title.textContent = '';
+    setTimeout(() => {
+      passcode.style.transition = 'opacity 1s ease, filter 1s ease';
+      passcode.style.opacity = '0';
+      passcode.style.filter = 'blur(10px)';
+      setTimeout(() => {
+        passcode.style.display = 'none';
+        reveal.classList.add('active');
+        document.title = 'Suyash Gunjal';
+        doReveal();
+      }, 1000);
+    }, 500);
+  } else {
+    // Fail
+    attempts++;
+    dotsBox.classList.add('shake');
+    if (navigator.vibrate) navigator.vibrate([40, 25, 40]);
+    setTimeout(() => {
+      dotsBox.classList.remove('shake');
+      dots.forEach(d => d.classList.remove('filled'));
+      input = '';
+      title.classList.remove('error');
+      title.textContent = 'Try Again';
+    }, 550);
+  }
+}
+
+function doReveal() {
+  document.getElementById('rn').classList.add('go');
+  document.getElementById('rt').classList.add('go');
+  setTimeout(() => document.getElementById('f1').classList.add('go'), 3000);
+  setTimeout(() => document.getElementById('f2').classList.add('go'), 4200);
+  setTimeout(() => document.getElementById('f3').classList.add('go'), 5400);
+  setTimeout(() => document.getElementById('f4').classList.add('go'), 6600);
+  document.getElementById('rf').classList.add('go');
+}
+
+// Click
+document.querySelectorAll('.key[data-n]').forEach(k => {
+  k.addEventListener('click', () => {
+    k.classList.add('pressed');
+    setTimeout(() => k.classList.remove('pressed'), 100);
+    press(k.dataset.n);
+  });
+  k.addEventListener('touchstart', e => { e.preventDefault(); k.click(); }, { passive: false });
+});
+
+document.getElementById('del').addEventListener('click', del);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key >= '0' && e.key <= '9') press(e.key);
+  if (e.key === 'Backspace') del();
+});
+</script>
+</body>
+</html>
