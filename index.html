@@ -5,179 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Locked</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    width: 100%; height: 100%; background: #000;
-    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    overflow: hidden; user-select: none; -webkit-user-select: none;
-    display: flex; align-items: center; justify-content: center;
-  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
 
-  #passcode {
-    display: flex; flex-direction: column;
-    align-items: center;
-    width: 100%; max-width: 340px;
-    padding: 0 20px;
-  }
+  /* ═══ PASSCODE ═══ */
+  #passcode{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease,filter 1s ease;z-index:20}
+  #passcode.gone{opacity:0;filter:blur(12px);pointer-events:none}
+  .pc-inner{display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;padding:0 20px}
+  .lock-icon{width:24px;height:24px;margin-bottom:10px;opacity:.85}
+  .lock-icon svg{width:100%;height:100%}
+  .title{font-size:17px;font-weight:400;color:#fff;margin-bottom:22px;letter-spacing:.2px;min-height:22px;text-align:center}
+  .dots{display:flex;gap:16px;margin-bottom:44px}
+  .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);background:transparent;transition:background .12s,border-color .12s,transform .12s}
+  .dot.filled{background:#fff;border-color:#fff;transform:scale(1.08)}
+  .dot.success{background:#34c759;border-color:#34c759}
+  .dots.shake{animation:shake .5s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}10%,50%,90%{transform:translateX(-8px)}30%,70%{transform:translateX(8px)}}
+  .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:285px}
+  .key{width:78px;height:78px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;outline:none;transition:background .08s,transform .06s;justify-self:center;-webkit-appearance:none}
+  .key:active,.key.pressed{background:rgba(255,255,255,.35);transform:scale(.94)}
+  .key-num{font-size:31px;font-weight:300;color:#fff;line-height:1}
+  .key-sub{font-size:9.5px;font-weight:500;color:#fff;letter-spacing:2.2px;margin-top:2px}
+  .action{width:78px;height:78px;background:transparent;border:none;outline:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15.5px;font-weight:400;color:#fff;justify-self:center;letter-spacing:.2px;opacity:.9}
+  .action:active{opacity:.4}
 
-  /* Lock icon */
-  .lock-icon {
-    width: 24px; height: 24px; margin-bottom: 10px; opacity: 0.85;
-  }
-  .lock-icon svg { width: 100%; height: 100%; }
+  /* ═══ COSMOS ═══ */
+  #constellation{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 2s ease;cursor:crosshair}
+  #constellation.active{opacity:1;pointer-events:all}
 
-  .title {
-    font-size: 17px; font-weight: 400; color: #fff;
-    margin-bottom: 22px; letter-spacing: 0.2px;
-    min-height: 22px; text-align: center;
-    transition: color 0.3s ease;
-  }
-  .title.error { color: #ff3b30; }
+  /* Deep background gradient */
+  #cosmos{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 35%,#0d0820 0%,#060412 40%,#020108 70%,#000 100%)}
 
-  /* Dots */
-  .dots {
-    display: flex; gap: 16px; margin-bottom: 44px;
-  }
-  .dot {
-    width: 14px; height: 14px; border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.35);
-    background: transparent;
-    transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
-  }
-  .dot.filled {
-    background: #fff; border-color: #fff; transform: scale(1.08);
-  }
-  .dot.success {
-    background: #34c759; border-color: #34c759;
-  }
-  .dots.shake { animation: shake 0.5s ease; }
-  @keyframes shake {
-    0%,100%{transform:translateX(0)}
-    10%,50%,90%{transform:translateX(-8px)}
-    30%,70%{transform:translateX(8px)}
-  }
+  /* Parallax layers */
+  .star-layer{position:absolute;inset:-60px;transition:transform .15s ease-out}
 
-  /* Numpad */
-  .numpad {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 16px; width: 100%; max-width: 285px;
-  }
-  .key {
-    width: 78px; height: 78px; border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    cursor: pointer; border: none; outline: none;
-    transition: background 0.08s ease, transform 0.06s ease;
-    justify-self: center;
-    -webkit-appearance: none;
-  }
-  .key:active, .key.pressed {
-    background: rgba(255,255,255,0.35);
-    transform: scale(0.94);
-  }
-  .key-num {
-    font-size: 31px; font-weight: 300; color: #fff; line-height: 1;
-    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  }
-  .key-sub {
-    font-size: 9.5px; font-weight: 500; color: #fff;
-    letter-spacing: 2.2px; margin-top: 2px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  }
+  /* Nebulae */
+  .nebula{position:absolute;border-radius:50%;filter:blur(90px);opacity:0;transition:transform .2s ease-out}
+  .neb-1{width:500px;height:400px;top:10%;left:5%;background:radial-gradient(circle,rgba(80,30,120,.12),rgba(40,15,60,.05),transparent);animation:nebIn 4s ease 1s forwards}
+  .neb-2{width:600px;height:450px;top:40%;right:-5%;background:radial-gradient(circle,rgba(20,50,100,.1),rgba(10,25,50,.04),transparent);animation:nebIn 4s ease 2s forwards}
+  .neb-3{width:350px;height:350px;bottom:5%;left:25%;background:radial-gradient(circle,rgba(120,50,20,.08),rgba(60,25,10,.03),transparent);animation:nebIn 4s ease 2.5s forwards}
+  .neb-4{width:250px;height:200px;top:30%;left:45%;background:radial-gradient(circle,rgba(100,60,130,.06),transparent);animation:nebIn 4s ease 3s forwards}
+  @keyframes nebIn{to{opacity:1}}
 
-  .action {
-    width: 78px; height: 78px;
-    background: transparent; border: none; outline: none;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 15.5px; font-weight: 400;
-    color: #fff; justify-self: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    letter-spacing: 0.2px; opacity: 0.9;
-  }
-  .action:active { opacity: 0.4; }
+  /* Canvas layers */
+  canvas{position:absolute;inset:0}
 
-  /* ─── REVEAL ─── */
-  #reveal {
-    position: fixed; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: #000;
-    opacity: 0; pointer-events: none;
-    transition: opacity 1.5s ease;
-  }
-  #reveal.active { opacity: 1; pointer-events: all; }
+  /* Stars */
+  .star{position:absolute;border-radius:50%;transform:translate(-50%,-50%)}
+  .star.decor{pointer-events:none}
+  .star.key-star{z-index:2;cursor:pointer}
+  .star.key-star::before{content:'';position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(201,125,62,.04),transparent);animation:keyBreath 4s ease-in-out infinite;pointer-events:none}
+  .star.key-star::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(201,125,62,0);transition:border-color .5s;pointer-events:none}
+  .star.key-star:hover::after{border-color:rgba(201,125,62,.15)}
+  @keyframes keyBreath{0%,100%{transform:scale(1);opacity:.2}50%{transform:scale(2.5);opacity:.5}}
 
-  .r-name {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-weight: 300; font-size: clamp(2.2rem, 6vw, 4rem);
-    color: rgba(255,255,255,0); letter-spacing: 0.05em;
-    text-align: center; line-height: 1.2;
-  }
-  .r-name em { font-style: italic; color: #c97d3e; }
-  .r-name.go { animation: nameIn 3s ease 0.5s forwards; }
-  @keyframes nameIn {
-    0%{color:rgba(255,255,255,0);letter-spacing:0.25em;filter:blur(8px)}
-    100%{color:rgba(255,255,255,0.9);letter-spacing:0.05em;filter:blur(0)}
-  }
+  .star.activated{z-index:3}
+  .star.activated::before{animation:none;opacity:0}
 
-  .r-triad {
-    font-family: 'Azeret Mono', 'SF Mono', monospace;
-    font-size: 0.6rem; letter-spacing: 0.18em;
-    text-transform: uppercase; color: rgba(201,125,62,0);
-    margin-top: 1.2rem;
-  }
-  .r-triad .sep { margin: 0 0.6rem; opacity: 0.3; }
-  .r-triad.go { animation: fin 2s ease 2.5s forwards; }
+  .star.wrong-flash{animation:wrongPop .5s ease}
+  @keyframes wrongPop{0%{box-shadow:0 0 15px rgba(255,100,100,.4)}100%{box-shadow:none}}
 
-  .r-frags {
-    margin-top: 2.5rem; display: flex; flex-direction: column;
-    gap: 0.6rem; align-items: center;
-  }
-  .rf {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-weight: 300; font-style: italic;
-    font-size: 0.95rem; color: rgba(255,255,255,0);
-    text-align: center; max-width: 440px; line-height: 1.6;
-  }
-  .rf.go { animation: fin 2s ease forwards; }
-  @keyframes fin { to { color: rgba(255,255,255,0.4); } }
+  /* Shooting stars */
+  .shooting-star{position:absolute;pointer-events:none;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(255,255,255,0));transform-origin:left center;animation:shoot 1.2s ease-out forwards;z-index:1}
+  @keyframes shoot{0%{width:0;opacity:1}30%{width:120px;opacity:.8}100%{width:0;opacity:0;transform:translateX(200px)}}
 
-  .r-foot {
-    position: absolute; bottom: 7%;
-    font-family: 'Azeret Mono', 'SF Mono', monospace;
-    font-size: 0.42rem; letter-spacing: 0.3em;
-    text-transform: uppercase; color: rgba(201,125,62,0);
-  }
-  .r-foot.go { animation: fin 2s ease 9s forwards; }
+  /* ═══ REVEAL ═══ */
+  #reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 2.5s ease;z-index:10}
+  #reveal.active{opacity:1;pointer-events:all}
+  .r-name{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:clamp(2.2rem,6vw,4rem);color:rgba(255,255,255,0);letter-spacing:.05em;text-align:center;line-height:1.2}
+  .r-name em{font-style:italic;color:#c97d3e}
+  .r-name.go{animation:nameIn 3s ease .5s forwards}
+  @keyframes nameIn{0%{color:rgba(255,255,255,0);letter-spacing:.25em;filter:blur(8px)}100%{color:rgba(255,255,255,.9);letter-spacing:.05em;filter:blur(0)}}
+  .r-triad{font-family:'Azeret Mono','SF Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(201,125,62,0);margin-top:1.2rem}
+  .r-triad .sep{margin:0 .6rem;opacity:.3}
+  .r-triad.go{animation:fin 2s ease 2.5s forwards}
+  .r-frags{margin-top:2.5rem;display:flex;flex-direction:column;gap:.6rem;align-items:center}
+  .rf{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-style:italic;font-size:.95rem;color:rgba(255,255,255,0);text-align:center;max-width:440px;line-height:1.6}
+  .rf.go{animation:fin 2s ease forwards}
+  @keyframes fin{to{color:rgba(255,255,255,.4)}}
+  .r-foot{position:absolute;bottom:7%;font-family:'Azeret Mono','SF Mono',monospace;font-size:.42rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(201,125,62,0)}
+  .r-foot.go{animation:fin 2s ease 9s forwards}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Azeret+Mono:wght@300&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="passcode">
-  <div class="lock-icon">
-    <svg viewBox="0 0 24 24" fill="white"><path d="M18 10.5V8c0-3.31-2.69-6-6-6S6 4.69 6 8v2.5C4.9 10.5 4 11.4 4 12.5v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zM8.5 8c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2.5h-7V8zm3.5 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+  <div class="pc-inner">
+    <div class="lock-icon"><svg viewBox="0 0 24 24" fill="white"><path d="M18 10.5V8c0-3.31-2.69-6-6-6S6 4.69 6 8v2.5C4.9 10.5 4 11.4 4 12.5v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zM8.5 8c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2.5h-7V8zm3.5 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
+    <div class="title" id="title">Enter Passcode</div>
+    <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="numpad">
+      <div class="key" data-n="1"><span class="key-num">1</span><span class="key-sub">&nbsp;</span></div>
+      <div class="key" data-n="2"><span class="key-num">2</span><span class="key-sub">A B C</span></div>
+      <div class="key" data-n="3"><span class="key-num">3</span><span class="key-sub">D E F</span></div>
+      <div class="key" data-n="4"><span class="key-num">4</span><span class="key-sub">G H I</span></div>
+      <div class="key" data-n="5"><span class="key-num">5</span><span class="key-sub">J K L</span></div>
+      <div class="key" data-n="6"><span class="key-num">6</span><span class="key-sub">M N O</span></div>
+      <div class="key" data-n="7"><span class="key-num">7</span><span class="key-sub">P Q R S</span></div>
+      <div class="key" data-n="8"><span class="key-num">8</span><span class="key-sub">T U V</span></div>
+      <div class="key" data-n="9"><span class="key-num">9</span><span class="key-sub">W X Y Z</span></div>
+      <div class="action"></div>
+      <div class="key" data-n="0"><span class="key-num">0</span><span class="key-sub">&nbsp;</span></div>
+      <div class="action" id="del">Delete</div>
+    </div>
   </div>
-  <div class="title" id="title">Enter Passcode</div>
-  <div class="dots" id="dots">
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+</div>
+
+<div id="constellation">
+  <div id="cosmos">
+    <div class="nebula neb-1"></div>
+    <div class="nebula neb-2"></div>
+    <div class="nebula neb-3"></div>
+    <div class="nebula neb-4"></div>
+    <div class="star-layer" id="layer0"></div>
+    <div class="star-layer" id="layer1"></div>
+    <div class="star-layer" id="layer2"></div>
   </div>
-  <div class="numpad">
-    <div class="key" data-n="1"><span class="key-num">1</span><span class="key-sub">&nbsp;</span></div>
-    <div class="key" data-n="2"><span class="key-num">2</span><span class="key-sub">A B C</span></div>
-    <div class="key" data-n="3"><span class="key-num">3</span><span class="key-sub">D E F</span></div>
-    <div class="key" data-n="4"><span class="key-num">4</span><span class="key-sub">G H I</span></div>
-    <div class="key" data-n="5"><span class="key-num">5</span><span class="key-sub">J K L</span></div>
-    <div class="key" data-n="6"><span class="key-num">6</span><span class="key-sub">M N O</span></div>
-    <div class="key" data-n="7"><span class="key-num">7</span><span class="key-sub">P Q R S</span></div>
-    <div class="key" data-n="8"><span class="key-num">8</span><span class="key-sub">T U V</span></div>
-    <div class="key" data-n="9"><span class="key-num">9</span><span class="key-sub">W X Y Z</span></div>
-    <div class="action"></div>
-    <div class="key" data-n="0"><span class="key-num">0</span><span class="key-sub">&nbsp;</span></div>
-    <div class="action" id="del">Delete</div>
-  </div>
+  <canvas id="fx"></canvas>
+  <canvas id="conn"></canvas>
+  <div id="keyStarsEl"></div>
 </div>
 
 <div id="reveal">
@@ -187,93 +134,224 @@
     <div class="rf" id="f1">Radiologist who chose the frontier.</div>
     <div class="rf" id="f2">Leading AI evaluation at xAI — medicine meets machine.</div>
     <div class="rf" id="f3">Building healthcare institutions in Maharashtra.</div>
-    <div class="rf" id="f4">Published in Radiology: AI & BMJ Digital Health.</div>
+    <div class="rf" id="f4">Published in Radiology: AI &amp; BMJ Digital Health.</div>
   </div>
-  <div class="r-foot" id="rf">this is only the first layer</div>
+  <div class="r-foot" id="rfoot">this is only the beginning</div>
 </div>
 
 <script>
-const CODE = '777777';
-let input = '';
-let attempts = 0;
-const dots = document.querySelectorAll('.dot');
-const dotsBox = document.getElementById('dots');
-const title = document.getElementById('title');
-const passcode = document.getElementById('passcode');
-const reveal = document.getElementById('reveal');
+/* ═══ PASSCODE ═══ */
+const CODE='777777';let inp='',att=0;
+const dots=document.querySelectorAll('.dot'),dotsBox=document.getElementById('dots'),ttl=document.getElementById('title');
+function press(n){if(inp.length>=6)return;if(navigator.vibrate)navigator.vibrate(8);inp+=n;dots[inp.length-1].classList.add('filled');if(inp.length===6)setTimeout(check,280)}
+function del(){if(!inp.length)return;inp=inp.slice(0,-1);dots[inp.length].classList.remove('filled')}
+function check(){
+  if(inp===CODE){dots.forEach(d=>{d.classList.remove('filled');d.classList.add('success')});ttl.textContent='';setTimeout(()=>{document.getElementById('passcode').classList.add('gone');setTimeout(initCosmos,1200)},600)}
+  else{att++;dotsBox.classList.add('shake');if(navigator.vibrate)navigator.vibrate([40,25,40]);setTimeout(()=>{dotsBox.classList.remove('shake');dots.forEach(d=>d.classList.remove('filled'));inp='';ttl.textContent='Try Again'},550)}
+}
+document.querySelectorAll('.key[data-n]').forEach(k=>{k.addEventListener('click',()=>{k.classList.add('pressed');setTimeout(()=>k.classList.remove('pressed'),100);press(k.dataset.n)});k.addEventListener('touchstart',e=>{e.preventDefault();k.click()},{passive:false})});
+document.getElementById('del').addEventListener('click',del);
+document.addEventListener('keydown',e=>{if(document.getElementById('passcode').classList.contains('gone'))return;if(e.key>='0'&&e.key<='9')press(e.key);if(e.key==='Backspace')del()});
 
-function press(n) {
-  if (input.length >= 6) return;
-  if (navigator.vibrate) navigator.vibrate(8);
-  input += n;
-  dots[input.length - 1].classList.add('filled');
-  if (input.length === 6) setTimeout(check, 280);
+/* ═══ COSMOS ═══ */
+let W,H,mx=0,my=0,ready=false;
+const fxC=document.getElementById('fx'),fxCtx=fxC.getContext('2d');
+const connC=document.getElementById('conn'),connCtx=connC.getContext('2d');
+const layers=[document.getElementById('layer0'),document.getElementById('layer1'),document.getElementById('layer2')];
+const nebulae=document.querySelectorAll('.nebula');
+
+const keyPos=[{x:.30,y:.24},{x:.42,y:.21},{x:.55,y:.23},{x:.66,y:.26},{x:.58,y:.42},{x:.51,y:.59},{x:.45,y:.77}];
+let keyStars=[],activated=[],conns=[];
+let dustParticles=[];
+
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+document.addEventListener('touchmove',e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY},{passive:true});
+
+function initCosmos(){
+  W=innerWidth;H=innerHeight;
+  fxC.width=connC.width=W;fxC.height=connC.height=H;
+  document.getElementById('constellation').classList.add('active');
+  document.title='✦';
+
+  // Three parallax star layers — back to front
+  const layerCfg=[{count:120,sizeRange:[.3,1.2],opRange:[.05,.25],speed:.008},{count:60,sizeRange:[.8,2],opRange:[.1,.45],speed:.02},{count:25,sizeRange:[1.5,3.5],opRange:[.2,.6],speed:.04}];
+
+  layerCfg.forEach((cfg,li)=>{
+    for(let i=0;i<cfg.count;i++){
+      const s=document.createElement('div');
+      s.className='star decor';
+      const sz=cfg.sizeRange[0]+Math.random()*(cfg.sizeRange[1]-cfg.sizeRange[0]);
+      const op=cfg.opRange[0]+Math.random()*(cfg.opRange[1]-cfg.opRange[0]);
+      s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*104-2}%;top:${Math.random()*104-2}%;opacity:${op};
+        background:radial-gradient(circle,rgba(${200+Math.random()*55},${200+Math.random()*55},${220+Math.random()*35},${op*1.5}),transparent);
+        animation:tw${li}_${i} ${2.5+Math.random()*5}s ease-in-out ${Math.random()*4}s infinite`;
+      const st=document.createElement('style');
+      const flicker=op*(.4+Math.random()*.6);
+      st.textContent=`@keyframes tw${li}_${i}{0%,100%{opacity:${op*.4};transform:translate(-50%,-50%) scale(.8)}50%{opacity:${flicker+op};transform:translate(-50%,-50%) scale(1.2)}}`;
+      document.head.appendChild(st);
+      layers[li].appendChild(s);
+    }
+    layers[li]._speed=cfg.speed;
+  });
+
+  // Key stars
+  const ksEl=document.getElementById('keyStarsEl');
+  keyPos.forEach((p,i)=>{
+    const jx=(Math.random()-.5)*.025,jy=(Math.random()-.5)*.025;
+    const fx=p.x+jx,fy=p.y+jy;
+    const s=document.createElement('div');
+    s.className='star key-star';
+    const sz=5+Math.random()*3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${fx*100}%;top:${fy*100}%;
+      background:radial-gradient(circle,rgba(255,245,220,1) 0%,rgba(255,200,120,.4) 35%,rgba(201,125,62,.1) 60%,transparent 75%);
+      box-shadow:0 0 ${sz*2}px rgba(201,125,62,.15),0 0 ${sz*4}px rgba(201,125,62,.05);`;
+    s.addEventListener('click',()=>clickStar(i,s));
+    s.addEventListener('touchend',e=>{e.preventDefault();clickStar(i,s)});
+    ksEl.appendChild(s);
+    keyStars.push({el:s,x:fx*W,y:fy*H,fx,fy});
+  });
+
+  // Dust particles for FX canvas
+  for(let i=0;i<80;i++){
+    dustParticles.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.1,size:Math.random()*.8+.2,op:Math.random()*.12+.02});
+  }
+
+  // Shooting stars
+  setInterval(spawnShootingStar,4000+Math.random()*6000);
+  setTimeout(spawnShootingStar,2000);
+
+  ready=true;
+  animate();
 }
 
-function del() {
-  if (!input.length) return;
-  input = input.slice(0, -1);
-  dots[input.length].classList.remove('filled');
+function spawnShootingStar(){
+  if(!ready)return;
+  const s=document.createElement('div');
+  s.className='shooting-star';
+  const angle=-15-Math.random()*30;
+  s.style.cssText=`left:${Math.random()*70+10}%;top:${Math.random()*50+5}%;transform:rotate(${angle}deg);width:0`;
+  document.getElementById('cosmos').appendChild(s);
+  setTimeout(()=>s.remove(),1500);
 }
 
-function check() {
-  if (input === CODE) {
-    // Success
-    dots.forEach(d => { d.classList.remove('filled'); d.classList.add('success'); });
-    title.textContent = '';
-    setTimeout(() => {
-      passcode.style.transition = 'opacity 1s ease, filter 1s ease';
-      passcode.style.opacity = '0';
-      passcode.style.filter = 'blur(10px)';
-      setTimeout(() => {
-        passcode.style.display = 'none';
-        reveal.classList.add('active');
-        document.title = 'Suyash Gunjal';
-        doReveal();
-      }, 1000);
-    }, 500);
-  } else {
-    // Fail
-    attempts++;
-    dotsBox.classList.add('shake');
-    if (navigator.vibrate) navigator.vibrate([40, 25, 40]);
-    setTimeout(() => {
-      dotsBox.classList.remove('shake');
-      dots.forEach(d => d.classList.remove('filled'));
-      input = '';
-      title.classList.remove('error');
-      title.textContent = 'Try Again';
-    }, 550);
+function animate(){
+  if(!ready)return;
+
+  // Parallax layers
+  const cx=mx/W-.5,cy=my/H-.5;
+  layers.forEach(l=>{
+    const sp=l._speed*60;
+    l.style.transform=`translate(${cx*sp}px,${cy*sp}px)`;
+  });
+
+  // Nebula parallax
+  nebulae.forEach((n,i)=>{
+    const sp=8+i*4;
+    n.style.transform=`translate(${cx*sp}px,${cy*sp}px)`;
+  });
+
+  // Dust particles
+  fxCtx.clearRect(0,0,W,H);
+  dustParticles.forEach(p=>{
+    p.x+=p.vx+cx*.3;
+    p.y+=p.vy+cy*.2;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+
+    // Glow near mouse
+    const dm=Math.hypot(p.x-mx,p.y-my);
+    const boost=dm<200?(.15*(1-dm/200)):0;
+
+    fxCtx.beginPath();
+    fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    fxCtx.fillStyle=`rgba(180,160,200,${p.op+boost})`;
+    fxCtx.fill();
+  });
+
+  // Connections
+  connCtx.clearRect(0,0,W,H);
+  conns.forEach(c=>{
+    if(c.progress<1)c.progress=Math.min(1,c.progress+.025);
+    const f=keyStars[c.from],t=keyStars[c.to];
+    const ex=f.x+(t.x-f.x)*c.progress,ey=f.y+(t.y-f.y)*c.progress;
+
+    // Outer glow
+    connCtx.beginPath();connCtx.moveTo(f.x,f.y);connCtx.lineTo(ex,ey);
+    connCtx.strokeStyle='rgba(201,125,62,.12)';connCtx.lineWidth=6;
+    connCtx.shadowColor='rgba(201,125,62,.3)';connCtx.shadowBlur=20;
+    connCtx.stroke();connCtx.shadowBlur=0;
+
+    // Core line
+    const g=connCtx.createLinearGradient(f.x,f.y,ex,ey);
+    g.addColorStop(0,'rgba(255,220,150,.7)');g.addColorStop(1,'rgba(201,125,62,.4)');
+    connCtx.beginPath();connCtx.moveTo(f.x,f.y);connCtx.lineTo(ex,ey);
+    connCtx.strokeStyle=g;connCtx.lineWidth=1.2;connCtx.stroke();
+
+    // Traveling spark
+    if(c.progress<1){
+      connCtx.beginPath();connCtx.arc(ex,ey,2,0,Math.PI*2);
+      connCtx.fillStyle='rgba(255,240,200,.8)';connCtx.shadowColor='rgba(255,200,100,.6)';connCtx.shadowBlur=10;
+      connCtx.fill();connCtx.shadowBlur=0;
+    }
+  });
+
+  requestAnimationFrame(animate);
+}
+
+function clickStar(i,el){
+  if(!ready)return;
+  const next=activated.length;
+  if(i===next){
+    if(navigator.vibrate)navigator.vibrate(15);
+    el.classList.add('activated');
+    el.style.background='radial-gradient(circle,rgba(255,230,150,1) 0%,rgba(201,125,62,.8) 25%,rgba(201,125,62,.2) 50%,transparent 70%)';
+    el.style.boxShadow='0 0 25px rgba(201,125,62,.6),0 0 50px rgba(201,125,62,.2),0 0 80px rgba(201,125,62,.08)';
+    activated.push(i);
+    burst(el);
+    if(activated.length>1)conns.push({from:activated[activated.length-2],to:i,progress:0});
+    if(activated.length===keyPos.length)setTimeout(complete,1500);
+  } else if(!activated.includes(i)){
+    el.classList.add('wrong-flash');
+    setTimeout(()=>el.classList.remove('wrong-flash'),500);
+    if(activated.length>0){
+      setTimeout(()=>{
+        activated.forEach(idx=>{
+          const s=keyStars[idx].el;
+          s.classList.remove('activated');
+          s.style.background='';s.style.boxShadow='';
+        });
+        activated=[];conns=[];
+        connCtx.clearRect(0,0,W,H);
+      },350);
+    }
   }
 }
 
-function doReveal() {
-  document.getElementById('rn').classList.add('go');
-  document.getElementById('rt').classList.add('go');
-  setTimeout(() => document.getElementById('f1').classList.add('go'), 3000);
-  setTimeout(() => document.getElementById('f2').classList.add('go'), 4200);
-  setTimeout(() => document.getElementById('f3').classList.add('go'), 5400);
-  setTimeout(() => document.getElementById('f4').classList.add('go'), 6600);
-  document.getElementById('rf').classList.add('go');
+function burst(el){
+  const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    const a=Math.random()*Math.PI*2,d=15+Math.random()*50,sz=.5+Math.random()*2;
+    p.style.cssText=`position:fixed;width:${sz}px;height:${sz}px;border-radius:50%;pointer-events:none;z-index:5;
+      left:${cx+Math.cos(a)*d}px;top:${cy+Math.sin(a)*d}px;
+      background:rgba(${200+Math.random()*55},${150+Math.random()*80},${60+Math.random()*60},.8);
+      animation:bst .8s ease forwards`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),900);
+  }
+  if(!document.getElementById('bstStyle')){
+    const s=document.createElement('style');s.id='bstStyle';
+    s.textContent='@keyframes bst{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}';
+    document.head.appendChild(s);
+  }
 }
 
-// Click
-document.querySelectorAll('.key[data-n]').forEach(k => {
-  k.addEventListener('click', () => {
-    k.classList.add('pressed');
-    setTimeout(() => k.classList.remove('pressed'), 100);
-    press(k.dataset.n);
-  });
-  k.addEventListener('touchstart', e => { e.preventDefault(); k.click(); }, { passive: false });
-});
+function complete(){
+  ready=false;
+  keyStars.forEach(s=>{s.el.style.boxShadow='0 0 40px rgba(201,125,62,.7),0 0 80px rgba(201,125,62,.3),0 0 120px rgba(201,125,62,.1)'});
+  document.title='7';
+}
 
-document.getElementById('del').addEventListener('click', del);
-
-// Keyboard
-document.addEventListener('keydown', e => {
-  if (e.key >= '0' && e.key <= '9') press(e.key);
-  if (e.key === 'Backspace') del();
-});
+window.addEventListener('resize',()=>{if(!ready)return;W=innerWidth;H=innerHeight;fxC.width=connC.width=W;fxC.height=connC.height=H;keyStars.forEach((s,i)=>{s.x=s.fx*W;s.y=s.fy*H})});
 </script>
 </body>
 </html>
