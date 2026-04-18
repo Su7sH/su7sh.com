@@ -1,144 +1,171 @@
 <!DOCTYPE html>
 <!--
-     ┌─────────────────────────────────────────────┐
-     │                                             │
-     │   a desk. an evening.                       │
-     │   everything here is temporary.             │
-     │   at the present moment it is everything.   │
-     │                                             │
-     │   — S.G.    18°41′ N, 74°00′ E              │
-     │                                             │
-     └─────────────────────────────────────────────┘
-
-     you came here by reading. that already says something.
-     true rewards are always deeply placed.
-
-     // model credits at the bottom.
-
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │   a room. an evening.                                        │
+  │                                                              │
+  │   everything here is temporary.                              │
+  │   at the present moment it is everything.                    │
+  │                                                              │
+  │   — s.g.                                alephata · 18°41′ n  │
+  │                                                              │
+  │   you came here by reading. that already says something.     │
+  │   true rewards are always deeply placed.                     │
+  │                                                              │
+  │   // for the careful reader:                                 │
+  │   // the phone wakes first. it is usually the quiet one.     │
+  │                                                              │
+  └──────────────────────────────────────────────────────────────┘
 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="A room at dusk.">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="description" content="a room at dusk.">
+<meta name="theme-color" content="#06080c">
 <title>·</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{width:100%;height:100%;background:#050302;overflow:hidden;user-select:none;-webkit-user-select:none;cursor:none;font-family:'Cormorant Garamond',Georgia,serif}
-  canvas{display:block}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:#06080c;overflow:hidden;user-select:none;-webkit-user-select:none;cursor:none;font-family:'Cormorant Garamond',Georgia,serif;color:#dfe6f0}
+canvas{display:block}
 
-  /* ─── Custom cursor ─── */
-  #cursor{position:fixed;width:8px;height:8px;border-radius:50%;background:rgba(255,220,180,.9);box-shadow:0 0 12px rgba(255,190,120,.4);pointer-events:none;z-index:200;transform:translate(-50%,-50%);transition:width .28s cubic-bezier(.2,.85,.25,1),height .28s cubic-bezier(.2,.85,.25,1),background .3s,box-shadow .35s,opacity .4s;mix-blend-mode:screen}
-  #cursor.hot{width:30px;height:30px;background:rgba(255,170,80,.12);border:1px solid rgba(255,190,120,.5);box-shadow:0 0 28px rgba(255,160,70,.35)}
-  #cursor.pressed{width:4px;height:4px}
+/* ─────────── CURSOR ─────────── */
+#cursor{position:fixed;width:7px;height:7px;border-radius:50%;background:rgba(255,216,168,.95);box-shadow:0 0 14px rgba(255,180,100,.5);pointer-events:none;z-index:200;transform:translate(-50%,-50%);transition:width .3s cubic-bezier(.2,.85,.25,1),height .3s cubic-bezier(.2,.85,.25,1),background .3s,box-shadow .4s,opacity .4s;mix-blend-mode:screen}
+#cursor.hot{width:32px;height:32px;background:rgba(255,170,70,.1);border:1px solid rgba(255,190,120,.65);box-shadow:0 0 32px rgba(255,160,60,.45)}
+#cursor.pressed{width:4px;height:4px}
 
-  /* Film grain, haze, vignette */
-  #grain{position:fixed;inset:0;z-index:150;pointer-events:none;opacity:.05;mix-blend-mode:overlay}
-  #vignette{position:fixed;inset:0;pointer-events:none;z-index:140;background:radial-gradient(ellipse at 48% 58%,transparent 28%,rgba(8,4,1,.4) 72%,rgba(2,1,0,.85) 100%)}
-  #haze{position:fixed;inset:0;pointer-events:none;z-index:141;background:radial-gradient(ellipse at 25% 22%,rgba(255,170,80,.08) 0%,transparent 52%);mix-blend-mode:screen}
+/* ─────────── FILM LAYERS ─────────── */
+#grain{position:fixed;inset:0;z-index:150;pointer-events:none;opacity:.045;mix-blend-mode:overlay}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:140;background:radial-gradient(ellipse at 50% 52%,transparent 32%,rgba(4,6,12,.4) 78%,rgba(1,2,4,.88) 100%)}
+#warmhaze{position:fixed;inset:0;pointer-events:none;z-index:141;background:radial-gradient(ellipse at 12% 30%,rgba(255,170,80,.08) 0%,transparent 55%);mix-blend-mode:screen}
+#coolhaze{position:fixed;inset:0;pointer-events:none;z-index:142;background:radial-gradient(ellipse at 80% 40%,rgba(80,130,200,.06) 0%,transparent 55%);mix-blend-mode:screen}
 
-  /* 3D scene */
-  #scene{position:fixed;inset:0;z-index:10}
+/* ─────────── 3D ─────────── */
+#scene{position:fixed;inset:0;z-index:10}
 
-  /* ─── Loading veil ─── */
-  #veil{position:fixed;inset:0;z-index:300;background:#030201;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 2.4s ease-out;pointer-events:none;gap:1.2rem}
-  #veil.gone{opacity:0}
-  #veil-text{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:300;letter-spacing:.35em;color:rgba(220,180,140,.55);text-transform:lowercase}
-  #veil-progress{width:180px;height:1px;background:rgba(220,180,140,.1);overflow:hidden}
-  #veil-bar{height:100%;width:0%;background:linear-gradient(90deg,transparent,rgba(255,180,100,.8),transparent);transition:width .6s ease}
-  #veil-pct{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.25em;color:rgba(220,180,140,.3);text-transform:lowercase}
+/* ─────────── LOADING VEIL ─────────── */
+#veil{position:fixed;inset:0;z-index:300;background:#030406;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;transition:opacity 2.4s cubic-bezier(.4,0,.2,1);pointer-events:none}
+#veil.gone{opacity:0}
+#veil-text{font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:300;letter-spacing:.35em;color:rgba(200,210,230,.55);text-transform:lowercase}
+#veil-bar{width:180px;height:1px;background:rgba(200,210,230,.08);overflow:hidden;position:relative}
+#veil-bar::after{content:'';position:absolute;inset:0;width:var(--p,0%);background:linear-gradient(90deg,transparent,rgba(255,180,100,.9),transparent);transition:width .5s ease}
+#veil-pct{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.25em;color:rgba(200,210,230,.25);text-transform:lowercase}
+#veil-line{position:absolute;bottom:9%;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(200,210,230,.2);letter-spacing:.04em;text-align:center;padding:0 30px;opacity:0;transition:opacity 1.6s ease 1s}
+#veil.show-line #veil-line{opacity:1}
 
-  /* ─── Mac login overlay ─── */
-  #mac-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(4,2,1,0);transition:background 1.2s ease;pointer-events:none;flex-direction:column}
-  #mac-overlay.on{display:flex;pointer-events:all;background:rgba(4,2,1,.78);backdrop-filter:blur(6px)}
-  .mac-login{position:relative;display:flex;flex-direction:column;align-items:center;transform:scale(.85) translateY(20px);opacity:0;transition:transform 1.4s cubic-bezier(.2,.85,.25,1),opacity 1.2s ease}
-  #mac-overlay.on .mac-login{transform:scale(1) translateY(0);opacity:1}
-  .mac-avatar{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5a4a3a,#2a1f15);border:2px solid rgba(255,230,200,.15);box-shadow:0 8px 40px rgba(255,160,70,.15),inset 0 0 30px rgba(0,0,0,.4);margin-bottom:22px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:3.4rem;font-weight:300;font-style:italic;color:rgba(255,230,200,.65);letter-spacing:.02em}
-  .mac-user{font-family:-apple-system,'SF Pro Display',sans-serif;font-weight:300;font-size:1.5rem;color:rgba(255,240,220,.92);letter-spacing:.01em;margin-bottom:18px}
-  .mac-input-wrap{position:relative;width:230px;height:34px;border-radius:17px;background:rgba(255,240,220,.08);border:1px solid rgba(255,240,220,.12);display:flex;align-items:center;padding:0 14px;gap:10px;transition:border-color .3s,background .3s}
-  .mac-input-wrap.shake{animation:macShake .48s;border-color:rgba(255,70,60,.55)}
-  @keyframes macShake{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-9px)}35%,75%{transform:translateX(9px)}}
-  .mac-input-wrap.good{border-color:rgba(52,199,89,.7);background:rgba(52,199,89,.14)}
-  .mac-hint{font-family:-apple-system,sans-serif;font-size:.78rem;color:rgba(255,240,220,.5);flex:1}
-  .mac-dots{display:flex;gap:5px}
-  .mac-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,240,220,.88);opacity:0;transition:opacity .1s,transform .15s}
-  .mac-dot.on{opacity:1;transform:scale(1.15)}
-  .mac-arrow{width:18px;height:18px;border-radius:50%;background:rgba(255,240,220,.12);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:rgba(255,240,220,.55);cursor:pointer;transition:background .2s;border:none;font-family:inherit}
-  .mac-arrow:hover{background:rgba(255,240,220,.25)}
-  .mac-msg{margin-top:20px;font-family:-apple-system,sans-serif;font-size:.8rem;color:rgba(255,240,220,.45);min-height:18px;letter-spacing:.01em;transition:color .3s}
-  #mac-close{position:absolute;top:40px;right:40px;background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.2em;color:rgba(255,220,180,.3);cursor:pointer;padding:8px 14px;transition:color .3s;text-transform:lowercase}
-  #mac-close:hover{color:rgba(255,220,180,.85)}
+/* ─────────── iPHONE PASSCODE OVERLAY ─────────── */
+#phone-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(3,4,6,0);transition:background 1.4s ease;pointer-events:none}
+#phone-overlay.on{display:flex;pointer-events:all;background:rgba(3,4,6,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.phone-frame{position:relative;width:300px;height:616px;background:linear-gradient(135deg,#e8ecef 0%,#b8bdc4 50%,#d8dde2 100%);border-radius:46px;padding:3px;box-shadow:0 0 0 2px #1a1512,0 0 120px rgba(200,180,160,.15),0 40px 100px rgba(0,0,0,.95),inset 0 0 20px rgba(0,0,0,.25);transform:scale(.28) rotate(-10deg) translateY(30px);opacity:0;transition:transform 1.5s cubic-bezier(.2,.85,.25,1),opacity 1.2s ease}
+#phone-overlay.on .phone-frame{transform:scale(1) rotate(0) translateY(0);opacity:1}
+.phone-inner{position:relative;width:100%;height:100%;background:#0a0806;border-radius:43px;overflow:hidden}
+.phone-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:94px;height:26px;background:#000;border-radius:20px;z-index:3}
+.phone-screen{position:absolute;inset:11px;border-radius:35px;background:linear-gradient(180deg,#1a1108 0%,#080604 45%,#030201 100%);overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.phone-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,170,80,.09) 0%,transparent 55%),radial-gradient(ellipse at 70% 80%,rgba(80,130,200,.07) 0%,transparent 55%);pointer-events:none}
+.phone-time{font-family:-apple-system,'SF Pro Display',sans-serif;font-size:72px;font-weight:200;color:rgba(255,245,230,.96);letter-spacing:-.03em;margin-top:68px;text-shadow:0 2px 24px rgba(255,170,80,.18);z-index:2}
+.phone-date{font-family:-apple-system,sans-serif;font-size:16px;font-weight:400;color:rgba(255,245,230,.75);letter-spacing:.02em;margin-top:-2px;z-index:2}
+.phone-lock{width:26px;height:26px;margin-top:38px;opacity:.88;z-index:2}
+.phone-title{font-family:-apple-system,sans-serif;font-size:15px;font-weight:400;color:rgba(255,245,230,.88);margin-top:10px;letter-spacing:.2px;min-height:20px;transition:color .4s;z-index:2}
+.phone-dots{display:flex;gap:18px;margin-top:22px;z-index:2}
+.phone-dot{width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,245,230,.45);background:transparent;transition:background .14s,transform .14s,box-shadow .35s,border-color .3s}
+.phone-dot.filled{background:rgba(255,245,230,.96);border-color:rgba(255,245,230,.96);transform:scale(1.06);box-shadow:0 0 10px rgba(255,216,168,.45)}
+.phone-dot.good{background:#34c759!important;border-color:#34c759!important;box-shadow:0 0 14px rgba(52,199,89,.55)}
+.phone-dots.shake{animation:phShake .48s cubic-bezier(.4,0,.2,1)}
+@keyframes phShake{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-9px)}35%,75%{transform:translateX(9px)}}
+.phone-pad{display:grid;grid-template-columns:repeat(3,62px);gap:14px 22px;margin-top:auto;margin-bottom:40px;z-index:2}
+.ph-key{width:62px;height:62px;border-radius:50%;background:rgba(255,245,230,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:.5px solid rgba(255,245,230,.06);transition:background .1s,transform .08s}
+.ph-key:hover{background:rgba(255,245,230,.16)}
+.ph-key:active,.ph-key.pressed{background:rgba(255,245,230,.32);transform:scale(.93)}
+.ph-num{font-family:-apple-system,sans-serif;font-size:30px;font-weight:300;color:rgba(255,245,230,.96);line-height:1}
+.ph-sub{font-family:-apple-system,sans-serif;font-size:9px;font-weight:600;color:rgba(255,245,230,.88);letter-spacing:2.3px;margin-top:1.5px}
+.ph-action{width:62px;height:62px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:-apple-system,sans-serif;font-size:14.5px;color:rgba(255,245,230,.82);transition:opacity .2s}
+.ph-action:active{opacity:.35}
+#ph-back{position:absolute;top:-44px;right:4px;font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.22em;color:rgba(200,210,230,.3);cursor:pointer;background:none;border:none;padding:8px 12px;text-transform:lowercase;transition:color .3s}
+#ph-back:hover{color:rgba(255,216,168,.8)}
 
-  /* ─── Lateral entry ─── */
-  #lateral-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(4,2,1,.92);pointer-events:none;flex-direction:column;padding:0 40px}
-  #lateral-overlay.on{display:flex;pointer-events:all}
-  #lat-q{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:rgba(240,210,170,.55);letter-spacing:.05em;margin-bottom:2.5rem;text-align:center}
-  #lat-in{background:transparent;border:none;outline:none;border-bottom:1px solid rgba(255,170,80,.3);font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:300;color:rgba(255,230,200,.85);text-align:center;width:100%;max-width:480px;padding:12px 0;caret-color:rgba(255,170,80,.7);transition:border-color 1s}
-  #lat-in::placeholder{color:rgba(255,230,200,.12);font-style:italic}
-  #lat-in:focus{border-color:rgba(255,170,80,.55)}
-  #lat-c{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;color:rgba(255,220,180,.2);margin-top:1.4rem;transition:color .5s}
-  #lat-c.warm{color:rgba(255,170,80,.5)}
+/* ─────────── LATERAL ─────────── */
+#lateral-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(3,4,6,.94);pointer-events:none;flex-direction:column;padding:0 40px}
+#lateral-overlay.on{display:flex;pointer-events:all}
+#lat-q{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;font-style:italic;color:rgba(240,215,180,.58);letter-spacing:.04em;margin-bottom:2.5rem;text-align:center}
+#lat-in{background:transparent;border:none;outline:none;border-bottom:1px solid rgba(255,170,80,.3);font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:rgba(255,230,200,.88);text-align:center;width:100%;max-width:480px;padding:14px 0;caret-color:rgba(255,170,80,.72);transition:border-color 1s}
+#lat-in::placeholder{color:rgba(255,230,200,.14);font-style:italic}
+#lat-in:focus{border-color:rgba(255,170,80,.55)}
+#lat-c{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;color:rgba(255,216,168,.22);margin-top:1.5rem;transition:color .6s;text-transform:lowercase}
+#lat-c.warm{color:rgba(255,170,80,.52)}
 
-  /* ─── Notepad overlay ─── */
-  #pad-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(4,2,1,.4);backdrop-filter:blur(2px);pointer-events:none;flex-direction:column}
-  #pad-overlay.on{display:flex;pointer-events:all}
-  .pad-paper{position:relative;width:min(480px,88vw);padding:70px 60px 80px;background:linear-gradient(180deg,#f2ead8 0%,#ede3cf 100%);box-shadow:0 30px 80px rgba(0,0,0,.75),0 60px 140px rgba(255,170,80,.14);transform:rotate(-1.6deg) scale(.86);opacity:0;transition:transform 1.2s cubic-bezier(.2,.85,.25,1),opacity 1s ease}
-  #pad-overlay.on .pad-paper{transform:rotate(-1.6deg) scale(1);opacity:1}
-  .pad-paper::before{content:'';position:absolute;left:45px;top:0;bottom:0;width:1px;background:rgba(180,60,40,.28)}
-  .pad-paper::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0,transparent 35px,rgba(100,120,160,.13) 35px,rgba(100,120,160,.13) 36px);pointer-events:none}
-  .pad-ask{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:300;font-style:italic;color:rgba(80,60,35,.6);margin-bottom:26px;letter-spacing:.02em}
-  .pad-write{font-family:'Cormorant Garamond',serif;font-size:2.3rem;font-weight:300;color:#1a1308;min-height:3.2rem;position:relative;letter-spacing:.02em;line-height:1.3}
-  .pad-caret{display:inline-block;width:2px;height:2.1rem;background:#1a1308;vertical-align:middle;margin-left:2px;animation:blk 1.1s ease-in-out infinite}
-  @keyframes blk{0%,100%{opacity:1}45%,65%{opacity:0}}
-  .pad-hint{position:absolute;bottom:30px;right:50px;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.22em;color:rgba(80,60,35,.3)}
-  .pad-resp{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;font-style:italic;color:rgba(255,220,180,0);margin-top:2.4rem;transition:color 2s;text-align:center;padding:0 20px}
-  .pad-resp.on{color:rgba(255,200,150,.72)}
+/* ─────────── NOTEPAD ─────────── */
+#pad-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(3,4,6,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;flex-direction:column}
+#pad-overlay.on{display:flex;pointer-events:all}
+.pad-paper{position:relative;width:min(490px,88vw);padding:72px 60px 82px;background:linear-gradient(180deg,#f2ead6 0%,#ebe1c9 100%);box-shadow:0 36px 90px rgba(0,0,0,.8),0 60px 160px rgba(255,170,80,.14);transform:rotate(-1.6deg) scale(.82);opacity:0;transition:transform 1.4s cubic-bezier(.2,.85,.25,1),opacity 1.1s ease}
+#pad-overlay.on .pad-paper{transform:rotate(-1.6deg) scale(1);opacity:1}
+.pad-paper::before{content:'';position:absolute;left:46px;top:0;bottom:0;width:1px;background:rgba(180,60,40,.32)}
+.pad-paper::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0,transparent 35px,rgba(100,120,160,.14) 35px,rgba(100,120,160,.14) 36px);pointer-events:none}
+.pad-ask{font-family:'Cormorant Garamond',serif;font-size:1.06rem;font-weight:300;font-style:italic;color:rgba(80,60,35,.62);margin-bottom:28px;letter-spacing:.02em;position:relative;z-index:2}
+.pad-write{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:#1a1308;min-height:3.2rem;position:relative;z-index:2;letter-spacing:.02em;line-height:1.3}
+.pad-caret{display:inline-block;width:2px;height:2.1rem;background:#1a1308;vertical-align:middle;margin-left:2px;animation:blk 1.1s ease-in-out infinite}
+@keyframes blk{0%,100%{opacity:1}45%,65%{opacity:0}}
+.pad-hint{position:absolute;bottom:30px;right:52px;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.22em;color:rgba(80,60,35,.32);text-transform:lowercase;z-index:2}
+.pad-resp{font-family:'Cormorant Garamond',serif;font-size:1.32rem;font-weight:300;font-style:italic;color:rgba(255,216,168,0);margin-top:2.5rem;transition:color 2.2s;text-align:center;padding:0 20px;max-width:540px}
+.pad-resp.on{color:rgba(255,200,150,.74)}
 
-  /* ─── Chapter overlay ─── */
-  #chapter-overlay{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;background:rgba(2,1,0,.0);transition:background 1.6s ease;pointer-events:none;flex-direction:column}
-  #chapter-overlay.on{display:flex;pointer-events:all;background:rgba(2,1,0,.95)}
-  #ch-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.4rem);font-weight:300;font-style:italic;color:rgba(255,220,180,0);letter-spacing:.06em;text-align:center;padding:0 40px;transition:color 2.2s ease 0.4s;max-width:880px;line-height:1.35}
-  #chapter-overlay.on #ch-title{color:rgba(255,220,180,.78)}
-  #ch-sub{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.38em;color:rgba(255,200,150,0);margin-top:2.6rem;text-transform:lowercase;transition:color 1.8s ease 1.3s}
-  #chapter-overlay.on #ch-sub{color:rgba(255,200,150,.3)}
-  #ch-back{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.25em;color:rgba(255,200,150,0);text-transform:lowercase;cursor:pointer;background:none;border:none;padding:12px 20px;transition:color 1s ease 2.5s,opacity .3s}
-  #chapter-overlay.on #ch-back{color:rgba(255,200,150,.35)}
-  #ch-back:hover{color:rgba(255,200,150,.85)}
+/* ─────────── CHAPTER ─────────── */
+#chapter-overlay{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;background:rgba(2,3,5,0);transition:background 1.6s ease;pointer-events:none;flex-direction:column}
+#chapter-overlay.on{display:flex;pointer-events:all;background:rgba(2,3,5,.96)}
+#ch-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,5.2vw,3.6rem);font-weight:300;font-style:italic;color:rgba(255,216,168,0);letter-spacing:.06em;text-align:center;padding:0 40px;transition:color 2.2s ease .4s;max-width:900px;line-height:1.36}
+#chapter-overlay.on #ch-title{color:rgba(255,216,168,.78)}
+#ch-sub{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.38em;color:rgba(255,200,150,0);margin-top:2.6rem;text-transform:lowercase;transition:color 1.8s ease 1.3s}
+#chapter-overlay.on #ch-sub{color:rgba(255,200,150,.3)}
+#ch-back{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.25em;color:rgba(255,200,150,0);text-transform:lowercase;cursor:pointer;background:none;border:none;padding:14px 22px;transition:color 1s ease 2.4s,opacity .3s}
+#chapter-overlay.on #ch-back{color:rgba(255,200,150,.36)}
+#ch-back:hover{color:rgba(255,216,168,.88)}
 
-  /* ─── Ambient ─── */
-  #ambient{position:fixed;bottom:22px;left:26px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.2em;color:rgba(255,200,150,.14);z-index:145;pointer-events:none;transition:color 3s;text-transform:lowercase}
-  #ambient.on{color:rgba(255,200,150,.3)}
-  #clock{position:fixed;bottom:22px;right:26px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.22em;color:rgba(255,200,150,.14);z-index:145;pointer-events:none;text-transform:lowercase}
+/* ─────────── AMBIENT ─────────── */
+#ambient{position:fixed;bottom:24px;left:28px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.2em;color:rgba(255,200,150,.13);z-index:145;pointer-events:none;transition:color 3s;text-transform:lowercase}
+#ambient.on{color:rgba(255,200,150,.3)}
+#clock{position:fixed;bottom:24px;right:28px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.22em;color:rgba(255,200,150,.13);z-index:145;pointer-events:none;text-transform:lowercase;transition:color 3s}
+#clock.on{color:rgba(255,200,150,.3)}
 
-  /* ─── Tooltip ─── */
-  #tooltip{position:fixed;font-family:'Cormorant Garamond',serif;font-size:.88rem;font-weight:300;font-style:italic;color:rgba(255,220,180,.78);letter-spacing:.04em;pointer-events:none;z-index:155;opacity:0;transform:translate(-50%,calc(-100% - 22px));transition:opacity .35s ease;white-space:nowrap;text-shadow:0 2px 12px rgba(0,0,0,.95)}
-  #tooltip.on{opacity:1}
-  #tooltip::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:1px;height:18px;background:linear-gradient(180deg,rgba(255,170,80,.55),transparent)}
+/* ─────────── TOOLTIP ─────────── */
+#tooltip{position:fixed;font-family:'Cormorant Garamond',serif;font-size:.92rem;font-weight:300;font-style:italic;color:rgba(255,216,168,.82);letter-spacing:.04em;pointer-events:none;z-index:155;opacity:0;transform:translate(-50%,calc(-100% - 24px));transition:opacity .35s ease;white-space:nowrap;text-shadow:0 2px 14px rgba(0,0,0,.95)}
+#tooltip.on{opacity:1}
+#tooltip::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:1px;height:18px;background:linear-gradient(180deg,rgba(255,170,80,.55),transparent)}
 
-  /* ─── Credits (bottom source) ─── */
-  #credits{position:fixed;bottom:2px;left:2px;font-size:5px;color:#0a0604;pointer-events:none;z-index:0}
-  #credits::selection{color:#3a2a18;background:rgba(255,170,80,.1)}
+/* Hidden source lore */
+#lore{position:fixed;bottom:2px;left:2px;font-size:5px;color:#06080c;pointer-events:none;z-index:0;max-width:300px}
+#lore::selection{color:#3a2a18;background:rgba(255,170,80,.1)}
 
-  @media(max-width:640px){
-    #ambient,#clock{font-size:.5rem;letter-spacing:.16em}
-    .mac-avatar{width:100px;height:100px;font-size:2.8rem}
-    .mac-user{font-size:1.3rem}
-  }
+@media(max-width:640px){
+  #ambient,#clock{font-size:.5rem;letter-spacing:.16em;bottom:18px}
+  #ambient{left:18px}#clock{right:18px}
+  .phone-frame{width:270px;height:555px}
+  .phone-time{font-size:60px;margin-top:52px}
+  .phone-pad{grid-template-columns:repeat(3,54px);gap:12px 18px;margin-bottom:30px}
+  .ph-key,.ph-action{width:54px;height:54px}
+  .ph-num{font-size:26px}
+  #ch-title{font-size:1.9rem}
+  .pad-paper{padding:50px 40px 60px}
+  .pad-ask{font-size:.95rem}
+  .pad-write{font-size:1.9rem}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 
-<!-- ─── Hidden source lore ─── -->
-<div id="credits">
-  alephata · pune · 18°41′ n · 74°00′ e — physician, builder, husband, son. this is a room at dusk. nothing here asks anything of you. stay as long as you like. true rewards are always deeply placed. everything here is temporary, but at the present moment it is everything.
-  — models: macbook pro, apple magic keyboard, logitech g502 x lightspeed, ultra-wide monitor — sketchfab, used with attribution under CC-BY.
+<div id="lore">
+alephata · pune · 18°41′ n · 74°00′ e — a room at dusk. physician, builder, husband, son. nothing here asks anything of you. stay as long as you like.
+true rewards are always deeply placed. everything here is temporary, but at the present moment it is everything.
+the phone wakes first. it is usually the quiet one.
+— models · sketchfab: apple macbook pro, ultra-wide monitor, apple magic keyboard with numeric keyboard, logitech g502 x lightspeed, iphone 14 pro silver. used under cc-by.
 </div>
 
 <canvas id="grain"></canvas>
-<div id="haze"></div>
+<div id="warmhaze"></div>
+<div id="coolhaze"></div>
 <div id="vignette"></div>
 <div id="cursor"></div>
 
@@ -148,36 +175,54 @@
 <div id="clock"></div>
 <div id="tooltip"></div>
 
-<!-- ─── Loading veil ─── -->
 <div id="veil">
   <div id="veil-text">setting the evening</div>
-  <div id="veil-progress"><div id="veil-bar"></div></div>
+  <div id="veil-bar"></div>
   <div id="veil-pct">0%</div>
+  <div id="veil-line">everything here is temporary.<br>at the present moment it is everything.</div>
 </div>
 
-<!-- ─── Mac login overlay ─── -->
-<div id="mac-overlay">
-  <button id="mac-close">← back to the desk</button>
-  <div class="mac-login">
-    <div class="mac-avatar">s</div>
-    <div class="mac-user">suyash</div>
-    <div class="mac-input-wrap" id="mac-wrap">
-      <span class="mac-hint" id="mac-hint">Enter Password</span>
-      <div class="mac-dots" id="mac-dots"></div>
-      <button class="mac-arrow" id="mac-arrow">→</button>
+<!-- iPhone passcode overlay -->
+<div id="phone-overlay">
+  <div class="phone-frame">
+    <button id="ph-back">← back to the desk</button>
+    <div class="phone-inner">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-time" id="ph-time">6:37</div>
+        <div class="phone-date" id="ph-date">Friday, April 18</div>
+        <div class="phone-lock">
+          <svg viewBox="0 0 24 24" fill="rgba(255,245,230,.9)"><path d="M18 10.5V8c0-3.31-2.69-6-6-6S6 4.69 6 8v2.5C4.9 10.5 4 11.4 4 12.5v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zM8.5 8c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2.5h-7V8zm3.5 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+        </div>
+        <div class="phone-title" id="ph-title">Enter Passcode</div>
+        <div class="phone-dots" id="ph-dots"><div class="phone-dot"></div><div class="phone-dot"></div><div class="phone-dot"></div><div class="phone-dot"></div><div class="phone-dot"></div><div class="phone-dot"></div></div>
+        <div class="phone-pad">
+          <div class="ph-key" data-n="1"><span class="ph-num">1</span><span class="ph-sub">&nbsp;</span></div>
+          <div class="ph-key" data-n="2"><span class="ph-num">2</span><span class="ph-sub">A B C</span></div>
+          <div class="ph-key" data-n="3"><span class="ph-num">3</span><span class="ph-sub">D E F</span></div>
+          <div class="ph-key" data-n="4"><span class="ph-num">4</span><span class="ph-sub">G H I</span></div>
+          <div class="ph-key" data-n="5"><span class="ph-num">5</span><span class="ph-sub">J K L</span></div>
+          <div class="ph-key" data-n="6"><span class="ph-num">6</span><span class="ph-sub">M N O</span></div>
+          <div class="ph-key" data-n="7"><span class="ph-num">7</span><span class="ph-sub">P Q R S</span></div>
+          <div class="ph-key" data-n="8"><span class="ph-num">8</span><span class="ph-sub">T U V</span></div>
+          <div class="ph-key" data-n="9"><span class="ph-num">9</span><span class="ph-sub">W X Y Z</span></div>
+          <div class="ph-action"></div>
+          <div class="ph-key" data-n="0"><span class="ph-num">0</span><span class="ph-sub">&nbsp;</span></div>
+          <button class="ph-action" id="ph-del">Delete</button>
+        </div>
+      </div>
     </div>
-    <div class="mac-msg" id="mac-msg">touch id or enter password</div>
   </div>
 </div>
 
-<!-- ─── Lateral ─── -->
+<!-- Lateral -->
 <div id="lateral-overlay">
   <div id="lat-q">how do i know you?</div>
   <input type="text" id="lat-in" placeholder="in your own words" autocomplete="off" spellcheck="false" maxlength="240">
   <div id="lat-c">0 / 7 words</div>
 </div>
 
-<!-- ─── Notepad ─── -->
+<!-- Notepad -->
 <div id="pad-overlay">
   <div class="pad-paper">
     <div class="pad-ask">and you are —</div>
@@ -187,10 +232,10 @@
   <div class="pad-resp" id="pad-resp"></div>
 </div>
 
-<!-- ─── Chapter ─── -->
+<!-- Chapter -->
 <div id="chapter-overlay">
   <div id="ch-title"></div>
-  <div id="ch-sub">—— still writing this room ——</div>
+  <div id="ch-sub">— still writing this room —</div>
   <button id="ch-back">return to the desk</button>
 </div>
 
@@ -200,12 +245,12 @@ const W=()=>innerWidth,H=()=>innerHeight;
 
 /* ═══ FILM GRAIN ═══ */
 const grC=document.getElementById('grain'),grX=grC.getContext('2d');
-function grain(){grC.width=W();grC.height=H();const d=grX.createImageData(grC.width,grC.height);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=15}grX.putImageData(d,0,0)}
-grain();setInterval(grain,88);
+function grain(){grC.width=W();grC.height=H();const d=grX.createImageData(grC.width,grC.height);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=14}grX.putImageData(d,0,0)}
+grain();setInterval(grain,90);
 
 /* ═══ CURSOR ═══ */
 const cur=document.getElementById('cursor');
-let mx=0,my=0;
+let mx=innerWidth/2,my=innerHeight/2;
 document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
 document.addEventListener('mousedown',()=>cur.classList.add('pressed'));
 document.addEventListener('mouseup',()=>cur.classList.remove('pressed'));
@@ -213,427 +258,315 @@ document.addEventListener('mouseleave',()=>cur.style.opacity='0');
 document.addEventListener('mouseenter',()=>cur.style.opacity='1');
 
 /* ═══ CLOCK ═══ */
-function updClock(){const d=new Date();const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');document.getElementById('clock').textContent=h+':'+m+' · alephata'}
-updClock();setInterval(updClock,20000);
+function updClock(){
+  const d=new Date(),h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent=h+':'+m+' · alephata';
+  const ph=document.getElementById('ph-time');if(ph)ph.textContent=h+':'+m;
+  const pd=document.getElementById('ph-date');
+  if(pd){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const mo=['January','February','March','April','May','June','July','August','September','October','November','December'];pd.textContent=days[d.getDay()]+', '+mo[d.getMonth()]+' '+d.getDate()}
+}
+updClock();setInterval(updClock,15000);
 
 /* ═══════════════════════════════════════════════════════
-   THE ROOM — THREE.JS
+   SCENE
    ═══════════════════════════════════════════════════════ */
+const MODEL_BASE=(location.hostname==='su7sh.com'||location.hostname==='www.su7sh.com')?'models/':'https://su7sh.com/models/';
+
+// Verified transforms from live Chrome testing on your real models.
+const MODELS={
+  monitor:{
+    url:MODEL_BASE+'ultra-wide_monitor.glb',
+    targetWidth:6.2,
+    position:[0,1.35,-2.6],
+    rotation:[0,Math.PI*1.5,0],        // verified: -π/2 faces camera
+    interactive:true, label:'the monitor ·'
+  },
+  macbook:{
+    url:MODEL_BASE+'apple_macbook_pro.glb',
+    targetWidth:2.15,
+    position:[0,0.26,0.85],             // on black desk mat (y=0.14 + mat=0.02 + small lift)
+    rotation:[0,0,0]
+  },
+  keyboard:{
+    url:MODEL_BASE+'apple_magic_keyboard_with_numeric_keyboard.glb',
+    targetWidth:3.2,
+    position:[-3.3,0.14,1.5],
+    rotation:[0,0,0]
+  },
+  mouse:{
+    url:MODEL_BASE+'logitech_g502_x_lightspeed.glb',
+    targetWidth:0.82,
+    position:[2.5,0.14,1.45],
+    rotation:[0,Math.PI,0]
+  },
+  iphone:{
+    url:MODEL_BASE+'iphone_14_pro_silver.glb',
+    targetWidth:0.68,                   // phone length laid along Z
+    position:[-1.6,0.16,2.05],          // between keyboard and macbook, near user
+    rotation:[-Math.PI/2,0,0],          // verified: lay flat, screen up
+    interactive:true, label:'the phone ·'
+  }
+};
+
 let scene,camera,renderer,clock=new THREE.Clock();
-let deskObj,macbook,monitor,keyboard,mouse,printer,key;
-let macbookScreen=null;
-let interactives=[];
-let hovered=null;
+let interactives=[],hovered=null,raycaster=new THREE.Raycaster(),mouseNDC=new THREE.Vector2();
 let phoneUnlocked=false,nameEntered=false;
-
-let targetCamPos=new THREE.Vector3(0,3.2,8.5);
-let targetCamLook=new THREE.Vector3(0,1.2,0);
+let targetCamPos=new THREE.Vector3(0,3.15,8.2);
+let targetCamLook=new THREE.Vector3(0,1.55,-0.8);
 let camPos=targetCamPos.clone(),camLook=targetCamLook.clone();
-let mouseNDC=new THREE.Vector2();
-let raycaster=new THREE.Raycaster();
 
-/* ─── ENV MAP (warm dusk) ─── */
-function makeEnvMap(){
+let iphoneGlow=null,lampLight=null,neonLight=null,coolLED=null,monitorGlow=null;
+let printer=null,merckey=null;
+let printerGlowLight=null;
+
+/* ═══ PROCEDURAL TEXTURES ═══ */
+function makeWood(){
+  const c=document.createElement('canvas');c.width=1024;c.height=1024;const x=c.getContext('2d');
+  // Light oak base
+  x.fillStyle='#9e7a4e';x.fillRect(0,0,1024,1024);
+  for(let i=0;i<120;i++){
+    const y=i*(1024/120)+(Math.random()-.5)*8;
+    const alpha=.04+Math.random()*.18;
+    const shade=Math.random()<.5?'rgba(90,60,30,':'rgba(200,170,130,';
+    x.strokeStyle=shade+alpha+')';x.lineWidth=.4+Math.random()*1.8;
+    x.beginPath();x.moveTo(0,y);
+    let cx=0,cy=y;
+    while(cx<1024){const nx=cx+50+Math.random()*90,ny=y+(Math.random()-.5)*4;x.quadraticCurveTo(cx+25,cy+(Math.random()-.5)*2,nx,ny);cx=nx;cy=ny}
+    x.stroke();
+  }
+  for(let i=0;i<5;i++){const kx=Math.random()*1024,ky=Math.random()*1024,kr=5+Math.random()*11;const rg=x.createRadialGradient(kx,ky,0,kx,ky,kr);rg.addColorStop(0,'rgba(60,40,20,.7)');rg.addColorStop(.7,'rgba(90,60,30,.3)');rg.addColorStop(1,'transparent');x.fillStyle=rg;x.beginPath();x.arc(kx,ky,kr,0,Math.PI*2);x.fill()}
+  for(let i=0;i<35000;i++){x.fillStyle=`rgba(${120+Math.random()*60},${90+Math.random()*40},${50+Math.random()*30},${.015+Math.random()*.05})`;x.fillRect(Math.random()*1024,Math.random()*1024,1,1)}
+  const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.encoding=THREE.sRGBEncoding;return tex;
+}
+function makeWallTex(){
+  const c=document.createElement('canvas');c.width=1024;c.height=1024;const x=c.getContext('2d');
+  x.fillStyle='#121821';x.fillRect(0,0,1024,1024);
+  // subtle noise
+  for(let i=0;i<50000;i++){x.fillStyle=`rgba(${15+Math.random()*12},${20+Math.random()*14},${28+Math.random()*14},${.2+Math.random()*.35})`;x.fillRect(Math.random()*1024,Math.random()*1024,1,1)}
+  const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;
+}
+function makeMatTex(){
+  const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');
+  x.fillStyle='#0a0a0c';x.fillRect(0,0,512,512);
+  for(let i=0;i<80000;i++){x.fillStyle=`rgba(${15+Math.random()*10},${15+Math.random()*10},${18+Math.random()*10},${.4+Math.random()*.4})`;x.fillRect(Math.random()*512,Math.random()*512,1,1)}
+  const tex=new THREE.CanvasTexture(c);return tex;
+}
+function makeEnv(){
   const c=document.createElement('canvas');c.width=2048;c.height=1024;const x=c.getContext('2d');
   const g=x.createLinearGradient(0,0,0,1024);
-  g.addColorStop(0,'#1a1826');g.addColorStop(.35,'#2d2438');g.addColorStop(.5,'#4a2f28');g.addColorStop(.6,'#7a4a28');g.addColorStop(.7,'#4a2a18');g.addColorStop(.85,'#1a0a05');g.addColorStop(1,'#050302');
+  g.addColorStop(0,'#1a2235');g.addColorStop(.35,'#1a1f30');g.addColorStop(.5,'#2a2028');g.addColorStop(.65,'#3a2418');g.addColorStop(.8,'#1a0e08');g.addColorStop(1,'#050303');
   x.fillStyle=g;x.fillRect(0,0,2048,1024);
-  [[400,320,220,'rgba(255,190,100,.9)'],[1200,280,180,'rgba(255,160,80,.7)'],[1700,400,150,'rgba(255,140,70,.5)'],[200,600,100,'rgba(255,120,60,.3)'],[900,550,120,'rgba(255,130,60,.35)']].forEach(([cx,cy,r,col])=>{const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,col);rg.addColorStop(.4,col.replace(/[\d.]+\)/,'.25)'));rg.addColorStop(1,'transparent');x.fillStyle=rg;x.fillRect(cx-r,cy-r,r*2,r*2)});
-  const rg2=x.createRadialGradient(1600,150,0,1600,150,400);rg2.addColorStop(0,'rgba(120,140,180,.4)');rg2.addColorStop(1,'transparent');x.fillStyle=rg2;x.fillRect(1200,0,800,400);
-  const gr=x.createLinearGradient(0,512,0,1024);gr.addColorStop(0,'rgba(40,25,15,0)');gr.addColorStop(.5,'rgba(25,15,8,.4)');gr.addColorStop(1,'rgba(15,8,4,.85)');x.fillStyle=gr;x.fillRect(0,512,2048,512);
+  [[350,280,240,'rgba(255,185,95,.75)'],[1450,220,200,'rgba(100,140,210,.55)'],[1800,380,160,'rgba(255,150,70,.45)'],[250,600,100,'rgba(255,120,50,.25)'],[1100,500,150,'rgba(130,160,220,.3)']].forEach(([cx,cy,r,col])=>{const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,col);rg.addColorStop(.45,col.replace(/[\d.]+\)/,'.2)'));rg.addColorStop(1,'transparent');x.fillStyle=rg;x.fillRect(cx-r,cy-r,r*2,r*2)});
+  const gr=x.createLinearGradient(0,512,0,1024);gr.addColorStop(0,'rgba(30,20,10,0)');gr.addColorStop(.5,'rgba(20,13,7,.45)');gr.addColorStop(1,'rgba(10,6,3,.9)');x.fillStyle=gr;x.fillRect(0,512,2048,512);
   const tex=new THREE.CanvasTexture(c);tex.mapping=THREE.EquirectangularReflectionMapping;tex.encoding=THREE.sRGBEncoding;return tex;
 }
 
-/* ─── WOOD TEXTURE ─── */
-function makeWoodTexture(){
-  const c=document.createElement('canvas');c.width=1024;c.height=1024;const x=c.getContext('2d');
-  x.fillStyle='#2a1a0e';x.fillRect(0,0,1024,1024);
-  for(let i=0;i<90;i++){
-    const y=i*(1024/90)+(Math.random()-.5)*10;
-    const alpha=.05+Math.random()*.25;
-    const shade=Math.random()<.5?'rgba(15,8,4,':'rgba(58,36,20,';
-    x.strokeStyle=shade+alpha+')';x.lineWidth=.5+Math.random()*2.2;
-    x.beginPath();x.moveTo(0,y);
-    let cx=0,cy=y;
-    while(cx<1024){const nx=cx+40+Math.random()*80,ny=y+(Math.random()-.5)*6;x.quadraticCurveTo(cx+20,cy+(Math.random()-.5)*3,nx,ny);cx=nx;cy=ny}
-    x.stroke();
-  }
-  for(let i=0;i<6;i++){const kx=Math.random()*1024,ky=Math.random()*1024,kr=6+Math.random()*14;const rg=x.createRadialGradient(kx,ky,0,kx,ky,kr);rg.addColorStop(0,'rgba(10,5,2,.8)');rg.addColorStop(.7,'rgba(20,10,5,.4)');rg.addColorStop(1,'transparent');x.fillStyle=rg;x.beginPath();x.arc(kx,ky,kr,0,Math.PI*2);x.fill()}
-  for(let i=0;i<40000;i++){x.fillStyle=`rgba(${40+Math.random()*40},${25+Math.random()*25},${10+Math.random()*15},${.02+Math.random()*.06})`;x.fillRect(Math.random()*1024,Math.random()*1024,1,1)}
-  const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;
-}
-
-/* ─── MACBOOK LOGIN SCREEN (texture for screen mesh) ─── */
-let macLoginTex,macLoginCanvas;
-function makeMacLoginScreen(state){
-  // state: 0=locked with login, 1=unlocked showing desktop
-  const c=macLoginCanvas||document.createElement('canvas');
-  if(!macLoginCanvas){c.width=1920;c.height=1200;macLoginCanvas=c}
-  const x=c.getContext('2d');
-  x.clearRect(0,0,1920,1200);
-  if(state===1){
-    // Desktop
-    const g=x.createLinearGradient(0,0,0,1200);g.addColorStop(0,'#1a1330');g.addColorStop(.3,'#3a1838');g.addColorStop(.6,'#7a3525');g.addColorStop(.85,'#3a1828');g.addColorStop(1,'#0a0512');
-    x.fillStyle=g;x.fillRect(0,0,1920,1200);
-    const rg=x.createRadialGradient(1450,700,0,1450,700,500);rg.addColorStop(0,'rgba(255,150,80,.35)');rg.addColorStop(1,'transparent');x.fillStyle=rg;x.fillRect(950,200,970,900);
-    // Menu bar
-    x.fillStyle='rgba(20,15,12,.7)';x.fillRect(0,0,1920,34);
-    x.fillStyle='rgba(255,240,220,.95)';x.font='bold 16px -apple-system,sans-serif';x.textBaseline='middle';
-    x.beginPath();x.arc(24,17,6.5,0,Math.PI*2);x.fill();
-    x.fillText('Finder',44,17);x.font='16px -apple-system,sans-serif';
-    ['File','Edit','View','Go','Window','Help'].forEach((t,i)=>x.fillText(t,120+i*62,17));
-    x.textAlign='right';
-    const d=new Date();const h=d.getHours()%12||12,mm=String(d.getMinutes()).padStart(2,'0');
-    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    x.fillText(days[d.getDay()]+' '+h+':'+mm+(d.getHours()>=12?' PM':' AM'),1900,17);
-    x.textAlign='left';
-    // Sun illustration
-    const cx=960,cy=540;
-    for(let i=0;i<32;i++){const a=i*Math.PI*2/32,r1=110,r2=150+Math.random()*60;x.strokeStyle=`rgba(255,${170+Math.random()*50},${80+Math.random()*40},${.06+Math.random()*.1})`;x.lineWidth=2;x.beginPath();x.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);x.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);x.stroke()}
-    const sg=x.createRadialGradient(cx,cy,0,cx,cy,130);sg.addColorStop(0,'rgba(255,200,140,.95)');sg.addColorStop(.4,'rgba(255,160,90,.5)');sg.addColorStop(1,'transparent');x.fillStyle=sg;x.beginPath();x.arc(cx,cy,130,0,Math.PI*2);x.fill();
-    // Dock
-    x.fillStyle='rgba(30,22,18,.55)';
-    const dw=920,dx=(1920-dw)/2,dy=1110;
-    x.beginPath();if(x.roundRect)x.roundRect(dx,dy,dw,72,16);else x.rect(dx,dy,dw,72);x.fill();
-    x.strokeStyle='rgba(255,220,180,.1)';x.lineWidth=1;x.stroke();
-    const icons=['#4a7ac8','#c84a4a','#4ac87a','#c8a84a','#8a4ac8','#4ac8c8','#c84a8a','#c87a4a','#5a5a5a','#4a9ac8'];
-    icons.forEach((col,i)=>{const ix=dx+60+i*85,iy=dy+36;x.fillStyle=col;x.beginPath();if(x.roundRect)x.roundRect(ix-26,iy-26,52,52,9);else x.rect(ix-26,iy-26,52,52);x.fill();x.fillStyle='rgba(255,255,255,.17)';x.beginPath();if(x.roundRect)x.roundRect(ix-26,iy-26,52,18,[9,9,0,0]);else x.rect(ix-26,iy-26,52,18);x.fill()});
-  } else {
-    // LOGIN screen — deep blurred wallpaper, avatar, user, input
-    const g=x.createLinearGradient(0,0,0,1200);g.addColorStop(0,'#1a1826');g.addColorStop(.4,'#3a2028');g.addColorStop(.7,'#5a2818');g.addColorStop(1,'#0a0808');
-    x.fillStyle=g;x.fillRect(0,0,1920,1200);
-    // Soft bokeh blobs
-    for(let i=0;i<12;i++){const bx=Math.random()*1920,by=Math.random()*1200,br=80+Math.random()*200;const rg=x.createRadialGradient(bx,by,0,bx,by,br);rg.addColorStop(0,`rgba(255,${150+Math.random()*70},${60+Math.random()*80},${.05+Math.random()*.12})`);rg.addColorStop(1,'transparent');x.fillStyle=rg;x.fillRect(bx-br,by-br,br*2,br*2)}
-    // Center avatar
-    const cx=960,cy=520;
-    const ag=x.createRadialGradient(cx-30,cy-40,0,cx,cy,100);ag.addColorStop(0,'#5a4a3a');ag.addColorStop(.7,'#2a1f15');ag.addColorStop(1,'#0a0804');x.fillStyle=ag;x.beginPath();x.arc(cx,cy,100,0,Math.PI*2);x.fill();
-    x.strokeStyle='rgba(255,230,200,.2)';x.lineWidth=3;x.stroke();
-    // Initial
-    x.fillStyle='rgba(255,230,200,.7)';x.font='300 italic 100px Cormorant Garamond,serif';x.textAlign='center';x.textBaseline='middle';x.fillText('s',cx,cy+4);
-    // User name
-    x.fillStyle='rgba(255,240,220,.92)';x.font='300 40px -apple-system,sans-serif';x.fillText('suyash',cx,cy+160);
-    // Input bar
-    x.fillStyle='rgba(255,240,220,.1)';x.strokeStyle='rgba(255,240,220,.15)';x.lineWidth=1;
-    x.beginPath();if(x.roundRect)x.roundRect(cx-150,cy+200,300,44,22);else x.rect(cx-150,cy+200,300,44);x.fill();x.stroke();
-    x.fillStyle='rgba(255,240,220,.55)';x.font='300 20px -apple-system,sans-serif';x.textAlign='left';x.fillText('Enter Password',cx-130,cy+224);
-    x.textAlign='center';x.fillStyle='rgba(255,240,220,.45)';x.font='300 18px -apple-system,sans-serif';
-    x.fillText('Touch ID or enter password',cx,cy+290);
-    // Menu bar top
-    x.fillStyle='rgba(255,240,220,.8)';x.font='300 14px -apple-system,sans-serif';x.textAlign='right';
-    const d=new Date();const h=d.getHours()%12||12,mm=String(d.getMinutes()).padStart(2,'0');
-    x.fillText(h+':'+mm+(d.getHours()>=12?' PM':' AM'),1890,22);
-  }
-  if(macLoginTex){macLoginTex.needsUpdate=true}
-  return c;
-}
-
-/* ─── LIGHTING ─── */
-let keyLight,fillLight,screenGlow,lampGlow,monitorGlow,printerGlow,macGlow;
-function buildLighting(){
-  scene.add(new THREE.HemisphereLight(0x2a1a12,0x050302,.28));
-  keyLight=new THREE.SpotLight(0xffaa5c,1.6,22,Math.PI*.4,.7,1.3);
-  keyLight.position.set(-4.5,5.8,4.2);keyLight.target.position.set(0,.4,0);
-  keyLight.castShadow=true;keyLight.shadow.mapSize.set(2048,2048);
-  keyLight.shadow.bias=-.0003;keyLight.shadow.normalBias=.01;
-  keyLight.shadow.camera.near=.5;keyLight.shadow.camera.far=18;
-  scene.add(keyLight);scene.add(keyLight.target);
-
-  fillLight=new THREE.DirectionalLight(0x6080b8,.4);
-  fillLight.position.set(5,4,-3);scene.add(fillLight);
-
-  const rim=new THREE.DirectionalLight(0xffa060,.22);rim.position.set(-2,2,-4);scene.add(rim);
-
-  monitorGlow=new THREE.PointLight(0x7a4e6a,.6,5,2);
-  monitorGlow.position.set(0,1.9,-.6);scene.add(monitorGlow);
-
-  macGlow=new THREE.PointLight(0x9a6a88,.3,2.5,2);
-  macGlow.position.set(0,.8,1.0);scene.add(macGlow);
-
-  printerGlow=new THREE.PointLight(0xffc070,.25,2.5,2);
-  printerGlow.position.set(3.8,1.1,-.3);scene.add(printerGlow);
-
-  lampGlow=new THREE.PointLight(0xffb866,1.3,10,1.6);
-  lampGlow.position.set(-5,4.5,3.5);scene.add(lampGlow);
-}
-
-/* ─── DESK ─── */
-function buildDesk(){
-  const woodTex=makeWoodTexture();woodTex.repeat.set(2,1);
-  const deskMat=new THREE.MeshStandardMaterial({map:woodTex,color:0x8a5a32,metalness:.15,roughness:.65,envMapIntensity:.7});
-  deskObj=new THREE.Mesh(new THREE.BoxGeometry(14,.22,7),deskMat);
-  deskObj.position.y=0;deskObj.receiveShadow=true;scene.add(deskObj);
-  const edgeMat=new THREE.MeshStandardMaterial({color:0x5a3a1e,metalness:.1,roughness:.55,envMapIntensity:.5});
-  const frontEdge=new THREE.Mesh(new THREE.BoxGeometry(14,.05,.03),edgeMat);
-  frontEdge.position.set(0,.12,3.5);scene.add(frontEdge);
-  const legMat=new THREE.MeshStandardMaterial({color:0x2a1810,metalness:.4,roughness:.45});
-  [[-6.5,-1.5,2.8],[6.5,-1.5,2.8],[-6.5,-1.5,-2.8],[6.5,-1.5,-2.8]].forEach(p=>{
-    const leg=new THREE.Mesh(new THREE.BoxGeometry(.08,3,.08),legMat);
-    leg.position.set(...p);leg.castShadow=true;scene.add(leg);
-  });
-}
-
-/* ─── ROOM BOUNDS ─── */
-function buildRoomBounds(){
-  const wallMat=new THREE.MeshStandardMaterial({color:0x0a0912,roughness:.95,metalness:0,envMapIntensity:.3});
-  const wall=new THREE.Mesh(new THREE.PlaneGeometry(30,20),wallMat);
-  wall.position.set(0,5,-6);scene.add(wall);
-  const winMat=new THREE.MeshBasicMaterial({color:0x3850a0,transparent:true,opacity:.18});
-  const win=new THREE.Mesh(new THREE.PlaneGeometry(1.5,4),winMat);
-  win.position.set(8.5,3,-5.9);scene.add(win);
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,16),new THREE.MeshStandardMaterial({color:0x1a0f08,roughness:.7,metalness:.2,envMapIntensity:.4}));
-  floor.rotation.x=-Math.PI/2;floor.position.y=-2.5;floor.receiveShadow=true;scene.add(floor);
-  // Lamp halo (off-frame)
-  const glowMat=new THREE.MeshBasicMaterial({color:0xffcc88,transparent:true,opacity:.35});
-  const glow=new THREE.Mesh(new THREE.SphereGeometry(.4,20,20),glowMat);
-  glow.position.set(-6.2,2.2,2.5);scene.add(glow);
-  const bloomMat=new THREE.MeshBasicMaterial({color:0xffb066,transparent:true,opacity:.22,depthWrite:false});
-  const bloom=new THREE.Mesh(new THREE.PlaneGeometry(2.5,2.5),bloomMat);
-  bloom.position.set(-6,2,2.8);scene.add(bloom);
-}
-
-/* ─── PLACEHOLDER (printer & key until real models arrive) ─── */
-function buildPlaceholders(){
-  // Printer placeholder — tall cube
-  const pMat=new THREE.MeshStandardMaterial({color:0x14141a,metalness:.4,roughness:.5,envMapIntensity:.8});
-  printer=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2),pMat);
-  printer.position.set(4.2,.72,-.8);
-  printer.castShadow=true;printer.receiveShadow=true;
-  scene.add(printer);
-  // Subtle "coming soon" label inside
-  const labelC=document.createElement('canvas');labelC.width=256;labelC.height=64;
-  const lx=labelC.getContext('2d');lx.fillStyle='rgba(255,180,120,.6)';lx.font='italic 300 22px Cormorant Garamond,serif';lx.textAlign='center';lx.fillText('the atelier · arriving',128,38);
-  const labelTex=new THREE.CanvasTexture(labelC);
-  const label=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.28),new THREE.MeshBasicMaterial({map:labelTex,transparent:true}));
-  label.position.set(0,0,.61);printer.add(label);
-  // Key placeholder — small rounded box
-  const kMat=new THREE.MeshPhysicalMaterial({color:0x0a0a0c,metalness:.7,roughness:.28,clearcoat:.9,envMapIntensity:1.3});
-  key=new THREE.Mesh(new THREE.BoxGeometry(.42,.07,.62),kMat);
-  key.position.set(-3.8,.16,.3);key.rotation.y=.4;
-  key.castShadow=true;
-  scene.add(key);
-  // Tiny chrome star hint
-  const chrom=new THREE.MeshPhysicalMaterial({color:0xc8c8d0,metalness:1,roughness:.1,envMapIntensity:2});
-  const disk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.008,32),chrom);
-  disk.position.y=.04;key.add(disk);
-  for(let i=0;i<3;i++){
-    const a=i*Math.PI*2/3-Math.PI/2;
-    const bar=new THREE.Mesh(new THREE.BoxGeometry(.02,.006,.11),chrom);
-    bar.position.set(Math.cos(a)*.05,.045,Math.sin(a)*.05);bar.rotation.y=-a-Math.PI/2;key.add(bar);
-  }
-}
-
-/* ─── FIND A SCREEN-LIKE MESH IN LOADED MODEL ─── */
-function findScreenMesh(root){
-  // Heuristic: largest thin rectangular mesh (likely the screen).
-  // We'll find meshes with "screen" in the name first.
-  let bestByName=null,bestByArea=null,bestArea=0;
-  root.traverse(o=>{
-    if(!o.isMesh)return;
-    const n=(o.name||'').toLowerCase();
-    if(n.includes('screen')||n.includes('display')||n.includes('glass'))bestByName=o;
-    // Compute area of bounding box face (pick largest flat face)
-    o.geometry.computeBoundingBox();
-    const b=o.geometry.boundingBox;
-    if(!b)return;
-    const sx=b.max.x-b.min.x,sy=b.max.y-b.min.y,sz=b.max.z-b.min.z;
-    const faces=[sx*sy,sy*sz,sx*sz].sort((a,b)=>b-a);
-    const area=faces[0];
-    if(area>bestArea){bestArea=area;bestByArea=o}
-  });
-  return bestByName||bestByArea;
-}
-
-/* ─── MODEL LOADING ─── */
-const MODELS={
-  macbook:{url:'models/apple_macbook_pro.glb',scale:3.2,position:[0,.115,1.2],rotation:[0,Math.PI,0]},
-  monitor:{url:'models/ultra-wide_monitor.glb',scale:4.5,position:[0,.12,-1.7],rotation:[0,0,0]},
-  keyboard:{url:'models/apple_magic_keyboard_with_numeric_keyboard.glb',scale:1.3,position:[-.4,.14,1.25],rotation:[0,0,0]},
-  mouse:{url:'models/logitech_g502_x_lightspeed.glb',scale:.8,position:[1.9,.15,1.3],rotation:[0,-.1,0]}
-};
-const loaded={};
-let loadProgress=0,loadTotal=Object.keys(MODELS).length,loadedCount=0;
-
-function loadAll(onComplete){
-  const loader=new THREE.GLTFLoader();
-  const envMap=scene.environment;
-  const keys=Object.keys(MODELS);
-  let failed=0;
-  function tryLoad(i){
-    if(i>=keys.length){updateVeil(1,'');onComplete();return}
-    const name=keys[i],cfg=MODELS[name];
-    loader.load(cfg.url,
-      (gltf)=>{
-        const root=gltf.scene;
-        // Normalize and fit
-        const bbox=new THREE.Box3().setFromObject(root);
-        const size=bbox.getSize(new THREE.Vector3());
-        const maxDim=Math.max(size.x,size.y,size.z);
-        const baseScale=cfg.scale/Math.max(maxDim,.001);
-        root.scale.setScalar(baseScale);
-        // Re-center at origin horizontally, floor at y=0
-        const bbox2=new THREE.Box3().setFromObject(root);
-        const center=bbox2.getCenter(new THREE.Vector3());
-        const minY=bbox2.min.y;
-        root.position.sub(new THREE.Vector3(center.x,minY,center.z));
-        // Apply desired position
-        root.position.add(new THREE.Vector3(...cfg.position));
-        root.rotation.set(...cfg.rotation);
-        // Apply env map + shadows to all meshes, enhance if too dark
-        root.traverse(o=>{
-          if(o.isMesh){
-            o.castShadow=true;o.receiveShadow=true;
-            if(o.material){
-              const mats=Array.isArray(o.material)?o.material:[o.material];
-              mats.forEach(m=>{
-                m.envMap=envMap;
-                if(m.envMapIntensity!==undefined)m.envMapIntensity=1.1;
-                // Slightly warm the material if applicable
-                if(m.color&&m.color.r<.05&&m.color.g<.05&&m.color.b<.05){
-                  // true-black materials can look dead without lighting; nudge up
-                }
-                m.needsUpdate=true;
-              });
-            }
-          }
-        });
-        // Attach screen handling for MacBook
-        if(name==='macbook'){
-          const scr=findScreenMesh(root);
-          if(scr){
-            macLoginTex=new THREE.CanvasTexture(makeMacLoginScreen(0));
-            macLoginTex.encoding=THREE.sRGBEncoding;
-            macLoginTex.flipY=false; // GLTF convention
-            // Try both flipY values — apply and see
-            const scrMat=new THREE.MeshStandardMaterial({
-              map:macLoginTex,emissive:0xffffff,emissiveMap:macLoginTex,
-              emissiveIntensity:.85,metalness:0,roughness:.18
-            });
-            scr.material=scrMat;
-            macbookScreen=scr;
-          }
-        }
-        // Same for monitor: replace screen with desktop texture
-        if(name==='monitor'){
-          const scr=findScreenMesh(root);
-          if(scr){
-            const mTex=new THREE.CanvasTexture(makeMacLoginScreen(1));
-            mTex.encoding=THREE.sRGBEncoding;
-            mTex.flipY=false;
-            const mMat=new THREE.MeshStandardMaterial({
-              map:mTex,emissive:0xffffff,emissiveMap:mTex,
-              emissiveIntensity:.65,metalness:0,roughness:.18
-            });
-            scr.material=mMat;
-            window._monitorScreenTex=mTex;
-          }
-        }
-        scene.add(root);
-        loaded[name]=root;
-        // Assign to local vars
-        if(name==='macbook')macbook=root;
-        if(name==='monitor')monitor=root;
-        if(name==='keyboard')keyboard=root;
-        if(name==='mouse')mouse=root;
-        loadedCount++;
-        updateVeil(loadedCount/loadTotal,name);
-        tryLoad(i+1);
-      },
-      (xhr)=>{/* progress */},
-      (err)=>{
-        console.warn('failed to load',cfg.url,err);
-        failed++;
-        loadedCount++;
-        updateVeil(loadedCount/loadTotal,'missing '+name);
-        tryLoad(i+1);
-      }
-    );
-  }
-  tryLoad(0);
-}
-
-function updateVeil(p,label){
-  document.getElementById('veil-bar').style.width=Math.round(p*100)+'%';
-  document.getElementById('veil-pct').textContent=Math.round(p*100)+'%';
-  if(label)document.getElementById('veil-text').textContent=label.replace(/_/g,' ').replace('-',' ');
-}
-
-/* ─── SCENE INIT ─── */
-function initScene(){
+/* ═══ BUILD STATIC SCENE ═══ */
+function buildStatic(){
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x050302);
-  scene.fog=new THREE.Fog(0x050302,16,28);
+  scene.background=new THREE.Color(0x06080c);
+  scene.fog=new THREE.Fog(0x06080c,14,30);
+  scene.environment=makeEnv();
 
-  const envMap=makeEnvMap();
-  scene.environment=envMap;
-
-  camera=new THREE.PerspectiveCamera(34,W()/H(),.1,80);
-  camera.position.copy(camPos);
-  camera.lookAt(camLook);
+  camera=new THREE.PerspectiveCamera(34,W()/H(),.1,100);
+  camera.position.copy(camPos);camera.lookAt(camLook);
 
   renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-  renderer.setSize(W(),H());
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.2;
+  renderer.setSize(W(),H());renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
   renderer.outputEncoding=THREE.sRGBEncoding;
   document.getElementById('scene').appendChild(renderer.domElement);
 
-  buildLighting();
-  buildDesk();
-  buildRoomBounds();
-  buildPlaceholders();
+  /* LIGHTING */
+  // Hemisphere base — cool up, warm down
+  scene.add(new THREE.HemisphereLight(0xc6d4e8,0x2a1a0e,.42));
 
-  loadAll(()=>{
-    // Register interactives
-    if(macbook)interactives.push({obj:macbook,name:'macbook',label:'the macbook ·'});
-    interactives.push({obj:printer,name:'printer',label:'the atelier ·'});
-    if(monitor)interactives.push({obj:monitor,name:'monitor',label:'the monitor ·'});
-    interactives.push({obj:key,name:'key',label:'the key ·'});
+  // Key light — warm amber lamp from upper-left, off-frame
+  lampLight=new THREE.SpotLight(0xffb06a,1.55,20,Math.PI*.42,.65,1.25);
+  lampLight.position.set(-5.5,6.5,5);
+  lampLight.target.position.set(-1,.5,1);
+  lampLight.castShadow=true;
+  lampLight.shadow.mapSize.set(2048,2048);
+  lampLight.shadow.bias=-.0003;lampLight.shadow.normalBias=.012;
+  lampLight.shadow.camera.near=.5;lampLight.shadow.camera.far=22;
+  scene.add(lampLight,lampLight.target);
 
-    addEventListener('resize',onResize);
-    renderer.domElement.addEventListener('mousemove',onMouseMove);
-    renderer.domElement.addEventListener('click',onClick);
-    renderer.domElement.addEventListener('touchstart',onTouch,{passive:true});
+  // Fill — cool blue from right
+  const fill=new THREE.DirectionalLight(0x7092c4,.55);
+  fill.position.set(5.5,5,2);scene.add(fill);
 
-    setTimeout(()=>{
-      document.getElementById('veil').classList.add('gone');
-      setTimeout(()=>document.getElementById('veil').style.display='none',2500);
-      document.getElementById('ambient').classList.add('on');
-    },600);
-  });
+  // Rim back-light (blue LED bias glow behind monitor)
+  coolLED=new THREE.PointLight(0x5a8cd0,1.3,7,1.4);
+  coolLED.position.set(0,2.4,-4);scene.add(coolLED);
 
-  tick();
+  // Neon accent — warm orange/yellow bolt off right wall
+  neonLight=new THREE.PointLight(0xffb84a,1.2,6,1.8);
+  neonLight.position.set(6.5,2.6,-3);scene.add(neonLight);
+
+  // Lamp bloom halo
+  const halo=new THREE.PointLight(0xffbc6c,.6,8,1.6);
+  halo.position.set(-5,4.5,4);scene.add(halo);
+
+  // Subtle desk bounce
+  const bounce=new THREE.PointLight(0xffa66a,.22,4,2);
+  bounce.position.set(-1.5,.7,1.8);scene.add(bounce);
+
+  /* DESK — light wood */
+  const woodTex=makeWood();woodTex.repeat.set(1.5,.8);
+  const deskMat=new THREE.MeshStandardMaterial({map:woodTex,color:0xb89570,metalness:.1,roughness:.62,envMapIntensity:.55});
+  const desk=new THREE.Mesh(new THREE.BoxGeometry(14,.2,7),deskMat);
+  desk.receiveShadow=true;scene.add(desk);
+  // Desk front rim (slight shadow)
+  const rimMat=new THREE.MeshStandardMaterial({color:0x8a6a44,roughness:.6,metalness:.08});
+  const rim=new THREE.Mesh(new THREE.BoxGeometry(14,.04,.03),rimMat);rim.position.set(0,.12,3.5);scene.add(rim);
+
+  /* BLACK DESK MAT — matching reference photo, under macbook area */
+  const matTex=makeMatTex();
+  const matMat=new THREE.MeshStandardMaterial({map:matTex,color:0x101014,metalness:.1,roughness:.85,envMapIntensity:.4});
+  const mat=new THREE.Mesh(new THREE.BoxGeometry(4.4,.018,2.4),matMat);
+  mat.position.set(0,.119,1.5);mat.receiveShadow=true;scene.add(mat);
+
+  /* MONITOR RISER — small platform under the monitor stand */
+  const riserMat=new THREE.MeshStandardMaterial({color:0x202428,metalness:.6,roughness:.45,envMapIntensity:1});
+  const riser=new THREE.Mesh(new THREE.BoxGeometry(3.4,.2,1.3),riserMat);
+  riser.position.set(0,.22,-2.1);riser.castShadow=true;riser.receiveShadow=true;scene.add(riser);
+  // Riser side legs hint
+  const legMat=new THREE.MeshStandardMaterial({color:0x15181c,metalness:.7,roughness:.35});
+  [-1.55,1.55].forEach(x=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.08,.2,1.2),legMat);l.position.set(x,.22,-2.1);l.castShadow=true;scene.add(l)});
+
+  /* BACK WALL */
+  const wallTex=makeWallTex();wallTex.repeat.set(2,1);
+  const wallMat=new THREE.MeshStandardMaterial({map:wallTex,color:0x141a24,roughness:.95,metalness:.02,envMapIntensity:.3});
+  const wall=new THREE.Mesh(new THREE.PlaneGeometry(40,20),wallMat);
+  wall.position.set(0,6,-5.5);wall.receiveShadow=true;scene.add(wall);
+
+  /* COOL BIAS-LED BACK GLOW behind monitor on wall */
+  const biasMat=new THREE.MeshBasicMaterial({color:0x4a82c8,transparent:true,opacity:.35,depthWrite:false});
+  const bias=new THREE.Mesh(new THREE.PlaneGeometry(9,3.5),biasMat);
+  bias.position.set(0,2.6,-5.48);scene.add(bias);
+  const biasMat2=new THREE.MeshBasicMaterial({color:0x3068a8,transparent:true,opacity:.2,depthWrite:false});
+  const bias2=new THREE.Mesh(new THREE.PlaneGeometry(12,5),biasMat2);
+  bias2.position.set(0,2.6,-5.46);scene.add(bias2);
+
+  /* NEON LIGHTNING BOLT hint on right wall */
+  const neonMat=new THREE.MeshBasicMaterial({color:0xffbe5a,transparent:true,opacity:.85});
+  const bolt=new THREE.Mesh(makeBoltGeometry(),neonMat);
+  bolt.position.set(6.2,2.5,-5.4);bolt.scale.set(.55,.55,.55);scene.add(bolt);
+  const neonHalo=new THREE.MeshBasicMaterial({color:0xffb868,transparent:true,opacity:.22,depthWrite:false});
+  const halo2=new THREE.Mesh(new THREE.PlaneGeometry(2.4,3.2),neonHalo);halo2.position.set(6.2,2.5,-5.42);scene.add(halo2);
+
+  /* FLOOR */
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(40,20),new THREE.MeshStandardMaterial({color:0x0a0806,roughness:.7,metalness:.15,envMapIntensity:.35}));
+  floor.rotation.x=-Math.PI/2;floor.position.y=-2.2;floor.receiveShadow=true;scene.add(floor);
+
+  /* PLACEHOLDER OBJECTS — printer, key (until real models arrive) */
+  buildPrinter();
+  buildMerckey();
+
+  addEventListener('resize',onResize);
+  renderer.domElement.addEventListener('mousemove',onMove);
+  renderer.domElement.addEventListener('click',onClick);
+  renderer.domElement.addEventListener('touchstart',onTouch,{passive:true});
 }
 
-function onResize(){camera.aspect=W()/H();camera.updateProjectionMatrix();renderer.setSize(W(),H())}
-
-/* ─── INTERACTION ─── */
-function onMouseMove(e){
-  mouseNDC.x=(e.clientX/W())*2-1;
-  mouseNDC.y=-(e.clientY/H())*2+1;
-  checkHover();
+function makeBoltGeometry(){
+  // Simple lightning bolt shape
+  const shape=new THREE.Shape();
+  shape.moveTo(0,1);shape.lineTo(-.55,.05);shape.lineTo(-.15,.05);shape.lineTo(-.45,-1);shape.lineTo(.35,.15);shape.lineTo(.05,.15);shape.lineTo(.45,1);shape.lineTo(0,1);
+  return new THREE.ShapeGeometry(shape);
 }
-function onTouch(e){if(e.touches.length){mouseNDC.x=(e.touches[0].clientX/W())*2-1;mouseNDC.y=-(e.touches[0].clientY/H())*2+1;checkHover()}}
+
+function buildPrinter(){
+  const pMat=new THREE.MeshStandardMaterial({color:0x14151c,metalness:.4,roughness:.45,envMapIntensity:.8});
+  printer=new THREE.Group();
+  const cube=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),pMat);cube.castShadow=true;cube.receiveShadow=true;printer.add(cube);
+  // Glass door hint
+  const glassMat=new THREE.MeshPhysicalMaterial({color:0x1a2030,metalness:.1,roughness:.2,transmission:.4,thickness:.1,transparent:true,opacity:.4,clearcoat:.8});
+  const glass=new THREE.Mesh(new THREE.PlaneGeometry(1,1),glassMat);glass.position.z=.56;printer.add(glass);
+  // Blue LED inside
+  const led=new THREE.Mesh(new THREE.BoxGeometry(.9,.02,.02),new THREE.MeshBasicMaterial({color:0xbcd8ff}));
+  led.position.set(0,.52,-.5);printer.add(led);
+  printerGlowLight=new THREE.PointLight(0x88ccff,.25,2,2);printerGlowLight.position.set(0,0,.4);printer.add(printerGlowLight);
+  printer.position.set(4.6,.68,-.6);printer.scale.set(.82,.82,.82);
+  printer.userData.name='printer';printer.userData.label='the atelier ·';
+  scene.add(printer);
+}
+function buildMerckey(){
+  merckey=new THREE.Group();
+  const bodyMat=new THREE.MeshPhysicalMaterial({color:0x0a0a0c,metalness:.72,roughness:.25,clearcoat:.95,clearcoatRoughness:.08,envMapIntensity:1.4});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.42,.07,.62),bodyMat);body.castShadow=true;merckey.add(body);
+  const chrom=new THREE.MeshPhysicalMaterial({color:0xe0e2e8,metalness:1,roughness:.05,clearcoat:1,envMapIntensity:2.4});
+  const disk=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.007,48),chrom);disk.position.y=.039;merckey.add(disk);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.095,.007,8,36),chrom);ring.rotation.x=Math.PI/2;ring.position.y=.043;merckey.add(ring);
+  for(let i=0;i<3;i++){const a=i*Math.PI*2/3-Math.PI/2;const bar=new THREE.Mesh(new THREE.BoxGeometry(.018,.006,.09),chrom);bar.position.set(Math.cos(a)*.045,.043,Math.sin(a)*.045);bar.rotation.y=-a-Math.PI/2;merckey.add(bar)}
+  merckey.position.set(-4.3,.155,-.1);merckey.rotation.y=.5;
+  merckey.userData.name='key';merckey.userData.label='the key ·';
+  scene.add(merckey);
+}
+
+/* ═══ MODEL LOADING ═══ */
+const loaded={};
+const modelKeys=Object.keys(MODELS);
+let loadedCount=0;
+function updateVeil(pct,label){
+  const bar=document.getElementById('veil-bar');bar.style.setProperty('--p',(pct*100)+'%');
+  document.getElementById('veil-pct').textContent=Math.round(pct*100)+'%';
+  if(label)document.getElementById('veil-text').textContent=label.replace(/_/g,' ').replace(/-/g,' ');
+  if(pct>.5&&!document.getElementById('veil').classList.contains('show-line'))document.getElementById('veil').classList.add('show-line');
+}
+
+function loadAll(done){
+  const loader=new THREE.GLTFLoader();
+  function next(i){
+    if(i>=modelKeys.length){done();return}
+    const name=modelKeys[i],cfg=MODELS[name];
+    updateVeil(i/modelKeys.length,name);
+    loader.load(cfg.url,(gltf)=>{
+      const root=gltf.scene;
+      root.rotation.set(...cfg.rotation);root.updateMatrixWorld(true);
+      const bbox=new THREE.Box3().setFromObject(root);
+      const size=bbox.getSize(new THREE.Vector3());
+      const maxDim=Math.max(size.x,size.y,size.z);
+      const fit=cfg.targetWidth/Math.max(maxDim,.001);
+      root.scale.setScalar(fit);root.updateMatrixWorld(true);
+      const bbox2=new THREE.Box3().setFromObject(root);
+      const center=bbox2.getCenter(new THREE.Vector3());
+      const minY=bbox2.min.y;
+      root.position.sub(new THREE.Vector3(center.x,minY,center.z));
+      root.position.add(new THREE.Vector3(...cfg.position));
+      root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m.envMapIntensity!==undefined)m.envMapIntensity=1.15;m.needsUpdate=true})}}});
+      root.userData.name=name;
+      root.userData.label=cfg.label;
+      loaded[name]=root;scene.add(root);
+      loadedCount++;next(i+1);
+    },
+    undefined,
+    (err)=>{console.warn('load fail:',name,err);loadedCount++;next(i+1)});
+  }
+  next(0);
+}
+
+/* ═══ INTERACTION ═══ */
+function onMove(e){mouseNDC.x=(e.clientX/W())*2-1;mouseNDC.y=-(e.clientY/H())*2+1;check()}
+function onTouch(e){if(e.touches.length){mouseNDC.x=(e.touches[0].clientX/W())*2-1;mouseNDC.y=-(e.touches[0].clientY/H())*2+1;check()}}
 function onClick(){
   if(!hovered)return;
-  if(hovered.name==='macbook')openMac();
-  else if(hovered.name==='printer')openChapter('the atelier · building for the love of it','printer');
-  else if(hovered.name==='monitor'){if(!phoneUnlocked){nudge('unlock the laptop first');return}openChapter('the monitor · what i do with my days','monitor')}
-  else if(hovered.name==='key'){if(!phoneUnlocked){nudge('unlock the laptop first');return}openChapter('the key · what comes before me','key')}
+  const n=hovered.userData.name;
+  if(n==='iphone')openPhone();
+  else if(n==='printer'){if(!phoneUnlocked){nudge('unlock the phone first');return}openChapter('the atelier · building for the love of it')}
+  else if(n==='monitor'){if(!phoneUnlocked){nudge('unlock the phone first');return}openChapter('the monitor · what i do with my days')}
+  else if(n==='key'){if(!phoneUnlocked){nudge('unlock the phone first');return}openChapter('the key · what comes before me')}
 }
-function nudge(t){const tt=document.getElementById('tooltip');tt.textContent=t+' ·';tt.classList.add('on');setTimeout(()=>tt.classList.remove('on'),1400)}
-
-function checkHover(){
+function nudge(t){const tt=document.getElementById('tooltip');tt.textContent=t+' ·';tt.style.left=mx+'px';tt.style.top=my+'px';tt.classList.add('on');setTimeout(()=>tt.classList.remove('on'),1400)}
+function check(){
   raycaster.setFromCamera(mouseNDC,camera);
-  const objs=interactives.map(i=>i.obj);
-  const hits=raycaster.intersectObjects(objs,true);
+  const hits=raycaster.intersectObjects(interactives,true);
   let found=null;
   if(hits.length){
     for(const hit of hits){
       let o=hit.object;
-      while(o){const match=interactives.find(i=>i.obj===o);if(match){found=match;break}o=o.parent}
+      while(o){if(o.userData&&o.userData.name&&interactives.includes(o)){found=o;break}o=o.parent}
       if(found)break;
     }
   }
@@ -641,107 +574,57 @@ function checkHover(){
     hovered=found;
     cur.classList.toggle('hot',!!found);
     const tt=document.getElementById('tooltip');
-    if(found){tt.textContent=found.label;tt.classList.add('on')}else{tt.classList.remove('on')}
+    if(found){tt.textContent=found.userData.label;tt.classList.add('on')}else{tt.classList.remove('on')}
   }
   if(hovered){const tt=document.getElementById('tooltip');tt.style.left=mx+'px';tt.style.top=my+'px'}
 }
+function onResize(){camera.aspect=W()/H();camera.updateProjectionMatrix();renderer.setSize(W(),H())}
 
-/* ─── MAC LOGIN (passcode) ─── */
+/* ═══ PASSCODE FLOW ═══ */
 const CODE='777777';
 let pcInp='',pcAtt=0,pcIdleTimer=null;
-function openMac(){
-  document.getElementById('mac-overlay').classList.add('on');
-  clearTimeout(pcIdleTimer);
-  pcIdleTimer=setTimeout(triggerLateral,30000);
-  cur.style.opacity='0';
-  setTimeout(()=>{renderMacDots()},100);
-}
-function closeMac(){
-  document.getElementById('mac-overlay').classList.remove('on');
-  cur.style.opacity='1';
-  clearTimeout(pcIdleTimer);
-}
-document.getElementById('mac-close').addEventListener('click',closeMac);
-function renderMacDots(){
-  const box=document.getElementById('mac-dots');
-  box.innerHTML='';
-  for(let i=0;i<6;i++){
-    const d=document.createElement('div');
-    d.className='mac-dot'+(i<pcInp.length?' on':'');
-    box.appendChild(d);
-  }
-  document.getElementById('mac-hint').style.opacity=pcInp.length?0:.6;
-}
-function pcType(n){
+function openPhone(){document.getElementById('phone-overlay').classList.add('on');clearTimeout(pcIdleTimer);pcIdleTimer=setTimeout(triggerLateral,30000);cur.style.opacity='0'}
+function closePhone(){document.getElementById('phone-overlay').classList.remove('on');cur.style.opacity='1';clearTimeout(pcIdleTimer)}
+document.getElementById('ph-back').addEventListener('click',closePhone);
+function pcPress(n){
   if(pcInp.length>=6)return;
-  pcInp+=n;renderMacDots();
+  pcInp+=n;
   if(navigator.vibrate)navigator.vibrate(5);
-  if(pcInp.length===6)setTimeout(pcCheck,250);
+  const dots=document.querySelectorAll('.phone-dot');
+  dots[pcInp.length-1].classList.add('filled');
+  if(pcInp.length===6)setTimeout(pcCheck,280);
   clearTimeout(pcIdleTimer);pcIdleTimer=setTimeout(triggerLateral,30000);
 }
-function pcDel(){if(!pcInp.length)return;pcInp=pcInp.slice(0,-1);renderMacDots()}
+function pcDel(){if(!pcInp.length)return;pcInp=pcInp.slice(0,-1);document.querySelectorAll('.phone-dot')[pcInp.length].classList.remove('filled')}
 function pcCheck(){
-  const wrap=document.getElementById('mac-wrap');
+  const dots=document.querySelectorAll('.phone-dot');
   if(pcInp===CODE){
-    wrap.classList.add('good');
-    document.getElementById('mac-msg').textContent='welcome back, suyash.';
-    document.getElementById('mac-msg').style.color='rgba(52,199,89,.75)';
+    clearTimeout(pcIdleTimer);
+    dots.forEach(d=>{d.classList.remove('filled');d.classList.add('good')});
+    document.getElementById('ph-title').textContent='welcome back';
+    if(navigator.vibrate)navigator.vibrate([10,30,10]);
     phoneUnlocked=true;
-    // Update MacBook screen texture to show desktop
-    if(macLoginTex&&macbookScreen){
-      makeMacLoginScreen(1);
-      macLoginTex.needsUpdate=true;
-    }
-    if(macGlow){macGlow.color.setHex(0x7080aa);macGlow.intensity=.5}
-    setTimeout(()=>{closeMac();setTimeout(openNotepad,900)},1200);
-  } else {
+    if(iphoneGlow){iphoneGlow.color.setHex(0x66ff88);iphoneGlow.intensity=.4}
+    setTimeout(()=>{closePhone();setTimeout(openNotepad,900)},1100);
+  }else{
     pcAtt++;
-    wrap.classList.add('shake');
+    document.getElementById('ph-dots').classList.add('shake');
     if(navigator.vibrate)navigator.vibrate([30,20,30]);
-    setTimeout(()=>{wrap.classList.remove('shake');pcInp='';renderMacDots();document.getElementById('mac-msg').textContent='that\u2019s not it. try again.'},480);
+    setTimeout(()=>{document.getElementById('ph-dots').classList.remove('shake');dots.forEach(d=>d.classList.remove('filled'));pcInp='';document.getElementById('ph-title').textContent='try again'},480);
     if(pcAtt>=5)setTimeout(triggerLateral,700);
   }
 }
-document.getElementById('mac-arrow').addEventListener('click',()=>{if(pcInp.length)pcCheck()});
-document.addEventListener('keydown',e=>{
-  if(!document.getElementById('mac-overlay').classList.contains('on'))return;
-  if(e.key>='0'&&e.key<='9'){pcType(e.key);e.preventDefault()}
-  if(e.key==='Backspace'){pcDel();e.preventDefault()}
-  if(e.key==='Enter'&&pcInp.length)pcCheck();
-  if(e.key==='Escape')closeMac();
-});
+document.querySelectorAll('.ph-key').forEach(k=>{k.addEventListener('click',()=>{k.classList.add('pressed');setTimeout(()=>k.classList.remove('pressed'),100);pcPress(k.dataset.n)})});
+document.getElementById('ph-del').addEventListener('click',pcDel);
+document.addEventListener('keydown',e=>{if(!document.getElementById('phone-overlay').classList.contains('on'))return;if(e.key>='0'&&e.key<='9')pcPress(e.key);if(e.key==='Backspace')pcDel();if(e.key==='Escape')closePhone()});
 
-/* ─── LATERAL ─── */
-function triggerLateral(){
-  if(phoneUnlocked||document.getElementById('lateral-overlay').classList.contains('on'))return;
-  clearTimeout(pcIdleTimer);
-  document.getElementById('mac-overlay').classList.remove('on');
-  document.getElementById('lateral-overlay').classList.add('on');
-  setTimeout(()=>document.getElementById('lat-in').focus(),100);
-}
+/* ═══ LATERAL ═══ */
+function triggerLateral(){if(phoneUnlocked||document.getElementById('lateral-overlay').classList.contains('on'))return;clearTimeout(pcIdleTimer);document.getElementById('phone-overlay').classList.remove('on');document.getElementById('lateral-overlay').classList.add('on');setTimeout(()=>document.getElementById('lat-in').focus(),100)}
 const latIn=document.getElementById('lat-in'),latC=document.getElementById('lat-c');
-latIn?.addEventListener('input',()=>{
-  const c=latIn.value.trim().split(/\s+/).filter(w=>w.length>0).length;
-  latC.textContent=c+' / 7 words';
-  latC.classList.toggle('warm',c>=5);
-});
-latIn?.addEventListener('keydown',e=>{
-  if(e.key!=='Enter')return;
-  e.preventDefault();
-  const c=latIn.value.trim().split(/\s+/).filter(w=>w.length>0).length;
-  if(c>=7){
-    latC.textContent='the door opens.';latC.style.color='rgba(255,170,80,.55)';
-    phoneUnlocked=true;
-    if(macLoginTex){makeMacLoginScreen(1);macLoginTex.needsUpdate=true}
-    try{sessionStorage.setItem('lat',latIn.value)}catch(x){}
-    setTimeout(()=>{document.getElementById('lateral-overlay').classList.remove('on');setTimeout(openNotepad,800)},1800);
-  } else {
-    latIn.style.borderColor='rgba(255,80,60,.5)';latC.textContent='more.';
-    setTimeout(()=>{latIn.style.borderColor='';latC.textContent=c+' / 7 words'},900);
-  }
-});
+latIn.addEventListener('input',()=>{const c=latIn.value.trim().split(/\s+/).filter(w=>w.length>0).length;latC.textContent=c+' / 7 words';latC.classList.toggle('warm',c>=5)});
+latIn.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const c=latIn.value.trim().split(/\s+/).filter(w=>w.length>0).length;if(c>=7){latC.textContent='the door opens.';latC.style.color='rgba(255,170,80,.55)';phoneUnlocked=true;if(iphoneGlow){iphoneGlow.color.setHex(0x66ff88);iphoneGlow.intensity=.4}try{sessionStorage.setItem('lat',latIn.value)}catch(x){}setTimeout(()=>{document.getElementById('lateral-overlay').classList.remove('on');setTimeout(openNotepad,800)},1800)}else{latIn.style.borderColor='rgba(255,80,60,.5)';latC.textContent='more.';setTimeout(()=>{latIn.style.borderColor='';latC.textContent=c+' / 7 words'},900)}});
 
-/* ─── NOTEPAD ─── */
+/* ═══ NOTEPAD ═══ */
 let guestName='';
 function openNotepad(){document.getElementById('pad-overlay').classList.add('on')}
 document.addEventListener('keydown',e=>{
@@ -749,73 +632,91 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&guestName.length>0){
     nameEntered=true;
     const resp=document.getElementById('pad-resp');
-    const greet=['welcome, ','stay a while, ','you made it, ','the room is yours, '];
-    resp.textContent=greet[Math.floor(Math.random()*greet.length)]+guestName+'.';
+    const greetings=['welcome, ','stay a while, ','you made it, ','the room is yours, '];
+    resp.textContent=greetings[Math.floor(Math.random()*greetings.length)]+guestName+'.';
     resp.classList.add('on');
     try{sessionStorage.setItem('guest',guestName)}catch(x){}
-    setTimeout(()=>{document.getElementById('pad-overlay').classList.remove('on');revealObjects()},3200);
+    setTimeout(()=>{document.getElementById('pad-overlay').classList.remove('on');revealRoom()},3200);
     return;
   }
   if(e.key==='Backspace'){e.preventDefault();guestName=guestName.slice(0,-1);document.getElementById('pad-name').textContent=guestName;return}
   if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&guestName.length<24){guestName+=e.key;document.getElementById('pad-name').textContent=guestName}
 });
-
-function revealObjects(){
-  const amb=document.getElementById('ambient');
-  amb.textContent=(guestName?guestName.toLowerCase():'welcome')+' · three things to notice';
-  targetCamPos.set(-.3,3.0,8.0);
+function revealRoom(){
+  const amb=document.getElementById('ambient');amb.textContent=(guestName?guestName.toLowerCase():'welcome')+' · three things to notice';
+  targetCamPos.set(0,3.0,7.8);
 }
 
-/* ─── CHAPTER ─── */
-function openChapter(title,which){
-  document.getElementById('ch-title').textContent=title;
-  document.getElementById('chapter-overlay').classList.add('on');
-  cur.style.opacity='0';
-}
+/* ═══ CHAPTER ═══ */
+function openChapter(title){document.getElementById('ch-title').textContent=title;document.getElementById('chapter-overlay').classList.add('on');cur.style.opacity='0'}
 document.getElementById('ch-back').addEventListener('click',()=>{document.getElementById('chapter-overlay').classList.remove('on');cur.style.opacity='1'});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('chapter-overlay').classList.contains('on')){document.getElementById('chapter-overlay').classList.remove('on');cur.style.opacity='1'}});
 
-/* ─── ANIMATION LOOP ─── */
+/* ═══ ANIMATION LOOP ═══ */
 let tC=0;
 function tick(){
   const dt=clock.getDelta();tC+=dt;
-  // Camera parallax
-  const tx=(mouseNDC.x*.28)+targetCamPos.x;
-  const ty=(-mouseNDC.y*.1)+targetCamPos.y;
-  camPos.x+=(tx-camPos.x)*.04;camPos.y+=(ty-camPos.y)*.04;camPos.z+=(targetCamPos.z-camPos.z)*.04;
-  camLook.x+=(targetCamLook.x-camLook.x)*.05;camLook.y+=(targetCamLook.y-camLook.y)*.05;
+  // camera parallax
+  const tx=(mouseNDC.x*.3)+targetCamPos.x;
+  const ty=(-mouseNDC.y*.12)+targetCamPos.y;
+  camPos.x+=(tx-camPos.x)*.035;camPos.y+=(ty-camPos.y)*.035;camPos.z+=(targetCamPos.z-camPos.z)*.04;
+  camLook.x+=(targetCamLook.x-camLook.x)*.04;camLook.y+=(targetCamLook.y-camLook.y)*.04;camLook.z+=(targetCamLook.z-camLook.z)*.04;
   camera.position.copy(camPos);camera.lookAt(camLook);
-  // Lamp flicker
-  if(keyLight)keyLight.intensity=1.6+Math.sin(tC*2)*.03+Math.sin(tC*13)*.015;
-  if(lampGlow)lampGlow.intensity=1.3+Math.sin(tC*2.3)*.04;
-  if(monitorGlow)monitorGlow.intensity=.6+Math.sin(tC*.4)*.08;
-  // Hover lift
+  // lamp flicker
+  if(lampLight)lampLight.intensity=1.55+Math.sin(tC*2.1)*.035+Math.sin(tC*13.7)*.018;
+  if(neonLight)neonLight.intensity=1.2+Math.sin(tC*11.2)*.04+Math.sin(tC*1.3)*.06;
+  if(coolLED)coolLED.intensity=1.3+Math.sin(tC*.8)*.08;
+  // iphone beacon pulse when locked
+  if(iphoneGlow&&!phoneUnlocked){iphoneGlow.intensity=.35+Math.sin(tC*1.4)*.25}
+  // printer led idle breath
+  if(printerGlowLight)printerGlowLight.intensity=.25+Math.sin(tC*1.9)*.08;
+  // hover lift
   interactives.forEach(it=>{
-    if(!it.obj)return;
-    const hov=hovered&&hovered.obj===it.obj;
-    const tY=hov?.08:0;
-    if(it._baseY===undefined)it._baseY=it.obj.position.y;
-    it.obj.position.y+=((it._baseY+tY)-it.obj.position.y)*.12;
+    const hov=hovered===it;
+    const tY=hov?.06:0;
+    if(it._baseY===undefined)it._baseY=it.position.y;
+    it.position.y+=((it._baseY+tY)-it.position.y)*.12;
   });
   if(renderer&&scene&&camera)renderer.render(scene,camera);
   requestAnimationFrame(tick);
 }
 
-/* ─── EASTER EGGS ─── */
+/* ═══ INIT ═══ */
+buildStatic();
+loadAll(()=>{
+  updateVeil(1,'ready');
+  // Register interactives
+  if(loaded.iphone){
+    interactives.push(loaded.iphone);
+    // iPhone beacon glow — above the phone, small warm light
+    iphoneGlow=new THREE.PointLight(0xffc678,.5,1.6,2);
+    iphoneGlow.position.set(...MODELS.iphone.position);iphoneGlow.position.y+=.5;
+    scene.add(iphoneGlow);
+  }
+  if(loaded.monitor)interactives.push(loaded.monitor);
+  if(printer)interactives.push(printer);
+  if(merckey)interactives.push(merckey);
+
+  setTimeout(()=>{
+    document.getElementById('veil').classList.add('gone');
+    setTimeout(()=>document.getElementById('veil').style.display='none',2600);
+    document.getElementById('ambient').classList.add('on');
+    document.getElementById('clock').classList.add('on');
+  },700);
+});
+tick();
+
+/* ═══ EASTER EGGS ═══ */
 document.addEventListener('contextmenu',e=>{e.preventDefault();const m=document.createElement('div');m.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Cormorant Garamond,serif;font-style:italic;font-size:1rem;color:rgba(255,180,120,.5);z-index:999;pointer-events:none;animation:ctxF 2.5s ease forwards';m.textContent='nothing hidden behind right-click. hidden things are elsewhere.';document.body.appendChild(m);setTimeout(()=>m.remove(),2600)});
 document.head.insertAdjacentHTML('beforeend','<style>@keyframes ctxF{0%{opacity:1}100%{opacity:0}}</style>');
 
 let ks=[];const KON=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-document.addEventListener('keydown',e=>{ks.push(e.key);if(ks.length>KON.length)ks.shift();if(JSON.stringify(ks)===JSON.stringify(KON)){ks=[];phoneUnlocked=true;if(macLoginTex){makeMacLoginScreen(1);macLoginTex.needsUpdate=true}document.getElementById('ambient').textContent='· you already know the code ·'}});
+document.addEventListener('keydown',e=>{ks.push(e.key);if(ks.length>KON.length)ks.shift();if(JSON.stringify(ks)===JSON.stringify(KON)){ks=[];phoneUnlocked=true;if(iphoneGlow){iphoneGlow.color.setHex(0x66ff88);iphoneGlow.intensity=.4}document.getElementById('ambient').textContent='· you already know the code ·'}});
 
-console.log('%ca room at dusk.','font-family:Cormorant Garamond,serif;font-style:italic;color:#d4a848;font-size:14px');
+console.log('%ca room at dusk.','font-family:Cormorant Garamond,serif;font-style:italic;color:#d4a848;font-size:15px');
 console.log('%cthere is more here than meets the eye.','color:#8a6a42;font-size:10px');
+console.log('%cthe phone wakes first. it is usually the quiet one.','color:#8a6a42;font-size:10px;font-style:italic');
 console.log('%c18°41′ N, 74°00′ E · alephata','color:#4a3a2a;font-size:9px;font-family:monospace');
-
-/* ─── BEGIN ─── */
-if(typeof THREE==='undefined'){document.getElementById('veil-text').textContent='three.js failed to load'}
-else if(typeof THREE.GLTFLoader==='undefined'){document.getElementById('veil-text').textContent='gltf loader failed';setTimeout(initScene,500)}
-else{initScene()}
 </script>
 </body>
 </html>
