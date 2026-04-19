@@ -460,6 +460,9 @@ function triggerUnlock(){
   if(isUnlocked)return;
   isUnlocked=true;
   console.log('%c🔓 unlocked — the universe arrives','color:#8fc;font-weight:bold;font-size:13px');
+  // restore full control sensitivity now that we're zooming out
+  controls.rotateSpeed=1.0;
+  controls.zoomSpeed=1.0;
   // fade the overlay out
   hideLockOverlay();
   // stagger-reveal hidden objects (stars first for dramatic "sky turns on" effect, then desk objects)
@@ -712,6 +715,9 @@ function buildScene(woodTex){
     '5':{pos:[-11,2.5,2], tgt:[0,1,-0.5],   label:'5 · Side Profile'}
   };
   document.addEventListener('keydown',(e)=>{
+    // Only fire presets post-unlock and when no modal is capturing input
+    if(!isUnlocked||terminalOpen)return;
+    if(document.getElementById('lock-overlay').classList.contains('show'))return;
     const p=PRESETS[e.key];
     if(p&&!flyInActive&&!presetActive){
       presetStartPos.copy(camera.position);
@@ -1182,18 +1188,20 @@ function tick(){
     }
   } else if(controls){
     controls.update();
-    // ── cursor parallax (when not dragging, not in preset) ──
-    parallaxAmp+=(isDragging?-0.04:0.04);
-    parallaxAmp=Math.max(0,Math.min(1,parallaxAmp));
-    const tPX=cursorNX*0.28;         // horizontal sway
-    const tPY=-cursorNY*0.18;        // vertical sway (inverted)
-    parallaxX+=(tPX-parallaxX)*0.05;
-    parallaxY+=(tPY-parallaxY)*0.05;
-    // apply offset in camera's local right/up frame, cleared next frame by controls.update()
-    const right=new THREE.Vector3(),up=new THREE.Vector3();
-    camera.matrix.extractBasis(right,up,new THREE.Vector3());
-    camera.position.addScaledVector(right,parallaxX*parallaxAmp);
-    camera.position.addScaledVector(up,parallaxY*parallaxAmp);
+    // ── cursor parallax (post-unlock only; skip at close phone-focus distance) ──
+    if(isUnlocked){
+      parallaxAmp+=(isDragging?-0.04:0.04);
+      parallaxAmp=Math.max(0,Math.min(1,parallaxAmp));
+      const tPX=cursorNX*0.28;         // horizontal sway
+      const tPY=-cursorNY*0.18;        // vertical sway (inverted)
+      parallaxX+=(tPX-parallaxX)*0.05;
+      parallaxY+=(tPY-parallaxY)*0.05;
+      // apply offset in camera's local right/up frame, cleared next frame by controls.update()
+      const right=new THREE.Vector3(),up=new THREE.Vector3();
+      camera.matrix.extractBasis(right,up,new THREE.Vector3());
+      camera.position.addScaledVector(right,parallaxX*parallaxAmp);
+      camera.position.addScaledVector(up,parallaxY*parallaxAmp);
+    }
   }
   // Lamp — subtle oil-lamp flicker + Morse-code modulation (spells SUYASH) once fully unlocked
   if(lampLight){
@@ -1290,13 +1298,16 @@ loadWood(woodTex=>{
   controls.update();
   controls.enabled=true;
   controls.autoRotate=false;
+  controls.rotateSpeed=0.32;              // much gentler — camera is close to the phone
+  controls.zoomSpeed=0.5;                 // and slower zoom so nobody overshoots
   loadAll(()=>{
     if(loaded.iphone){
       iphoneGlow=new THREE.PointLight(0xffc678,.35,1.5,2);
       iphoneGlow.position.set(MODELS.iphone.position[0],MODELS.iphone.position[1]+.35,MODELS.iphone.position[2]);
       iphoneGlow.userData.preUnlockKeep=true;  // stays lit pre-unlock
       scene.add(iphoneGlow);
-      loaded.iphone.userData.preUnlockKeep=true;  // stays visible pre-unlock
+      // tag iphone AND every mesh inside it — GLBs are groups with nested meshes
+      loaded.iphone.traverse(o=>{o.userData.preUnlockKeep=true;});
     }
     /* ─── MERCEDES DIAGNOSTIC ─── */
     if(loaded.mercedes){
