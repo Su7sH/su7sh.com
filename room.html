@@ -107,6 +107,12 @@ canvas{display:block}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 </head>
 <body>
 
@@ -169,12 +175,26 @@ const MODELS={
     targetWidth:0.75,
     position:[1.2,0.16,2.25],
     rotation:[-Math.PI/2,Math.PI,0]  // flat, screen up
+  },
+  // Mercedes — the display piece. Drop a GLB at models/mercedes.glb
+  // Tweak targetWidth if the model is too big/small on the pedestal.
+  // spin:true wraps it in a rotating pivot (see loadAll + tick).
+  mercedes:{
+    url:MODEL_BASE+'mercedes.glb',
+    targetWidth:2.0,
+    position:[-3.5,0.165,-0.5],
+    rotation:[0,0,0],
+    spin:true
   }
 };
 
 let scene,camera,renderer,controls,clock=new THREE.Clock();
+let composer=null;
 let idleTimer=null;
-let lampLight=null,iphoneGlow=null,motes=null,moonLight=null;
+let lampLight=null,iphoneGlow=null,motes=null,moonLight=null,steam=null;
+let flyInActive=false,flyInT=0;
+const flyInDuration=4.2;
+const flyInStartPos=new THREE.Vector3(-3,9,20);
 let loaded={};
 let baseCamPos=new THREE.Vector3(0,3.0,8.2);
 let baseCamLook=new THREE.Vector3(0,1.4,-0.6);
@@ -243,6 +263,18 @@ function buildScene(woodTex){
     if(idleTimer)clearTimeout(idleTimer);
     idleTimer=setTimeout(()=>{controls.autoRotate=true},5000);
   });
+
+  /* ─── BLOOM POST-PROCESSING — the cinematic lift ─── */
+  composer=new THREE.EffectComposer(renderer);
+  composer.setSize(W(),H());
+  composer.addPass(new THREE.RenderPass(scene,camera));
+  const bloom=new THREE.UnrealBloomPass(
+    new THREE.Vector2(W(),H()),
+    0.78,   // strength
+    0.42,   // radius
+    0.58    // threshold — only bright things bloom
+  );
+  composer.addPass(bloom);
 
   /* Lighting — restrained */
   scene.add(new THREE.HemisphereLight(0x8090a8,0x080604,.28));
@@ -388,6 +420,53 @@ function buildScene(woodTex){
   moonLight.shadow.bias=-.0003;moonLight.shadow.normalBias=.014;
   scene.add(moonLight,moonLight.target);
 
+  /* ─── VOLUMETRIC MOONLIGHT SHAFT ───
+     additive-blended slab aligned with the moon ray.
+     gives "god rays" coming through the window when bloom amplifies it.
+  */
+  const shaftLen=12;
+  const shaftGeo=new THREE.BoxGeometry(
+    win.z1-win.z0-0.15,
+    win.y1-win.y0-0.15,
+    shaftLen
+  );
+  shaftGeo.translate(0,0,shaftLen/2);   // start at window, extend forward along +z
+  const shaftMat=new THREE.MeshBasicMaterial({
+    color:0x8cb8e4,transparent:true,opacity:0.055,
+    blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
+  });
+  const shaft=new THREE.Mesh(shaftGeo,shaftMat);
+  const windowCtr=new THREE.Vector3(ROOM.xMin,(win.y0+win.y1)/2,(win.z0+win.z1)/2);
+  shaft.position.copy(windowCtr);
+  const moonDir=new THREE.Vector3().subVectors(
+    moonLight.target.position,moonLight.position
+  ).normalize();
+  shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),moonDir);
+  scene.add(shaft);
+  // inner hotspot — brighter, narrower
+  const shaftCore=new THREE.Mesh(
+    shaftGeo.clone(),
+    new THREE.MeshBasicMaterial({
+      color:0xc4d8f4,transparent:true,opacity:0.09,
+      blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
+    })
+  );
+  shaftCore.scale.set(0.55,0.55,1);
+  shaftCore.position.copy(windowCtr);
+  shaftCore.quaternion.copy(shaft.quaternion);
+  scene.add(shaftCore);
+  // bright rectangle where the shaft meets the floor — pooled light
+  const floorPool=new THREE.Mesh(
+    new THREE.PlaneGeometry(4.5,5.5),
+    new THREE.MeshBasicMaterial({
+      color:0x8cb8e4,transparent:true,opacity:0.18,
+      blending:THREE.AdditiveBlending,depthWrite:false
+    })
+  );
+  floorPool.rotation.x=-Math.PI/2;
+  floorPool.position.set(-2.5,ROOM.yMin+0.015,0.8);
+  scene.add(floorPool);
+
   /* ══════════════ RUG (under desk) ══════════════ */
   const rugTex=(()=>{
     const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
@@ -440,7 +519,7 @@ function buildScene(woodTex){
   lampStem.position.y=1.03;lampStem.castShadow=true;lampGroup.add(lampStem);
   const lampShade=new THREE.Mesh(
     new THREE.CylinderGeometry(.4,.55,.55,18,1,true),
-    new THREE.MeshStandardMaterial({color:0xbb8454,roughness:.55,metalness:.15,emissive:0xff9848,emissiveIntensity:.35,side:THREE.DoubleSide})
+    new THREE.MeshStandardMaterial({color:0xbb8454,roughness:.55,metalness:.15,emissive:0xff9848,emissiveIntensity:.75,side:THREE.DoubleSide})
   );
   lampShade.position.y=2.2;lampGroup.add(lampShade);
   const bulb=new THREE.Mesh(
@@ -448,16 +527,38 @@ function buildScene(woodTex){
     new THREE.MeshBasicMaterial({color:0xffc98a})
   );
   bulb.position.y=2.15;lampGroup.add(bulb);
-  lampGroup.position.set(-5.2,ROOM.yMin+.22,-1.8);
+  lampGroup.position.set(-5.2,0.10,-1.8);
   scene.add(lampGroup);
 
   // retarget the existing warm spotlight so it emanates from this lamp
-  lampLight.position.set(-5.2,ROOM.yMin+2.15,-1.8);
+  lampLight.position.set(-5.2,2.25,-1.8);
   lampLight.target.position.set(-0.3,.4,.5);
   // also add a small point light inside the shade for ambient glow
   const lampPt=new THREE.PointLight(0xffb878,.55,3.5,2);
-  lampPt.position.set(-5.2,ROOM.yMin+2.15,-1.8);
+  lampPt.position.set(-5.2,2.25,-1.8);
   scene.add(lampPt);
+
+  /* ══════════════ PEDESTAL — the Mercedes's display platform ══════════════
+     dark lacquered disk with a faint cyan emissive ring.
+     tiny rim light just above it gives the "on display" feel.
+  */
+  const pedestal=new THREE.Mesh(
+    new THREE.CylinderGeometry(1.05,1.10,0.05,48),
+    new THREE.MeshStandardMaterial({color:0x0d0d10,metalness:.72,roughness:.26,envMapIntensity:1.0})
+  );
+  pedestal.position.set(-3.5,0.135,-0.5);
+  pedestal.receiveShadow=true;
+  scene.add(pedestal);
+  const pedRing=new THREE.Mesh(
+    new THREE.TorusGeometry(1.05,0.016,8,72),
+    new THREE.MeshStandardMaterial({color:0x000000,emissive:0x5aa0d8,emissiveIntensity:2.4,roughness:.35,metalness:0})
+  );
+  pedRing.rotation.x=Math.PI/2;
+  pedRing.position.set(-3.5,0.163,-0.5);
+  scene.add(pedRing);
+  const pedGlow=new THREE.PointLight(0x8ab4e0,.28,1.9,2);
+  pedGlow.position.set(-3.5,0.28,-0.5);
+  scene.add(pedGlow);
 
   /* ══════════════ BOOKS (small stack on desk) ══════════════ */
   const bookColors=[0x3a2818,0x5a3a1c,0x241418,0x2a1a22];
@@ -491,6 +592,27 @@ function buildScene(woodTex){
   handle.rotation.z=Math.PI/2;handle.position.set(.16,.18,0);mug.add(handle);
   mug.position.set(3.6,.12,1.2);
   scene.add(mug);
+
+  /* ─── STEAM from the mug ─── */
+  const steamCount=36;
+  const steamPos=new Float32Array(steamCount*3);
+  const steamLife=new Float32Array(steamCount);
+  const MUG_X=3.6,MUG_Z=1.2,STEAM_Y0=0.48;
+  for(let i=0;i<steamCount;i++){
+    steamPos[i*3]  =MUG_X+(Math.random()-.5)*0.16;
+    steamPos[i*3+1]=STEAM_Y0+Math.random()*1.3;
+    steamPos[i*3+2]=MUG_Z+(Math.random()-.5)*0.16;
+    steamLife[i]   =Math.random();
+  }
+  const steamGeo=new THREE.BufferGeometry();
+  steamGeo.setAttribute('position',new THREE.BufferAttribute(steamPos,3));
+  const steamMat=new THREE.PointsMaterial({
+    color:0xd8e4f0,size:0.085,transparent:true,opacity:0.38,
+    sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false
+  });
+  steam=new THREE.Points(steamGeo,steamMat);
+  steam.userData.life=steamLife;
+  scene.add(steam);
 
   /* ══════════════ NOTEBOOK on desk ══════════════ */
   const notebook=new THREE.Mesh(
@@ -581,7 +703,18 @@ function loadAll(onDone){
           }
         }
       });
-      loaded[name]=root;scene.add(root);
+      if(cfg.spin){
+        // Wrap in a pivot at the bbox-center XZ so rotation spins in place,
+        // not orbits around root origin.
+        const pivot=new THREE.Group();
+        pivot.position.set(cfg.position[0],cfg.position[1],cfg.position[2]);
+        root.position.sub(pivot.position);
+        pivot.add(root);
+        scene.add(pivot);
+        loaded[name]=pivot;
+      } else {
+        loaded[name]=root;scene.add(root);
+      }
       next(i+1);
     },undefined,err=>{console.warn('fail',name,err);next(i+1)});
   }
@@ -593,13 +726,34 @@ function updateVeil(pct){
   if(pct>.5&&!document.getElementById('veil').classList.contains('show-line'))document.getElementById('veil').classList.add('show-line');
 }
 
-function onResize(){camera.aspect=W()/H();camera.updateProjectionMatrix();renderer.setSize(W(),H())}
+function onResize(){
+  camera.aspect=W()/H();camera.updateProjectionMatrix();
+  renderer.setSize(W(),H());
+  if(composer)composer.setSize(W(),H());
+}
 
 /* Animation — controls-driven, with gentle life in lamp and iphone */
 let tC=0;
 function tick(){
   const dt=Math.min(clock.getDelta(),.1);tC+=dt;
-  if(controls)controls.update();
+  // Cinematic fly-in on first arrival
+  if(flyInActive){
+    flyInT+=dt;
+    const t=Math.min(flyInT/flyInDuration,1);
+    const e=1-Math.pow(1-t,3);   // easeOutCubic
+    camera.position.lerpVectors(flyInStartPos,baseCamPos,e);
+    camera.lookAt(baseCamLook);
+    if(t>=1){
+      flyInActive=false;
+      camera.position.copy(baseCamPos);
+      controls.target.copy(baseCamLook);
+      controls.update();
+      controls.enabled=true;
+      setTimeout(()=>{if(!flyInActive)controls.autoRotate=true},2500);
+    }
+  } else if(controls){
+    controls.update();
+  }
   // Lamp — subtle oil-lamp flicker
   if(lampLight)lampLight.intensity=1.3+Math.sin(tC*2.1)*.028+Math.sin(tC*13.7)*.014;
   // iPhone — very slow gentle pulse, like a heartbeat
@@ -616,13 +770,38 @@ function tick(){
     }
     p.needsUpdate=true;
   }
-  if(renderer&&scene&&camera)renderer.render(scene,camera);
+  // Steam — rise and wisp off the mug
+  if(steam){
+    const p=steam.geometry.attributes.position;
+    const a=p.array;
+    for(let i=0;i<p.count;i++){
+      a[i*3+1]+=0.011+Math.sin(tC*1.1+i*0.3)*0.002;
+      a[i*3]  +=Math.sin(tC*1.4+i*0.7)*0.0045;
+      a[i*3+2]+=Math.cos(tC*1.1+i*0.5)*0.0045;
+      if(a[i*3+1]>1.9){
+        a[i*3]  =3.6+(Math.random()-.5)*0.16;
+        a[i*3+1]=0.48;
+        a[i*3+2]=1.2+(Math.random()-.5)*0.16;
+      }
+    }
+    p.needsUpdate=true;
+  }
+  // Mercedes — slow rotation on the pedestal (full turn ~22s)
+  if(loaded.mercedes)loaded.mercedes.rotation.y=tC*0.28;
+  // render through bloom composer (fallback to direct render if composer not ready)
+  if(composer)composer.render();
+  else if(renderer&&scene&&camera)renderer.render(scene,camera);
   requestAnimationFrame(tick);
 }
 
 /* Init */
 loadWood(woodTex=>{
   buildScene(woodTex);
+  // cinematic start pose — camera held far and high, controls locked
+  camera.position.copy(flyInStartPos);
+  camera.lookAt(baseCamLook);
+  controls.enabled=false;
+  controls.autoRotate=false;
   loadAll(()=>{
     if(loaded.iphone){
       iphoneGlow=new THREE.PointLight(0xffc678,.35,1.5,2);
@@ -631,6 +810,8 @@ loadWood(woodTex=>{
     }
     updateVeil(1);
     setTimeout(()=>{
+      // start the fly-in simultaneously with the veil fade
+      flyInActive=true;flyInT=0;
       document.getElementById('veil').classList.add('gone');
       setTimeout(()=>document.getElementById('veil').style.display='none',2500);
       document.getElementById('ambient').classList.add('on');
