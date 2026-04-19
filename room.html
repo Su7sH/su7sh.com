@@ -181,8 +181,8 @@ const MODELS={
   // spin:true wraps it in a rotating pivot (see loadAll + tick).
   mercedes:{
     url:MODEL_BASE+'mercedes.glb',
-    targetWidth:2.0,
-    position:[-3.5,0.165,-0.5],
+    targetWidth:2.2,
+    position:[3.6,0.165,1.2],
     rotation:[0,0,0],
     spin:true
   }
@@ -191,7 +191,7 @@ const MODELS={
 let scene,camera,renderer,controls,clock=new THREE.Clock();
 let composer=null;
 let idleTimer=null;
-let lampLight=null,iphoneGlow=null,motes=null,moonLight=null,steam=null;
+let lampLight=null,iphoneGlow=null,motes=null;
 let flyInActive=false,flyInT=0;
 const flyInDuration=4.2;
 const flyInStartPos=new THREE.Vector3(-3,9,20);
@@ -277,7 +277,7 @@ function buildScene(woodTex){
   composer.addPass(bloom);
 
   /* Lighting — restrained */
-  scene.add(new THREE.HemisphereLight(0x8090a8,0x080604,.28));
+  scene.add(new THREE.HemisphereLight(0x8090a8,0x080604,.42));
 
   lampLight=new THREE.SpotLight(0xffb06a,1.3,22,Math.PI*.38,.7,1.3);
   lampLight.position.set(-5.5,6.5,5);
@@ -323,7 +323,6 @@ function buildScene(woodTex){
 
   /* ══════════════ ROOM ENCLOSURE ══════════════
      room bounds — x:[-10,10]  y:[-2.2, 6]  z:[-12, 10]
-     left wall has a window  (winY 0.4–3.4, winZ -3.2–0.8)
   */
   const ROOM={xMin:-10,xMax:10,yMin:-2.2,yMax:6,zMin:-12,zMax:10};
   const wallMat=new THREE.MeshStandardMaterial({color:0x0b0f16,roughness:.96,metalness:.02,envMapIntensity:.22});
@@ -358,114 +357,11 @@ function buildScene(woodTex){
   );
   ceiling.position.set(0,ROOM.yMax+thk/2,cxZ);ceiling.receiveShadow=true;scene.add(ceiling);
 
-  /* ══════ LEFT WALL with WINDOW — 4 panels around a hole ══════ */
-  const win={y0:0.4,y1:3.4,z0:-3.2,z1:0.8};
-  const LX=ROOM.xMin-thk/2;
-  // below window
-  { const h=win.y0-ROOM.yMin;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(thk,h,roomD),wallMat);
-    m.position.set(LX,ROOM.yMin+h/2,cxZ);m.receiveShadow=true;scene.add(m); }
-  // above window
-  { const h=ROOM.yMax-win.y1;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(thk,h,roomD),wallMat);
-    m.position.set(LX,win.y1+h/2,cxZ);m.receiveShadow=true;scene.add(m); }
-  // toward back (lower z)
-  { const d=win.z0-ROOM.zMin, h=win.y1-win.y0;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(thk,h,d),wallMat);
-    m.position.set(LX,(win.y0+win.y1)/2,ROOM.zMin+d/2);m.receiveShadow=true;scene.add(m); }
-  // toward front (higher z)
-  { const d=ROOM.zMax-win.z1, h=win.y1-win.y0;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(thk,h,d),wallMat);
-    m.position.set(LX,(win.y0+win.y1)/2,win.z1+d/2);m.receiveShadow=true;scene.add(m); }
-
-  /* window muntins (interior cross) */
-  const muntinMat=new THREE.MeshStandardMaterial({color:0x1a1a20,roughness:.45,metalness:.4});
-  const muntinH=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.08,win.z1-win.z0-0.04),muntinMat);
-  muntinH.position.set(ROOM.xMin+0.05,(win.y0+win.y1)/2,(win.z0+win.z1)/2);scene.add(muntinH);
-  const muntinV=new THREE.Mesh(new THREE.BoxGeometry(0.1,win.y1-win.y0-0.04,0.08),muntinMat);
-  muntinV.position.set(ROOM.xMin+0.05,(win.y0+win.y1)/2,(win.z0+win.z1)/2);scene.add(muntinV);
-
-  /* sky beyond the window — night gradient + stars + faint horizon */
-  const skyTex=(()=>{
-    const c=document.createElement('canvas');c.width=256;c.height=256;
-    const x=c.getContext('2d');
-    const g=x.createLinearGradient(0,0,0,256);
-    g.addColorStop(0,'#1e2a4a');g.addColorStop(.45,'#0c1530');g.addColorStop(1,'#060a18');
-    x.fillStyle=g;x.fillRect(0,0,256,256);
-    for(let i=0;i<70;i++){const sx=Math.random()*256,sy=Math.random()*190;
-      const a=.2+Math.random()*.6;x.fillStyle=`rgba(230,235,245,${a})`;
-      x.fillRect(sx,sy,1,1);
-      if(Math.random()<.15){x.fillStyle=`rgba(230,235,245,${a*.4})`;
-        x.fillRect(sx-1,sy,3,1);x.fillRect(sx,sy-1,1,3);}}
-    x.fillStyle='#020406';x.fillRect(0,215,256,41);
-    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;
-  })();
-  const sky=new THREE.Mesh(
-    new THREE.PlaneGeometry(win.z1-win.z0+1.2,win.y1-win.y0+1.2),
-    new THREE.MeshBasicMaterial({map:skyTex})
-  );
-  sky.rotation.y=Math.PI/2;
-  sky.position.set(LX-0.5,(win.y0+win.y1)/2,(win.z0+win.z1)/2);
-  scene.add(sky);
-
-  /* moonlight streaming through window — cool blue directional */
-  moonLight=new THREE.DirectionalLight(0xb0c6e8,0.65);
-  moonLight.position.set(-14,4.2,-1);
-  moonLight.target.position.set(2,0,1.5);
-  moonLight.castShadow=true;
-  moonLight.shadow.mapSize.set(1024,1024);
-  moonLight.shadow.camera.left=-8;moonLight.shadow.camera.right=8;
-  moonLight.shadow.camera.top=5;moonLight.shadow.camera.bottom=-3;
-  moonLight.shadow.camera.near=1;moonLight.shadow.camera.far=28;
-  moonLight.shadow.bias=-.0003;moonLight.shadow.normalBias=.014;
-  scene.add(moonLight,moonLight.target);
-
-  /* ─── VOLUMETRIC MOONLIGHT SHAFT ───
-     additive-blended slab aligned with the moon ray.
-     gives "god rays" coming through the window when bloom amplifies it.
-  */
-  const shaftLen=12;
-  const shaftGeo=new THREE.BoxGeometry(
-    win.z1-win.z0-0.15,
-    win.y1-win.y0-0.15,
-    shaftLen
-  );
-  shaftGeo.translate(0,0,shaftLen/2);   // start at window, extend forward along +z
-  const shaftMat=new THREE.MeshBasicMaterial({
-    color:0x8cb8e4,transparent:true,opacity:0.055,
-    blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
-  });
-  const shaft=new THREE.Mesh(shaftGeo,shaftMat);
-  const windowCtr=new THREE.Vector3(ROOM.xMin,(win.y0+win.y1)/2,(win.z0+win.z1)/2);
-  shaft.position.copy(windowCtr);
-  const moonDir=new THREE.Vector3().subVectors(
-    moonLight.target.position,moonLight.position
-  ).normalize();
-  shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),moonDir);
-  scene.add(shaft);
-  // inner hotspot — brighter, narrower
-  const shaftCore=new THREE.Mesh(
-    shaftGeo.clone(),
-    new THREE.MeshBasicMaterial({
-      color:0xc4d8f4,transparent:true,opacity:0.09,
-      blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
-    })
-  );
-  shaftCore.scale.set(0.55,0.55,1);
-  shaftCore.position.copy(windowCtr);
-  shaftCore.quaternion.copy(shaft.quaternion);
-  scene.add(shaftCore);
-  // bright rectangle where the shaft meets the floor — pooled light
-  const floorPool=new THREE.Mesh(
-    new THREE.PlaneGeometry(4.5,5.5),
-    new THREE.MeshBasicMaterial({
-      color:0x8cb8e4,transparent:true,opacity:0.18,
-      blending:THREE.AdditiveBlending,depthWrite:false
-    })
-  );
-  floorPool.rotation.x=-Math.PI/2;
-  floorPool.position.set(-2.5,ROOM.yMin+0.015,0.8);
-  scene.add(floorPool);
+  /* ══════ LEFT WALL — solid ══════ */
+  const leftWall=new THREE.Mesh(new THREE.BoxGeometry(thk,roomH,roomD),wallMat);
+  leftWall.position.set(ROOM.xMin-thk/2,cyY,cxZ);
+  leftWall.receiveShadow=true;
+  scene.add(leftWall);
 
   /* ══════════════ RUG (under desk) ══════════════ */
   const rugTex=(()=>{
@@ -489,21 +385,6 @@ function buildScene(woodTex){
     new THREE.MeshStandardMaterial({map:rugTex,roughness:.92,metalness:0,envMapIntensity:.2})
   );
   rug.position.set(0,ROOM.yMin+.022,1.3);rug.receiveShadow=true;scene.add(rug);
-
-  /* ══════════════ CHAIR (viewer-side of desk) ══════════════ */
-  const chairLeather=new THREE.MeshStandardMaterial({color:0x181418,roughness:.62,metalness:.12,envMapIntensity:.6});
-  const chairMetal=new THREE.MeshStandardMaterial({color:0x08080a,metalness:.7,roughness:.35});
-  const chair=new THREE.Group();
-  const seat=new THREE.Mesh(new THREE.BoxGeometry(1.5,.14,1.3),chairLeather);
-  seat.position.y=1.0;seat.castShadow=true;seat.receiveShadow=true;chair.add(seat);
-  const back=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.7,.12),chairLeather);
-  back.position.set(0,1.85,-.6);back.castShadow=true;back.receiveShadow=true;chair.add(back);
-  [[-.65,-.55],[.65,-.55],[-.65,.55],[.65,.55]].forEach(([lx,lz])=>{
-    const leg=new THREE.Mesh(new THREE.BoxGeometry(.08,1.0,.08),chairMetal);
-    leg.position.set(lx,.5,lz);leg.castShadow=true;chair.add(leg);
-  });
-  chair.position.set(0,ROOM.yMin,3.3);
-  scene.add(chair);
 
   /* ══════════════ LAMP FIXTURE (motivates the warm light) ══════════════ */
   const lampGroup=new THREE.Group();
@@ -539,26 +420,35 @@ function buildScene(woodTex){
   scene.add(lampPt);
 
   /* ══════════════ PEDESTAL — the Mercedes's display platform ══════════════
-     dark lacquered disk with a faint cyan emissive ring.
-     tiny rim light just above it gives the "on display" feel.
+     dark lacquered disk with a bright emissive ring.
+     warm hero light from above + cool under-glow from the pedestal makes the car pop.
   */
   const pedestal=new THREE.Mesh(
-    new THREE.CylinderGeometry(1.05,1.10,0.05,48),
+    new THREE.CylinderGeometry(1.15,1.20,0.05,48),
     new THREE.MeshStandardMaterial({color:0x0d0d10,metalness:.72,roughness:.26,envMapIntensity:1.0})
   );
-  pedestal.position.set(-3.5,0.135,-0.5);
+  pedestal.position.set(3.6,0.135,1.2);
   pedestal.receiveShadow=true;
   scene.add(pedestal);
   const pedRing=new THREE.Mesh(
-    new THREE.TorusGeometry(1.05,0.016,8,72),
-    new THREE.MeshStandardMaterial({color:0x000000,emissive:0x5aa0d8,emissiveIntensity:2.4,roughness:.35,metalness:0})
+    new THREE.TorusGeometry(1.15,0.018,8,72),
+    new THREE.MeshStandardMaterial({color:0x000000,emissive:0x5aa0d8,emissiveIntensity:2.6,roughness:.35,metalness:0})
   );
   pedRing.rotation.x=Math.PI/2;
-  pedRing.position.set(-3.5,0.163,-0.5);
+  pedRing.position.set(3.6,0.163,1.2);
   scene.add(pedRing);
-  const pedGlow=new THREE.PointLight(0x8ab4e0,.28,1.9,2);
-  pedGlow.position.set(-3.5,0.28,-0.5);
+  // cool rim glow from the pedestal edge
+  const pedGlow=new THREE.PointLight(0x8ab4e0,.45,2.6,2);
+  pedGlow.position.set(3.6,0.30,1.2);
   scene.add(pedGlow);
+  // warm hero light from above — makes the car's shape + highlights readable
+  const mercKey=new THREE.PointLight(0xffe6c8,1.1,4.2,2);
+  mercKey.position.set(3.6,2.4,1.2);
+  scene.add(mercKey);
+  // small front fill — kills the dead shadow on the near side
+  const mercFill=new THREE.PointLight(0xfff0dc,0.5,3.2,2);
+  mercFill.position.set(3.6,1.0,2.8);
+  scene.add(mercFill);
 
   /* ══════════════ BOOKS (small stack on desk) ══════════════ */
   const bookColors=[0x3a2818,0x5a3a1c,0x241418,0x2a1a22];
@@ -575,44 +465,6 @@ function buildScene(woodTex){
   bookStack.position.set(4.6,.12,-1.6);
   bookStack.rotation.y=.22;
   scene.add(bookStack);
-
-  /* ══════════════ MUG on desk (warm ceramic) ══════════════ */
-  const mugMat=new THREE.MeshStandardMaterial({color:0xe4dcc8,roughness:.45,metalness:.08,envMapIntensity:.8});
-  const mug=new THREE.Group();
-  const mugBody=new THREE.Mesh(new THREE.CylinderGeometry(.16,.14,.34,18),mugMat);
-  mugBody.position.y=.17;mugBody.castShadow=true;mug.add(mugBody);
-  // dark coffee surface
-  const coffee=new THREE.Mesh(
-    new THREE.CircleGeometry(.148,18),
-    new THREE.MeshStandardMaterial({color:0x1a0c06,roughness:.2,metalness:.4,envMapIntensity:.9})
-  );
-  coffee.rotation.x=-Math.PI/2;coffee.position.y=.335;mug.add(coffee);
-  // handle
-  const handle=new THREE.Mesh(new THREE.TorusGeometry(.1,.022,8,18,Math.PI),mugMat);
-  handle.rotation.z=Math.PI/2;handle.position.set(.16,.18,0);mug.add(handle);
-  mug.position.set(3.6,.12,1.2);
-  scene.add(mug);
-
-  /* ─── STEAM from the mug ─── */
-  const steamCount=36;
-  const steamPos=new Float32Array(steamCount*3);
-  const steamLife=new Float32Array(steamCount);
-  const MUG_X=3.6,MUG_Z=1.2,STEAM_Y0=0.48;
-  for(let i=0;i<steamCount;i++){
-    steamPos[i*3]  =MUG_X+(Math.random()-.5)*0.16;
-    steamPos[i*3+1]=STEAM_Y0+Math.random()*1.3;
-    steamPos[i*3+2]=MUG_Z+(Math.random()-.5)*0.16;
-    steamLife[i]   =Math.random();
-  }
-  const steamGeo=new THREE.BufferGeometry();
-  steamGeo.setAttribute('position',new THREE.BufferAttribute(steamPos,3));
-  const steamMat=new THREE.PointsMaterial({
-    color:0xd8e4f0,size:0.085,transparent:true,opacity:0.38,
-    sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false
-  });
-  steam=new THREE.Points(steamGeo,steamMat);
-  steam.userData.life=steamLife;
-  scene.add(steam);
 
   /* ══════════════ NOTEBOOK on desk ══════════════ */
   const notebook=new THREE.Mesh(
@@ -715,8 +567,9 @@ function loadAll(onDone){
       } else {
         loaded[name]=root;scene.add(root);
       }
+      console.log('%c✓ loaded:','color:#6a8','%c'+name,'color:#aaa',cfg.url);
       next(i+1);
-    },undefined,err=>{console.warn('fail',name,err);next(i+1)});
+    },undefined,err=>{console.warn('%c✗ failed:','color:#c66','%c'+name,'color:#aaa',cfg.url,err);next(i+1)});
   }
   next(0);
 }
@@ -767,22 +620,6 @@ function tick(){
       a[i*3]  +=Math.sin(tC*0.15+i*0.7)*0.0018;
       a[i*3+2]+=Math.cos(tC*0.12+i*0.4)*0.0014;
       if(a[i*3+1]>5.2){a[i*3+1]=0.2;a[i*3]=(Math.random()-.5)*14;a[i*3+2]=(Math.random()-.5)*10-1;}
-    }
-    p.needsUpdate=true;
-  }
-  // Steam — rise and wisp off the mug
-  if(steam){
-    const p=steam.geometry.attributes.position;
-    const a=p.array;
-    for(let i=0;i<p.count;i++){
-      a[i*3+1]+=0.011+Math.sin(tC*1.1+i*0.3)*0.002;
-      a[i*3]  +=Math.sin(tC*1.4+i*0.7)*0.0045;
-      a[i*3+2]+=Math.cos(tC*1.1+i*0.5)*0.0045;
-      if(a[i*3+1]>1.9){
-        a[i*3]  =3.6+(Math.random()-.5)*0.16;
-        a[i*3+1]=0.48;
-        a[i*3+2]=1.2+(Math.random()-.5)*0.16;
-      }
     }
     p.needsUpdate=true;
   }
