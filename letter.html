@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!--
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                                                                  │
+  │   for the reader who lingers.                                    │
+  │                                                                  │
+  │   there are six pages here, and a seventh only the patient find. │
+  │   nothing is sold. nothing is asked.                             │
+  │                                                                  │
+  │   — alephata, 18°41′ n                                           │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="a letter, left on a door.">
+<meta name="theme-color" content="#f4ede1">
+<title>·</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ─── palette ───
+   cream       #f4ede1
+   charcoal    #2a2a28
+   charcoal-70 #2a2a28b3
+   charcoal-40 #2a2a2866
+   sage        #6b7a5a
+   sage-dim    #6b7a5a80
+   rule        #2a2a2822
+*/
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:#f4ede1;
+  color:#2a2a28;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-weight:300;
+  font-size:18px;
+  line-height:1.7;
+  overflow-x:hidden;
+  /* subtle paper texture via layered radials */
+  background-image:
+    radial-gradient(circle at 20% 30%,rgba(107,122,90,.025) 0%,transparent 40%),
+    radial-gradient(circle at 80% 70%,rgba(42,42,40,.02) 0%,transparent 50%),
+    #f4ede1;
+}
+
+/* faint paper grain */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:.4;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.16 0 0 0 0 0.16 0 0 0 .06 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  mix-blend-mode:multiply;
+}
+
+::selection{background:#6b7a5a33;color:#2a2a28}
+::-moz-selection{background:#6b7a5a33;color:#2a2a28}
+
+/* pages */
+main{position:relative;z-index:2}
+
+.page{
+  min-height:100vh;
+  min-height:100svh;
+  padding:10vh 8vw;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  position:relative;
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity 1.6s cubic-bezier(.2,.6,.2,1),transform 1.6s cubic-bezier(.2,.6,.2,1);
+}
+.page.revealed{opacity:1;transform:translateY(0)}
+
+.page-num{
+  position:absolute;
+  top:3.2vh;
+  left:8vw;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  font-weight:300;
+  letter-spacing:.3em;
+  color:#2a2a2866;
+  text-transform:lowercase;
+}
+
+.page-loc{
+  position:absolute;
+  top:3.2vh;
+  right:8vw;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  font-weight:300;
+  letter-spacing:.28em;
+  color:#2a2a2866;
+  text-transform:lowercase;
+}
+
+.page-inner{max-width:720px;margin:0 auto;width:100%}
+
+/* typography system */
+.h-lead{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;
+  font-style:italic;
+  font-size:clamp(2.4rem,6.8vw,5.2rem);
+  line-height:1.15;
+  letter-spacing:-.005em;
+  color:#2a2a28;
+}
+
+.h-mid{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;
+  font-style:italic;
+  font-size:clamp(1.8rem,4vw,3rem);
+  line-height:1.3;
+  letter-spacing:-.005em;
+}
+
+.prose{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;
+  font-size:clamp(1.25rem,1.8vw,1.65rem);
+  line-height:1.72;
+  letter-spacing:.002em;
+  color:#2a2a28cc;
+}
+
+.prose em{
+  font-style:italic;
+  color:#2a2a28;
+}
+
+.prose .accent{
+  color:#6b7a5a;
+  font-style:italic;
+}
+
+.small{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:300;
+  letter-spacing:.22em;
+  text-transform:lowercase;
+  color:#2a2a2899;
+}
+
+.attr{
+  display:block;
+  margin-top:2.2rem;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-weight:300;
+  font-size:1rem;
+  color:#2a2a2899;
+  letter-spacing:.02em;
+}
+
+.rule{
+  display:block;
+  width:48px;
+  height:1px;
+  background:#6b7a5a66;
+  margin:2.4rem 0;
+}
+
+.rule.long{width:72px}
+
+/* page 1 */
+.p1 .page-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2.2rem}
+.p1 .h-lead{font-size:clamp(2.6rem,7.4vw,6rem);line-height:1.1}
+.p1 .small{letter-spacing:.42em}
+
+/* page 2 */
+.p2 .page-inner{max-width:640px;text-align:left}
+.p2 .h-mid{margin-bottom:.4em}
+.p2 .line-2{color:#2a2a28b3}
+
+/* page 3 */
+.p3 .prose p + p{margin-top:1.4em}
+
+/* page 4 */
+.p4 .prose p + p{margin-top:1.4em}
+
+/* the seam — hidden door to the room */
+.seam{
+  position:relative;
+  color:#2a2a28;
+  cursor:text;
+  transition:color 1.2s ease,text-shadow 1.2s ease;
+}
+.seam::after{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:0px;
+  background:#6b7a5a;
+  opacity:0;
+  transition:opacity .6s ease,height .6s ease;
+}
+.seam:hover{
+  color:#6b7a5a;
+  text-shadow:0 0 22px rgba(107,122,90,.18);
+  cursor:pointer;
+}
+.seam:hover::after{
+  opacity:.5;
+  height:1px;
+}
+
+/* page 5 */
+.p5 .prose p + p{margin-top:1.4em}
+
+/* page 6 — closing */
+.p6 .page-inner{text-align:left}
+.p6 .h-mid{font-size:clamp(1.6rem,3.2vw,2.4rem)}
+
+.footer{
+  margin-top:5rem;
+  padding-top:2.4rem;
+  border-top:1px solid #2a2a2822;
+  display:flex;
+  flex-direction:column;
+  gap:.8rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  font-weight:300;
+  letter-spacing:.22em;
+  color:#2a2a2899;
+  text-transform:lowercase;
+}
+.footer .row{display:flex;gap:1.6rem;flex-wrap:wrap}
+.footer a{
+  color:#2a2a28cc;
+  text-decoration:none;
+  transition:color .4s ease;
+}
+.footer a:hover{color:#6b7a5a}
+.footer .sig{
+  color:#2a2a2866;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.95rem;
+  letter-spacing:.02em;
+  text-transform:none;
+  margin-top:.4rem;
+}
+
+/* scroll hint — a faint mark at the bottom of each early page */
+.scroll-hint{
+  position:absolute;
+  bottom:4.5vh;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  font-weight:300;
+  letter-spacing:.38em;
+  color:#2a2a2855;
+  text-transform:lowercase;
+  animation:fadePulse 3.6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes fadePulse{
+  0%,100%{opacity:.35}
+  50%{opacity:.75}
+}
+.p6 .scroll-hint{display:none}
+
+/* transition mark between pages — thin green line, fades */
+.page + .page::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:1px;
+  height:40px;
+  background:linear-gradient(180deg,transparent,#6b7a5a33,transparent);
+}
+
+/* mobile */
+@media(max-width:640px){
+  .page{padding:12vh 7vw}
+  .page-num,.page-loc{top:2.4vh;font-size:.58rem;letter-spacing:.24em}
+  .page-num{left:7vw}.page-loc{right:7vw}
+  .prose{font-size:1.15rem;line-height:1.72}
+  .rule{margin:1.8rem 0}
+  .scroll-hint{font-size:.52rem;letter-spacing:.3em;bottom:3.5vh}
+  .footer{font-size:.6rem;letter-spacing:.18em}
+  .footer .row{gap:1.2rem}
+}
+</style>
+</head>
+<body>
+
+<main>
+
+<!-- ─────────────── page 1 — arrival ─────────────── -->
+<section class="page p1" data-page="1">
+  <div class="page-num">i · of vi</div>
+  <div class="page-loc">alephata · 18°41′n</div>
+  <div class="page-inner">
+    <div class="small">a letter, left on a door</div>
+    <h1 class="h-lead">you came here<br>by reading.</h1>
+    <div class="small">that already says something.</div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- ─────────────── page 2 — premise ─────────────── -->
+<section class="page p2" data-page="2">
+  <div class="page-num">ii · of vi</div>
+  <div class="page-loc">on what passes</div>
+  <div class="page-inner">
+    <h2 class="h-mid">everything here is temporary.</h2>
+    <h2 class="h-mid line-2">at the present moment<br>it is everything.</h2>
+    <span class="rule long"></span>
+    <div class="small">a thought, borrowed, held</div>
+  </div>
+  <div class="scroll-hint">continue</div>
+</section>
+
+<!-- ─────────────── page 3 — on attention ─────────────── -->
+<section class="page p3" data-page="3">
+  <div class="page-num">iii · of vi</div>
+  <div class="page-loc">on noticing</div>
+  <div class="page-inner">
+    <div class="prose">
+      <p>there is a quiet that is not the absence of sound. it is the presence of <span class="accent">attention</span> — the kind a reader brings to a page they have no reason to read.</p>
+      <p>most of the world is not loud. most of it is waiting, arranged, patient. a kettle cooling. a window left ajar. a book dog-eared by a stranger on a train. these things keep their own time.</p>
+      <p>to live well, perhaps, is to learn the shape of this waiting. to not mistake stillness for nothing. to sit with the long hour between sunset and dark and call it, correctly, <em>an evening</em>.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">onward</div>
+</section>
+
+<!-- ─────────────── page 4 — doorways (contains the seam) ─────────────── -->
+<section class="page p4" data-page="4">
+  <div class="page-num">iv · of vi</div>
+  <div class="page-loc">on doorways</div>
+  <div class="page-inner">
+    <div class="prose">
+      <p>most doors announce themselves. they have handles, hinges, a small brass plate. we walk through without thinking — the door has done the asking for us.</p>
+      <p>the better doors are harder to see. a gap in the hedge where the neighbour children slip through. a shortcut on a map nobody printed. a <span class="seam" id="seam" tabindex="0" role="link" aria-label="a quiet way through">seam</span> in the ordinary, only visible to someone standing very still.</p>
+      <p>i have come to believe that most of what is worth finding is reached by the second kind. not because the first kind is wrong, but because the first kind is shared — and the second kind, by its quietness, is almost always a gift meant for you.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">further</div>
+</section>
+
+<!-- ─────────────── page 5 — on making ─────────────── -->
+<section class="page p5" data-page="5">
+  <div class="page-num">v · of vi</div>
+  <div class="page-loc">on making</div>
+  <div class="page-inner">
+    <div class="prose">
+      <p>there are gardens kept by old men whom nobody visits. bowls turned by hand in a shed behind a house no one has been to. sentences polished, after midnight, long after the editor has gone home.</p>
+      <p>these things are not done for a reason we can name. they are done because the doing is itself the point — because to make a thing carefully is to say, without saying, <em>i was here, and i paid attention.</em></p>
+      <p>true rewards are always <span class="accent">deeply placed</span>. you do not stumble into them. you arrive by being the kind of person who looks.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">last page</div>
+</section>
+
+<!-- ─────────────── page 6 — letting go ─────────────── -->
+<section class="page p6" data-page="6">
+  <div class="page-num">vi · of vi</div>
+  <div class="page-loc">a closing</div>
+  <div class="page-inner">
+    <h2 class="h-mid">stay as long as you like.</h2>
+    <h2 class="h-mid" style="color:#2a2a28b3">the door's open either way.</h2>
+    <span class="rule long"></span>
+    <div class="footer">
+      <div class="sig">— suyash · alephata, pune</div>
+      <div class="row">
+        <a href="mailto:hello@su7sh.com">mail</a>
+        <a href="https://www.linkedin.com/in/suyashgunjal" target="_blank" rel="noopener">linkedin</a>
+        <a href="https://x.com/suyashgunjal" target="_blank" rel="noopener">x</a>
+      </div>
+      <div style="color:#2a2a2855;margin-top:.8rem">18°41′ n · 74°00′ e</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+'use strict';
+
+/* ─── fade-in on scroll ─── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('revealed');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '-5% 0px -5% 0px' });
+
+document.querySelectorAll('.page').forEach(p => io.observe(p));
+
+/* ─── the seam ─── */
+const seam = document.getElementById('seam');
+if (seam) {
+  const enter = () => {
+    // small, dignified transition — fade to black then navigate
+    document.body.style.transition = 'opacity 1.4s cubic-bezier(.4,0,.2,1)';
+    document.body.style.opacity = '0';
+    setTimeout(() => { window.location.href = 'room.html'; }, 1300);
+  };
+  seam.addEventListener('click', (e) => { e.preventDefault(); enter(); });
+  seam.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
+  });
+}
+
+/* ─── hidden console whisper for the source-viewer ─── */
+console.log(
+  '%cnothing here is sold.\nnothing here is asked.',
+  'font-family:Cormorant Garamond,serif;font-style:italic;font-size:14px;color:#6b7a5a'
+);
+console.log(
+  '%ca room exists, for the attentive.',
+  'font-family:JetBrains Mono,monospace;font-size:10px;color:#2a2a2855;letter-spacing:.2em'
+);
+
+/* ─── the written word, for those who look ─── */
+// The quiet door is on page four.
+// The word is not underlined. It simply rests slightly differently on the page,
+// and rewards the reader who slows down enough to notice.
+</script>
+
+</body>
+</html>
