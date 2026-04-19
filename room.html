@@ -41,6 +41,53 @@ canvas{display:block}
 #veil-line{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(200,210,230,.25);letter-spacing:.04em;text-align:center;padding:0 30px;opacity:0;transition:opacity 1.6s ease 1s;max-width:520px;line-height:1.5}
 #veil.show-line #veil-line{opacity:1}
 
+/* Lock overlay — passcode gate */
+#lock-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,6,10,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;transition:opacity .35s ease-out}
+#lock-overlay.show{display:flex;opacity:1}
+.lock-panel{padding:36px 32px 22px;border-radius:22px;background:rgba(18,20,26,.96);border:1px solid rgba(255,255,255,.06);box-shadow:0 24px 70px rgba(0,0,0,.55);min-width:272px;transform:translateY(10px);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.2,1),opacity .4s ease-out}
+#lock-overlay.show .lock-panel{transform:translateY(0);opacity:1}
+.lock-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:19px;color:#e4e4e7;text-align:center;letter-spacing:.02em;margin-bottom:18px}
+.lock-dots{display:flex;gap:13px;justify-content:center;margin-bottom:26px}
+.lock-dots span{width:11px;height:11px;border-radius:50%;border:1.4px solid rgba(255,255,255,.32);transition:all .14s ease-out}
+.lock-dots span.filled{background:#fff;border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.35)}
+.lock-keypad{display:grid;grid-template-columns:repeat(3,56px);gap:10px 16px;justify-content:center}
+.lock-keypad button{width:56px;height:56px;border-radius:50%;border:none;background:rgba(255,255,255,.055);color:#e4e4e7;font-family:'Inter',sans-serif;font-size:21px;font-weight:300;cursor:pointer;transition:all .1s ease-out}
+.lock-keypad button:hover{background:rgba(255,255,255,.12)}
+.lock-keypad button:active{background:rgba(255,255,255,.2);transform:scale(.94)}
+.lock-keypad button.spacer{visibility:hidden;cursor:default}
+.lock-keypad button.del{background:transparent;font-size:17px}
+.lock-hint{margin-top:18px;text-align:center;font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;color:rgba(255,255,255,.35);letter-spacing:.04em}
+.lock-panel.shake{animation:lock-shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes lock-shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+
+/* Pre-unlock floating hint */
+#phone-hint{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);z-index:60;font-family:'Instrument Serif',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.5);letter-spacing:.05em;pointer-events:none;opacity:0;transition:opacity 1.2s ease-out 1s;text-align:center}
+#phone-hint.on{opacity:1}
+#phone-hint::after{content:'';display:block;margin:10px auto 0;width:22px;height:1px;background:rgba(255,255,255,.18)}
+
+/* Terminal overlay — click the monitor to summon */
+#terminal-overlay{position:fixed;inset:0;z-index:190;display:none;align-items:center;justify-content:center;background:rgba(4,6,10,.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .25s ease-out}
+#terminal-overlay.show{display:flex;opacity:1}
+.terminal-panel{width:min(640px,92vw);height:min(440px,70vh);background:rgba(8,9,12,.97);border:1px solid rgba(255,255,255,.08);border-radius:10px;box-shadow:0 30px 90px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;transform:scale(.96);opacity:0;transition:transform .3s cubic-bezier(.2,.9,.2,1),opacity .3s ease-out;font-family:'JetBrains Mono',monospace}
+#terminal-overlay.show .terminal-panel{transform:scale(1);opacity:1}
+.terminal-header{display:flex;align-items:center;gap:6px;padding:9px 13px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05)}
+.terminal-dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+.terminal-dot.red{background:#ff5f56}
+.terminal-dot.yellow{background:#ffbd2e}
+.terminal-dot.green{background:#27c93f}
+.terminal-title{margin-left:14px;font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.04em}
+.terminal-body{flex:1;padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.55;color:#cfd4da;white-space:pre-wrap;word-break:break-word}
+.terminal-body::-webkit-scrollbar{width:6px}
+.terminal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+.terminal-line{margin:0}
+.terminal-line.user{color:#e4e8ee}
+.terminal-line.system{color:#7ea3c8}
+.terminal-line.error{color:#e38b8b}
+.terminal-line.muted{color:rgba(207,212,218,.55)}
+.terminal-input-line{display:flex;align-items:center;gap:8px;padding:10px 16px 14px;border-top:1px solid rgba(255,255,255,.05)}
+.terminal-prompt{color:#8fbcd4;font-size:13px;font-weight:500}
+#terminal-input{flex:1;background:transparent;border:none;outline:none;color:#e4e8ee;font-family:inherit;font-size:13px;caret-color:#8fbcd4}
+
 /* The small return link */
 #return{
   position:fixed;
@@ -122,13 +169,58 @@ canvas{display:block}
 <div id="scene"></div>
 
 <a id="return" href="letter.html">← return to the letter</a>
-<div id="ambient">drag to look around.<br>scroll to step nearer.<br>stay as long as you like.</div>
+<div id="ambient">drag · scroll · 1–5 for views.<br>click the car · click the screen · hold W.<br>the lamp is saying something.</div>
 <div id="clock"></div>
 
 <div id="veil">
   <div id="veil-text">arriving</div>
   <div id="veil-bar"></div>
   <div id="veil-line">everything here is temporary.<br>at the present moment it is everything.</div>
+</div>
+
+<!-- pre-unlock floating hint (appears once veil fades) -->
+<div id="phone-hint">tap the phone</div>
+
+<!-- passcode lock overlay -->
+<div id="lock-overlay" aria-hidden="true">
+  <div class="lock-panel">
+    <div class="lock-title">enter passcode</div>
+    <div class="lock-dots" id="lock-dots">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="lock-keypad" id="lock-keypad">
+      <button data-k="1">1</button>
+      <button data-k="2">2</button>
+      <button data-k="3">3</button>
+      <button data-k="4">4</button>
+      <button data-k="5">5</button>
+      <button data-k="6">6</button>
+      <button data-k="7">7</button>
+      <button data-k="8">8</button>
+      <button data-k="9">9</button>
+      <button class="spacer" tabindex="-1"></button>
+      <button data-k="0">0</button>
+      <button class="del" data-del>⌫</button>
+    </div>
+    <div class="lock-hint">six sevens</div>
+  </div>
+</div>
+
+<!-- terminal overlay (summoned by clicking the monitor) -->
+<div id="terminal-overlay" aria-hidden="true">
+  <div class="terminal-panel">
+    <div class="terminal-header">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">suyash@alephata ~ terminal</span>
+    </div>
+    <div class="terminal-body" id="terminal-body"></div>
+    <div class="terminal-input-line">
+      <span class="terminal-prompt">$</span>
+      <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autocapitalize="off"/>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -183,7 +275,7 @@ const MODELS={
   mercedes:{
     url:MODEL_BASE+'mercedes.glb',
     targetWidth:2.2,
-    position:[3.6,0.165,1.2],
+    position:[4.2,0.165,0.8],
     rotation:[0,0,0],
     spin:true
   }
@@ -194,8 +286,75 @@ let composer=null;
 let idleTimer=null;
 let lampLight=null,iphoneGlow=null,motes=null;
 let flyInActive=false,flyInT=0;
-const flyInDuration=4.2;
-const flyInStartPos=new THREE.Vector3(-3,9,20);
+const flyInDuration=4.8;
+const flyInStartPos=new THREE.Vector3(-6,16,42);
+
+/* ─── INTERACTIVE STATE ─── */
+const raycaster=new THREE.Raycaster();
+const mouseV2=new THREE.Vector2();
+
+// preset camera tweening
+let presetActive=false,presetT=0;
+const PRESET_DURATION=1.6;
+const presetStartPos=new THREE.Vector3();
+const presetStartTarget=new THREE.Vector3();
+const presetTargetPos=new THREE.Vector3();
+const presetTargetTgt=new THREE.Vector3();
+
+// cursor parallax
+let cursorNX=0,cursorNY=0;
+let parallaxX=0,parallaxY=0;
+let parallaxAmp=0;        // 0 → 1 smoothly, kills jitter on engage/disengage
+let isDragging=false;
+
+// Mercedes interactions
+let mercedesSpinning=true;
+let mercedesSpinSpeed=0.28;
+let paintIndex=0;
+let originalPaintColors=null;
+
+// ─── PASSCODE LOCK STATE ───
+let isUnlocked=false;
+let unlockCodeEntered='';
+const CORRECT_CODE='777777';
+const lockedObjects=[];             // renderables hidden pre-unlock
+const dimmedLights=[];              // lights set to 0 intensity pre-unlock
+let currentTweenDuration=PRESET_DURATION;  // preset = 1.6s; unlock overrides to ~4s
+let unlockLightRampActive=false;
+let unlockLightRampT=0;
+const UNLOCK_LIGHT_RAMP_DURATION=3.5;
+const PHONE_FOCUS_POS=new THREE.Vector3(2.3,1.6,4.8);
+const PHONE_FOCUS_TGT=new THREE.Vector3(1.2,0.16,2.25);
+
+// ─── MORSE-CODE LAMP ───
+// the lamp flicker is a Morse pattern spelling a word; attentive visitors can decode it.
+const MORSE_WORD='SUYASH';
+const MORSE_MAP={A:'.-',H:'....',S:'...',U:'..-',Y:'-.--'};
+const MORSE_UNIT=0.22;              // seconds per dot
+const morsePattern=(()=>{
+  const seq=[];
+  const letters=MORSE_WORD.split('');
+  letters.forEach((L,i)=>{
+    const code=MORSE_MAP[L];
+    code.split('').forEach((s,j)=>{
+      seq.push({on:true, duration:(s==='.'?1:3)*MORSE_UNIT});
+      if(j<code.length-1)seq.push({on:false, duration:1*MORSE_UNIT});
+    });
+    if(i<letters.length-1)seq.push({on:false, duration:3*MORSE_UNIT});
+  });
+  seq.push({on:false, duration:7*MORSE_UNIT});
+  return seq;
+})();
+const MORSE_CYCLE=morsePattern.reduce((s,p)=>s+p.duration,0);
+
+// ─── WARP DRIVE ───
+let warpActive=false;
+let warpIntensity=0;               // 0 → 1 smoothly
+const warpCamStartPos=new THREE.Vector3();
+
+// ─── MONITOR TERMINAL ───
+let terminalOpen=false;
+const terminalLines=[];            // scrollback buffer
 let loaded={};
 let baseCamPos=new THREE.Vector3(0,3.0,8.2);
 let baseCamLook=new THREE.Vector3(0,1.4,-0.6);
@@ -226,13 +385,266 @@ function loadWood(cb){
   );
 }
 
+/* ═══════════════ LOCK / UNLOCK HELPERS ═══════════════
+   scene is locked on init: only the desk + phone + base lights are visible;
+   all other objects are hidden and most lights dimmed to 0.
+   passcode input happens through the HTML overlay (#lock-overlay).
+   on correct code: reveal objects staggered + ramp lights + pull camera back.
+*/
+function lockScene(){
+  scene.traverse(obj=>{
+    if(obj===scene)return;
+    // Hide renderables unless whitelisted
+    if((obj.isMesh||obj.isPoints||obj.isLine)&&!obj.userData.preUnlockKeep){
+      obj.visible=false;
+      lockedObjects.push(obj);
+    }
+    // Dim lights unless whitelisted (keep: hemisphere, fill, iphoneGlow)
+    if(obj.isLight&&!obj.userData.preUnlockKeep){
+      obj.userData._origIntensity=obj.intensity;
+      obj.intensity=0;
+      dimmedLights.push(obj);
+    }
+  });
+  console.log(`%c🔒 scene locked — ${lockedObjects.length} objects hidden, ${dimmedLights.length} lights dimmed`,'color:#f8a;font-weight:bold');
+}
+
+function raycastPhone(x,y){
+  if(!loaded.iphone)return false;
+  mouseV2.x=(x/W())*2-1;mouseV2.y=-(y/H())*2+1;
+  raycaster.setFromCamera(mouseV2,camera);
+  return raycaster.intersectObject(loaded.iphone,true).length>0;
+}
+
+function showLockOverlay(){
+  document.getElementById('lock-overlay').classList.add('show');
+  document.getElementById('phone-hint').classList.remove('on');
+  unlockCodeEntered='';
+  updateLockDots();
+}
+function hideLockOverlay(){
+  document.getElementById('lock-overlay').classList.remove('show');
+}
+function updateLockDots(){
+  const dots=document.querySelectorAll('#lock-dots span');
+  dots.forEach((d,i)=>{
+    if(i<unlockCodeEntered.length)d.classList.add('filled');
+    else d.classList.remove('filled');
+  });
+}
+function onKeypadPress(digit){
+  if(unlockCodeEntered.length>=6)return;
+  unlockCodeEntered+=digit;
+  updateLockDots();
+  if(unlockCodeEntered.length===6){
+    setTimeout(checkPasscode,180);   // let the last dot visually fill first
+  }
+}
+function onKeypadDelete(){
+  unlockCodeEntered=unlockCodeEntered.slice(0,-1);
+  updateLockDots();
+}
+function checkPasscode(){
+  if(unlockCodeEntered===CORRECT_CODE){
+    triggerUnlock();
+  }else{
+    // wrong: shake + clear
+    const panel=document.querySelector('.lock-panel');
+    panel.classList.add('shake');
+    setTimeout(()=>panel.classList.remove('shake'),450);
+    setTimeout(()=>{unlockCodeEntered='';updateLockDots();},500);
+  }
+}
+
+function triggerUnlock(){
+  if(isUnlocked)return;
+  isUnlocked=true;
+  console.log('%c🔓 unlocked — the universe arrives','color:#8fc;font-weight:bold;font-size:13px');
+  // fade the overlay out
+  hideLockOverlay();
+  // stagger-reveal hidden objects (stars first for dramatic "sky turns on" effect, then desk objects)
+  // sort so Points (stars) come first, then large groups, then small
+  const revealOrder=[...lockedObjects].sort((a,b)=>{
+    const aStar=a.isPoints?0:1;
+    const bStar=b.isPoints?0:1;
+    return aStar-bStar;
+  });
+  revealOrder.forEach((obj,i)=>{
+    setTimeout(()=>{obj.visible=true;},80+i*22);
+  });
+  // ramp lights smoothly over camera-pullback duration
+  unlockLightRampActive=true;
+  unlockLightRampT=0;
+  // kick off camera pullback via preset tween, but with longer duration
+  presetStartPos.copy(camera.position);
+  presetStartTarget.copy(controls.target);
+  presetTargetPos.copy(baseCamPos);
+  presetTargetTgt.copy(baseCamLook);
+  presetT=0;
+  currentTweenDuration=4.2;
+  presetActive=true;
+  controls.enabled=false;
+  controls.autoRotate=false;
+  // Reveal the ambient hint + clock after the pullback completes
+  setTimeout(()=>{
+    document.getElementById('ambient').classList.add('on');
+    document.getElementById('clock').classList.add('on');
+  },3600);
+}
+
+/* wire up the keypad buttons once DOM is ready */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('#lock-keypad button[data-k]').forEach(btn=>{
+    btn.addEventListener('click',()=>onKeypadPress(btn.dataset.k));
+  });
+  document.querySelector('#lock-keypad button[data-del]').addEventListener('click',onKeypadDelete);
+  // physical keyboard support
+  document.addEventListener('keydown',(e)=>{
+    if(!document.getElementById('lock-overlay').classList.contains('show'))return;
+    if(/^[0-9]$/.test(e.key))onKeypadPress(e.key);
+    else if(e.key==='Backspace')onKeypadDelete();
+    else if(e.key==='Escape')hideLockOverlay();
+  });
+});
+
+/* ═══════════════ MONITOR TERMINAL ═══════════════
+   HTML overlay summoned by clicking the 3D monitor (post-unlock).
+   accepts text commands; response is a pre-scripted fragment.
+*/
+const TERMINAL_COMMANDS={
+  help:()=>[
+    'available commands:',
+    '  help          show this',
+    '  whoami        about the curator',
+    '  ls            list files',
+    '  cat <file>    read a file',
+    '  pwd           where you are',
+    '  uname         system info',
+    '  date          local time',
+    '  clear         clear screen',
+    '  exit          close terminal (Esc also works)'
+  ],
+  whoami:()=>[
+    'suyash — radiologist, builder of quiet rooms.',
+    'alephata, maharashtra · 18°41′ N, 74°00′ E'
+  ],
+  ls:()=>[
+    '~/about    ~/letter   ~/signal',
+    '~/stars    ~/seven    ~/thanks'
+  ],
+  pwd:()=>['/home/suyash'],
+  uname:()=>['the room · v1.0 · three.js webgl'],
+  date:()=>[new Date().toString()],
+  _files:{
+    'about':[
+      'this is su7sh.com.',
+      'three doors: the portfolio, the letter, this room.',
+      'everything else is hidden in plain sight.'
+    ],
+    'letter':[
+      'everything here is temporary.',
+      'at the present moment it is everything.',
+      '— from the letter, page four.'
+    ],
+    'signal':[
+      'the lamp is talking.',
+      'six letters. one word. all morse.'
+    ],
+    'stars':[
+      '~4,300 stars in this room. most unnamed.',
+      'hold W and they stretch.'
+    ],
+    'seven':[
+      'six sevens opened the world.',
+      'a seventh opens what?'
+    ],
+    'thanks':[
+      'thank you for reading this far.',
+      'you are rarer than you know.'
+    ]
+  }
+};
+
+function renderTerminalLines(){
+  const body=document.getElementById('terminal-body');
+  body.innerHTML=terminalLines.map(l=>
+    `<div class="terminal-line ${l.cls||''}">${l.text.replace(/[<>]/g,c=>c==='<'?'&lt;':'&gt;')}</div>`
+  ).join('');
+  body.scrollTop=body.scrollHeight;
+}
+function addTerminalLine(text,cls){
+  terminalLines.push({text,cls:cls||''});
+  renderTerminalLines();
+}
+function clearTerminalBody(){
+  terminalLines.length=0;
+  renderTerminalLines();
+}
+function showTerminalOverlay(){
+  if(terminalOpen)return;
+  terminalOpen=true;
+  // seed welcome once
+  if(terminalLines.length===0){
+    addTerminalLine('the room · v1.0','system');
+    addTerminalLine("type 'help' for commands.",'muted');
+    addTerminalLine('','');
+  }
+  document.getElementById('terminal-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('terminal-input').focus(),100);
+}
+function hideTerminalOverlay(){
+  terminalOpen=false;
+  document.getElementById('terminal-overlay').classList.remove('show');
+  document.getElementById('terminal-input').blur();
+}
+function handleTerminalSubmit(raw){
+  const cmd=raw.trim();
+  if(cmd==='')return;
+  addTerminalLine('$ '+cmd,'user');
+  // parse
+  if(cmd==='clear'){clearTerminalBody();return;}
+  if(cmd==='exit'){hideTerminalOverlay();return;}
+  if(cmd.startsWith('cat ')){
+    const arg=cmd.slice(4).trim().replace(/^~?\/?/,'');
+    const file=TERMINAL_COMMANDS._files[arg];
+    if(file){file.forEach(l=>addTerminalLine(l));addTerminalLine('','');}
+    else addTerminalLine(`cat: ${arg}: no such file`,'error');
+    return;
+  }
+  if(cmd==='echo'||cmd.startsWith('echo ')){addTerminalLine(cmd.slice(5));return;}
+  const fn=TERMINAL_COMMANDS[cmd];
+  if(fn){fn().forEach(l=>addTerminalLine(l));addTerminalLine('','');}
+  else addTerminalLine(`command not found: ${cmd}. type 'help'.`,'error');
+}
+
+/* wire terminal input once DOM is ready */
+document.addEventListener('DOMContentLoaded',()=>{
+  const input=document.getElementById('terminal-input');
+  input.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      handleTerminalSubmit(input.value);
+      input.value='';
+      e.preventDefault();
+    }else if(e.key==='Escape'){
+      hideTerminalOverlay();
+      e.preventDefault();
+    }
+  });
+});
+
+function raycastMonitor(x,y){
+  if(!loaded.monitor)return false;
+  mouseV2.x=(x/W())*2-1;mouseV2.y=-(y/H())*2+1;
+  raycaster.setFromCamera(mouseV2,camera);
+  return raycaster.intersectObject(loaded.monitor,true).length>0;
+}
+
 function buildScene(woodTex){
   scene=new THREE.Scene();
   scene.background=new THREE.Color(0x04060a);
-  scene.fog=new THREE.FogExp2(0x04060a,0.045);
   scene.environment=makeEnv();
 
-  camera=new THREE.PerspectiveCamera(34,W()/H(),.1,100);
+  camera=new THREE.PerspectiveCamera(34,W()/H(),.1,500);
   camera.position.copy(baseCamPos);camera.lookAt(baseCamLook);
 
   renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -248,10 +660,10 @@ function buildScene(woodTex){
   controls.enableDamping=true;
   controls.dampingFactor=0.08;
   controls.enablePan=false;
-  controls.minDistance=3.5;
-  controls.maxDistance=9.5;
-  controls.minPolarAngle=1.08;               // keep viewer below the ceiling
-  controls.maxPolarAngle=Math.PI*0.55;       // don't slip under the floor
+  controls.minDistance=2.0;
+  controls.maxDistance=55;
+  controls.minPolarAngle=0.12;               // almost straight-down view allowed
+  controls.maxPolarAngle=Math.PI*0.93;       // almost underneath allowed
   controls.rotateSpeed=0.65;
   controls.zoomSpeed=0.75;
   controls.autoRotate=true;
@@ -277,8 +689,150 @@ function buildScene(woodTex){
   );
   composer.addPass(bloom);
 
+  /* ═══════════════════════ INTERACTIVE LISTENERS ═══════════════════════
+     keyboard presets (1-5), cursor parallax, Mercedes click/wheel.
+     wired up here so renderer.domElement and controls exist.
+  */
+  // drag-state tracking (so parallax can pause while user is orbiting)
+  controls.addEventListener('start',()=>{isDragging=true;});
+  controls.addEventListener('end',()=>{isDragging=false;});
+
+  // cursor tracking — normalized to [-1, 1]
+  document.addEventListener('mousemove',(e)=>{
+    cursorNX=(e.clientX/W())*2-1;
+    cursorNY=(e.clientY/H())*2-1;
+  });
+
+  // ─── keyboard preset views (1–5) ───
+  const PRESETS={
+    '1':{pos:[-12,20,48], tgt:[0,0,-0.5],   label:'1 · Deep Space'},
+    '2':{pos:[1,12,2],    tgt:[0,0,-0.5],   label:'2 · Top Down'},
+    '3':{pos:[6.7,1.8,4.3],tgt:[4.2,0.8,0.8],label:'3 · Mercedes'},
+    '4':{pos:[0,2.5,5.5], tgt:[0,1.5,-2.5], label:'4 · Monitor'},
+    '5':{pos:[-11,2.5,2], tgt:[0,1,-0.5],   label:'5 · Side Profile'}
+  };
+  document.addEventListener('keydown',(e)=>{
+    const p=PRESETS[e.key];
+    if(p&&!flyInActive&&!presetActive){
+      presetStartPos.copy(camera.position);
+      presetStartTarget.copy(controls.target);
+      presetTargetPos.set(...p.pos);
+      presetTargetTgt.set(...p.tgt);
+      presetActive=true;presetT=0;
+      controls.enabled=false;controls.autoRotate=false;
+      console.log(`%c→ ${p.label}`,'color:#89f;font-weight:bold');
+    }
+  });
+
+  // ─── W key → WARP DRIVE (post-unlock only) ───
+  document.addEventListener('keydown',(e)=>{
+    if((e.key==='w'||e.key==='W')&&isUnlocked&&!warpActive&&!presetActive&&!unlockLightRampActive&&!terminalOpen){
+      warpActive=true;
+      warpCamStartPos.copy(camera.position);
+      controls.enabled=false;controls.autoRotate=false;
+      console.log('%c⟿ WARP ENGAGED','color:#6ff;font-weight:bold;font-size:13px');
+    }
+  });
+  document.addEventListener('keyup',(e)=>{
+    if((e.key==='w'||e.key==='W')&&warpActive){
+      warpActive=false;
+      console.log('%c⟸ warp disengaged','color:#6ff');
+    }
+  });
+
+  // ─── Mercedes click + wheel interactions ───
+  // drag-threshold so orbiting doesn't register as a click
+  let pdX=0,pdY=0,pdT=0;
+  let clickTimer=null;
+  renderer.domElement.addEventListener('pointerdown',(e)=>{
+    pdX=e.clientX;pdY=e.clientY;pdT=Date.now();
+  });
+  renderer.domElement.addEventListener('pointerup',(e)=>{
+    const dx=Math.abs(e.clientX-pdX);
+    const dy=Math.abs(e.clientY-pdY);
+    const dt=Date.now()-pdT;
+    if(dx<6&&dy<6&&dt<400){
+      // ─── pre-unlock: tap phone → open keypad ───
+      if(!isUnlocked){
+        if(raycastPhone(e.clientX,e.clientY)){
+          showLockOverlay();
+        }
+        return;   // nothing else is interactive pre-unlock
+      }
+      // ─── post-unlock: Monitor click → open terminal ───
+      if(raycastMonitor(e.clientX,e.clientY)){
+        showTerminalOverlay();
+        return;
+      }
+      // ─── post-unlock: Mercedes click ───
+      if(!raycastMercedes(e.clientX,e.clientY))return;
+      // single-vs-double click via timer
+      if(clickTimer){
+        clearTimeout(clickTimer);clickTimer=null;
+        cyclePaintColor();
+      }else{
+        clickTimer=setTimeout(()=>{
+          clickTimer=null;
+          mercedesSpinning=!mercedesSpinning;
+          console.log(`%c→ Mercedes spin: ${mercedesSpinning?'on':'off'}`,'color:#89f');
+        },260);
+      }
+    }
+  });
+  // scroll wheel over Mercedes → adjust spin speed (captures to block OrbitControls zoom)
+  renderer.domElement.addEventListener('wheel',(e)=>{
+    if(raycastMercedes(e.clientX,e.clientY)){
+      e.preventDefault();e.stopPropagation();
+      mercedesSpinSpeed=Math.max(0,Math.min(2,mercedesSpinSpeed+(-Math.sign(e.deltaY)*0.05)));
+      console.log(`%c→ Mercedes speed: ${mercedesSpinSpeed.toFixed(2)}`,'color:#89f');
+    }
+  },{passive:false,capture:true});
+
+  // ─── helpers ───
+  function raycastMercedes(x,y){
+    if(!loaded.mercedes)return false;
+    mouseV2.x=(x/W())*2-1;mouseV2.y=-(y/H())*2+1;
+    raycaster.setFromCamera(mouseV2,camera);
+    return raycaster.intersectObject(loaded.mercedes,true).length>0;
+  }
+  function cyclePaintColor(){
+    if(!loaded.mercedes)return;
+    const PAINT=[null,0xc0c0c8,0x1a1a1e,0x3a4048,0xa68b5b,0x7a1a1a];
+    const NAMES=['original','silver','obsidian','gunmetal','champagne','ruby'];
+    paintIndex=(paintIndex+1)%PAINT.length;
+    // cache originals the first time we change color (so we can restore)
+    if(!originalPaintColors){
+      originalPaintColors=new Map();
+      loaded.mercedes.traverse(o=>{
+        if(o.isMesh&&o.material){
+          const ms=Array.isArray(o.material)?o.material:[o.material];
+          ms.forEach(m=>{
+            if(/body|boot|door|fender|hood|roof|bump|side/i.test(m.name||'')&&m.color)
+              originalPaintColors.set(m.uuid,m.color.clone());
+          });
+        }
+      });
+    }
+    const hex=PAINT[paintIndex];
+    loaded.mercedes.traverse(o=>{
+      if(o.isMesh&&o.material){
+        const ms=Array.isArray(o.material)?o.material:[o.material];
+        ms.forEach(m=>{
+          if(originalPaintColors.has(m.uuid)){
+            if(hex===null)m.color.copy(originalPaintColors.get(m.uuid));
+            else m.color.setHex(hex);
+            m.needsUpdate=true;
+          }
+        });
+      }
+    });
+    console.log(`%c→ Mercedes paint: ${NAMES[paintIndex]}`,'color:#89f;font-weight:bold');
+  }
+
   /* Lighting — restrained */
-  scene.add(new THREE.HemisphereLight(0x8090a8,0x080604,.42));
+  const hemi=new THREE.HemisphereLight(0x8090a8,0x080604,.20);
+  hemi.userData.preUnlockKeep=true;
+  scene.add(hemi);
 
   lampLight=new THREE.SpotLight(0xffb06a,1.3,22,Math.PI*.38,.7,1.3);
   lampLight.position.set(-5.5,6.5,5);
@@ -289,17 +843,17 @@ function buildScene(woodTex){
   scene.add(lampLight,lampLight.target);
 
   const fill=new THREE.DirectionalLight(0x5070a0,.28);
-  fill.position.set(5,5,2);scene.add(fill);
+  fill.position.set(5,5,2);fill.userData.preUnlockKeep=true;scene.add(fill);
 
   const warmPocket=new THREE.PointLight(0xffa66a,.28,5,2);
   warmPocket.position.set(-1,1.5,2.5);scene.add(warmPocket);
 
-  /* Desk */
+  /* Desk — stays visible pre-unlock (it's the table the phone rests on) */
   const desk=new THREE.Mesh(
     new THREE.BoxGeometry(15,.2,7.5),
     new THREE.MeshStandardMaterial({map:woodTex,color:0xa89078,metalness:.05,roughness:.68,envMapIntensity:.6})
   );
-  desk.receiveShadow=true;scene.add(desk);
+  desk.receiveShadow=true;desk.userData.preUnlockKeep=true;scene.add(desk);
 
   const lip=new THREE.Mesh(new THREE.BoxGeometry(15,.04,.04),new THREE.MeshStandardMaterial({color:0x5a3e24,roughness:.55}));
   lip.position.set(0,.12,3.75);scene.add(lip);
@@ -322,70 +876,90 @@ function buildScene(woodTex){
     leg.position.set(x,.23,-2.0);scene.add(leg);
   });
 
-  /* ══════════════ ROOM ENCLOSURE ══════════════
-     room bounds — x:[-10,10]  y:[-2.2, 6]  z:[-12, 10]
+  /* ══════════════ SPACE — starfield replaces the room ══════════════
+     two layers:
+       bg: ~4000 small dim stars at radius 140–180
+       fg: ~300 brighter near-stars at radius 70–100
+     both use additive blending so bloom catches them.
+     a gentle rotation is applied in tick().
   */
-  const ROOM={xMin:-10,xMax:10,yMin:-2.2,yMax:6,zMin:-12,zMax:10};
-  const wallMat=new THREE.MeshStandardMaterial({color:0x0b0f16,roughness:.96,metalness:.02,envMapIntensity:.22});
-  const wallWarm=new THREE.MeshStandardMaterial({color:0x121014,roughness:.94,metalness:.02,envMapIntensity:.2});
-  const thk=0.2;
-  const cxZ=(ROOM.zMin+ROOM.zMax)/2, cyY=(ROOM.yMin+ROOM.yMax)/2;
-  const roomW=ROOM.xMax-ROOM.xMin, roomH=ROOM.yMax-ROOM.yMin, roomD=ROOM.zMax-ROOM.zMin;
+  function buildStarSphere(count, rMin, rMax, baseSize, opacity) {
+    const pos = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      // uniform random point on a sphere
+      const u = Math.random(), v = Math.random();
+      const theta = 2 * Math.PI * u;
+      const phi = Math.acos(2 * v - 1);
+      const r = rMin + Math.random() * (rMax - rMin);
+      pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i*3+2] = r * Math.cos(phi);
+      // color: 70% white, 15% blue-white, 15% warm-yellow
+      const c = Math.random();
+      if (c < 0.70) {
+        col[i*3] = 0.92 + Math.random()*.08;
+        col[i*3+1] = 0.92 + Math.random()*.08;
+        col[i*3+2] = 0.95 + Math.random()*.05;
+      } else if (c < 0.85) {
+        col[i*3] = 0.62 + Math.random()*.20;
+        col[i*3+1] = 0.76 + Math.random()*.14;
+        col[i*3+2] = 1.00;
+      } else {
+        col[i*3] = 1.00;
+        col[i*3+1] = 0.86 + Math.random()*.10;
+        col[i*3+2] = 0.60 + Math.random()*.20;
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+    return new THREE.Points(g, new THREE.PointsMaterial({
+      size: baseSize, vertexColors: true, transparent: true, opacity: opacity,
+      sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+  }
+  const bgStars = buildStarSphere(4000, 140, 190, 0.28, 0.85);
+  const fgStars = buildStarSphere(300,   70, 105, 0.75, 1.00);
+  scene.add(bgStars);
+  scene.add(fgStars);
 
-  /* floor — expand to fit new room */
-  const floor=new THREE.Mesh(
-    new THREE.PlaneGeometry(roomW,roomD),
-    new THREE.MeshStandardMaterial({color:0x0a0806,roughness:.82,metalness:.06,envMapIntensity:.28})
-  );
-  floor.rotation.x=-Math.PI/2;floor.position.set(0,ROOM.yMin,cxZ);floor.receiveShadow=true;scene.add(floor);
+  // ─── WARP STREAKS — each star duplicated as a line segment for warp mode ───
+  function buildStarStreaks(starMesh, stretch){
+    const srcPos=starMesh.geometry.attributes.position.array;
+    const srcCol=starMesh.geometry.attributes.color.array;
+    const count=srcPos.length/3;
+    const linePos=new Float32Array(count*6);
+    const lineCol=new Float32Array(count*6);
+    for(let i=0;i<count;i++){
+      const sx=srcPos[i*3], sy=srcPos[i*3+1], sz=srcPos[i*3+2];
+      // line from slightly-inward point to slightly-outward point, giving a stretched look
+      linePos[i*6]   = sx*0.88;
+      linePos[i*6+1] = sy*0.88;
+      linePos[i*6+2] = sz*0.88;
+      linePos[i*6+3] = sx*(1+stretch);
+      linePos[i*6+4] = sy*(1+stretch);
+      linePos[i*6+5] = sz*(1+stretch);
+      // bright at inner end, dim at outer end (gives a "motion blur" feel)
+      for(let k=0;k<3;k++){
+        lineCol[i*6+k]   = srcCol[i*3+k];
+        lineCol[i*6+3+k] = srcCol[i*3+k]*0.12;
+      }
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(linePos,3));
+    g.setAttribute('color',   new THREE.BufferAttribute(lineCol,3));
+    return new THREE.LineSegments(g,new THREE.LineBasicMaterial({
+      vertexColors:true,transparent:true,opacity:0.95,
+      blending:THREE.AdditiveBlending,depthWrite:false
+    }));
+  }
+  const bgWarp=buildStarStreaks(bgStars,0.35);
+  const fgWarp=buildStarStreaks(fgStars,0.45);
+  bgWarp.visible=false;fgWarp.visible=false;
+  scene.add(bgWarp,fgWarp);
 
-  /* back wall */
-  const backWall=new THREE.Mesh(new THREE.BoxGeometry(roomW,roomH,thk),wallWarm);
-  backWall.position.set(0,cyY,ROOM.zMin-thk/2);backWall.receiveShadow=true;scene.add(backWall);
-
-  /* front wall */
-  const frontWall=new THREE.Mesh(new THREE.BoxGeometry(roomW,roomH,thk),wallMat);
-  frontWall.position.set(0,cyY,ROOM.zMax+thk/2);frontWall.receiveShadow=true;scene.add(frontWall);
-
-  /* right wall */
-  const rightWall=new THREE.Mesh(new THREE.BoxGeometry(thk,roomH,roomD),wallMat);
-  rightWall.position.set(ROOM.xMax+thk/2,cyY,cxZ);rightWall.receiveShadow=true;scene.add(rightWall);
-
-  /* ceiling */
-  const ceiling=new THREE.Mesh(
-    new THREE.BoxGeometry(roomW,thk,roomD),
-    new THREE.MeshStandardMaterial({color:0x06080c,roughness:.98,metalness:.02,envMapIntensity:.1})
-  );
-  ceiling.position.set(0,ROOM.yMax+thk/2,cxZ);ceiling.receiveShadow=true;scene.add(ceiling);
-
-  /* ══════ LEFT WALL — solid ══════ */
-  const leftWall=new THREE.Mesh(new THREE.BoxGeometry(thk,roomH,roomD),wallMat);
-  leftWall.position.set(ROOM.xMin-thk/2,cyY,cxZ);
-  leftWall.receiveShadow=true;
-  scene.add(leftWall);
-
-  /* ══════════════ RUG (under desk) ══════════════ */
-  const rugTex=(()=>{
-    const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
-    x.fillStyle='#3a1a18';x.fillRect(0,0,512,256);
-    // faded pattern
-    x.strokeStyle='rgba(120,55,40,.25)';x.lineWidth=1;
-    for(let i=0;i<60;i++){x.beginPath();const sx=Math.random()*512;x.moveTo(sx,0);x.lineTo(sx+(Math.random()-.5)*20,256);x.stroke();}
-    // diamond lozenges
-    x.strokeStyle='rgba(180,90,60,.3)';x.lineWidth=1.2;
-    for(let j=0;j<3;j++){for(let i=0;i<6;i++){x.beginPath();
-      x.moveTo(60+i*80,40+j*70);x.lineTo(100+i*80,80+j*70);
-      x.lineTo(60+i*80,120+j*70);x.lineTo(20+i*80,80+j*70);x.closePath();x.stroke();}}
-    // dark border
-    x.fillStyle='#241010';x.fillRect(0,0,512,18);x.fillRect(0,238,512,18);
-    x.fillRect(0,0,18,256);x.fillRect(494,0,18,256);
-    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t;
-  })();
-  const rug=new THREE.Mesh(
-    new THREE.BoxGeometry(9.5,.04,5.6),
-    new THREE.MeshStandardMaterial({map:rugTex,roughness:.92,metalness:0,envMapIntensity:.2})
-  );
-  rug.position.set(0,ROOM.yMin+.022,1.3);rug.receiveShadow=true;scene.add(rug);
+  window.__stars = { bg: bgStars, fg: fgStars, bgWarp, fgWarp };
 
   /* ══════════════ LAMP FIXTURE (motivates the warm light) ══════════════ */
   const lampGroup=new THREE.Group();
@@ -428,7 +1002,7 @@ function buildScene(woodTex){
     new THREE.CylinderGeometry(1.15,1.20,0.05,48),
     new THREE.MeshStandardMaterial({color:0x0d0d10,metalness:.72,roughness:.26,envMapIntensity:1.0})
   );
-  pedestal.position.set(3.6,0.135,1.2);
+  pedestal.position.set(4.2,0.135,0.8);
   pedestal.receiveShadow=true;
   scene.add(pedestal);
   const pedRing=new THREE.Mesh(
@@ -436,19 +1010,19 @@ function buildScene(woodTex){
     new THREE.MeshStandardMaterial({color:0x000000,emissive:0x5aa0d8,emissiveIntensity:2.6,roughness:.35,metalness:0})
   );
   pedRing.rotation.x=Math.PI/2;
-  pedRing.position.set(3.6,0.163,1.2);
+  pedRing.position.set(4.2,0.163,0.8);
   scene.add(pedRing);
   // cool rim glow from the pedestal edge
   const pedGlow=new THREE.PointLight(0x8ab4e0,.45,2.6,2);
-  pedGlow.position.set(3.6,0.30,1.2);
+  pedGlow.position.set(4.2,0.30,0.8);
   scene.add(pedGlow);
   // warm hero light from above — makes the car's shape + highlights readable
   const mercKey=new THREE.PointLight(0xffe6c8,1.1,4.2,2);
-  mercKey.position.set(3.6,2.4,1.2);
+  mercKey.position.set(4.2,2.4,0.8);
   scene.add(mercKey);
   // small front fill — kills the dead shadow on the near side
   const mercFill=new THREE.PointLight(0xfff0dc,0.5,3.2,2);
-  mercFill.position.set(3.6,1.0,2.8);
+  mercFill.position.set(4.2,1.0,2.4);
   scene.add(mercFill);
 
   /* ══════════════ BOOKS (small stack on desk) ══════════════ */
@@ -475,29 +1049,6 @@ function buildScene(woodTex){
   notebook.position.set(-2.5,.16,1.45);notebook.rotation.y=-.12;
   notebook.castShadow=true;notebook.receiveShadow=true;
   scene.add(notebook);
-
-  /* ══════════════ WALL PICTURE (back wall, right side) ══════════════ */
-  const picTex=(()=>{
-    const c=document.createElement('canvas');c.width=128;c.height=96;const x=c.getContext('2d');
-    const g=x.createLinearGradient(0,0,0,96);
-    g.addColorStop(0,'#2a1d10');g.addColorStop(.4,'#1a1830');g.addColorStop(1,'#060814');
-    x.fillStyle=g;x.fillRect(0,0,128,96);
-    x.fillStyle='#040508';x.fillRect(0,66,128,30);
-    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;
-  })();
-  const picFrame=new THREE.Group();
-  const frame=new THREE.Mesh(
-    new THREE.BoxGeometry(1.9,1.3,.06),
-    new THREE.MeshStandardMaterial({color:0x2a1c12,metalness:.3,roughness:.52})
-  );
-  picFrame.add(frame);
-  const picCanvas=new THREE.Mesh(
-    new THREE.PlaneGeometry(1.7,1.1),
-    new THREE.MeshBasicMaterial({map:picTex})
-  );
-  picCanvas.position.z=.032;picFrame.add(picCanvas);
-  picFrame.position.set(5.5,2.3,ROOM.zMin+thk+0.02);
-  scene.add(picFrame);
 
   /* ══════════════ DUST MOTES (particles, caught in light) ══════════════ */
   const moteCount=140;
@@ -609,11 +1160,57 @@ function tick(){
       controls.enabled=true;
       setTimeout(()=>{if(!flyInActive)controls.autoRotate=true},2500);
     }
+  } else if(presetActive){
+    // ── preset camera tween (1–5 keys, or unlock pullback) ──
+    presetT+=dt;
+    const t=Math.min(presetT/currentTweenDuration,1);
+    const e=1-Math.pow(1-t,3);   // easeOutCubic
+    camera.position.lerpVectors(presetStartPos,presetTargetPos,e);
+    controls.target.lerpVectors(presetStartTarget,presetTargetTgt,e);
+    camera.lookAt(controls.target);
+    if(t>=1){
+      presetActive=false;
+      camera.position.copy(presetTargetPos);
+      controls.target.copy(presetTargetTgt);
+      controls.enabled=true;
+      controls.update();
+      currentTweenDuration=PRESET_DURATION;   // reset for future preset jumps
+      // after unlock pullback completes, let auto-rotate resume after a breath
+      if(isUnlocked){
+        setTimeout(()=>{if(!presetActive)controls.autoRotate=true;},2500);
+      }
+    }
   } else if(controls){
     controls.update();
+    // ── cursor parallax (when not dragging, not in preset) ──
+    parallaxAmp+=(isDragging?-0.04:0.04);
+    parallaxAmp=Math.max(0,Math.min(1,parallaxAmp));
+    const tPX=cursorNX*0.28;         // horizontal sway
+    const tPY=-cursorNY*0.18;        // vertical sway (inverted)
+    parallaxX+=(tPX-parallaxX)*0.05;
+    parallaxY+=(tPY-parallaxY)*0.05;
+    // apply offset in camera's local right/up frame, cleared next frame by controls.update()
+    const right=new THREE.Vector3(),up=new THREE.Vector3();
+    camera.matrix.extractBasis(right,up,new THREE.Vector3());
+    camera.position.addScaledVector(right,parallaxX*parallaxAmp);
+    camera.position.addScaledVector(up,parallaxY*parallaxAmp);
   }
-  // Lamp — subtle oil-lamp flicker
-  if(lampLight)lampLight.intensity=1.3+Math.sin(tC*2.1)*.028+Math.sin(tC*13.7)*.014;
+  // Lamp — subtle oil-lamp flicker + Morse-code modulation (spells SUYASH) once fully unlocked
+  if(lampLight){
+    const noiseFlicker=Math.sin(tC*2.1)*.028+Math.sin(tC*13.7)*.014;
+    if(isUnlocked&&!unlockLightRampActive){
+      // decode current Morse phase
+      const phase=tC%MORSE_CYCLE;
+      let elapsed=0,morseOn=false;
+      for(const p of morsePattern){
+        if(phase<elapsed+p.duration){morseOn=p.on;break;}
+        elapsed+=p.duration;
+      }
+      const morseBoost=morseOn?0.16:-0.10;
+      lampLight.intensity=1.3+morseBoost+noiseFlicker;
+    }
+    // pre-unlock or mid-ramp: let lockScene / unlock-ramp own the intensity
+  }
   // iPhone — very slow gentle pulse, like a heartbeat
   if(iphoneGlow)iphoneGlow.intensity=.35+Math.sin(tC*0.8)*.18;
   // Dust motes — slow upward drift, reset on exit
@@ -628,8 +1225,56 @@ function tick(){
     }
     p.needsUpdate=true;
   }
-  // Mercedes — slow rotation on the pedestal (full turn ~22s)
-  if(loaded.mercedes)loaded.mercedes.rotation.y=tC*0.28;
+  // Mercedes — user-controllable rotation (click to toggle, scroll to adjust speed)
+  if(loaded.mercedes&&mercedesSpinning)loaded.mercedes.rotation.y+=dt*mercedesSpinSpeed;
+  // Starfield drift — barely perceptible, adds cosmic motion
+  if(window.__stars){
+    window.__stars.bg.rotation.y=tC*0.0018;
+    window.__stars.fg.rotation.y=tC*0.0028;
+    window.__stars.fg.rotation.x=tC*0.0009;
+    // mirror rotation onto warp streaks so the transition looks continuous
+    if(window.__stars.bgWarp){window.__stars.bgWarp.rotation.y=tC*0.0018;}
+    if(window.__stars.fgWarp){window.__stars.fgWarp.rotation.y=tC*0.0028;window.__stars.fgWarp.rotation.x=tC*0.0009;}
+  }
+  // ─── WARP DRIVE: hold W to engage. stars stretch into streaks, camera flies forward. release to return. ───
+  const prevWarpI=warpIntensity;
+  if(warpActive){
+    warpIntensity=Math.min(1,warpIntensity+dt*1.8);
+  }else{
+    warpIntensity=Math.max(0,warpIntensity-dt*2.4);
+  }
+  if(warpIntensity>0.02||prevWarpI>0.02){
+    const useStreaks=warpIntensity>0.12;
+    if(window.__stars){
+      window.__stars.bg.visible=!useStreaks;
+      window.__stars.fg.visible=!useStreaks;
+      if(window.__stars.bgWarp)window.__stars.bgWarp.visible=useStreaks;
+      if(window.__stars.fgWarp)window.__stars.fgWarp.visible=useStreaks;
+    }
+    if(warpActive){
+      // push camera forward along its view direction, scaled by intensity
+      const fwd=new THREE.Vector3();
+      camera.getWorldDirection(fwd);
+      camera.position.addScaledVector(fwd,dt*18*warpIntensity);
+    }else if(warpIntensity<1){
+      // snap camera back toward warp start
+      camera.position.lerp(warpCamStartPos,0.08);
+      if(warpIntensity<0.05&&camera.position.distanceTo(warpCamStartPos)<0.3){
+        camera.position.copy(warpCamStartPos);
+        if(!presetActive)controls.enabled=true;
+      }
+    }
+  }
+  // ─── unlock light ramp: smoothly bring dimmed lights from 0 to their original intensity ───
+  if(unlockLightRampActive){
+    unlockLightRampT+=dt;
+    const t=Math.min(unlockLightRampT/UNLOCK_LIGHT_RAMP_DURATION,1);
+    const e=1-Math.pow(1-t,2);  // easeOutQuad — smooth fade-in
+    dimmedLights.forEach(l=>{
+      l.intensity=(l.userData._origIntensity||0)*e;
+    });
+    if(t>=1)unlockLightRampActive=false;
+  }
   // render through bloom composer (fallback to direct render if composer not ready)
   if(composer)composer.render();
   else if(renderer&&scene&&camera)renderer.render(scene,camera);
@@ -639,16 +1284,19 @@ function tick(){
 /* Init */
 loadWood(woodTex=>{
   buildScene(woodTex);
-  // cinematic start pose — camera held far and high, controls locked
-  camera.position.copy(flyInStartPos);
-  camera.lookAt(baseCamLook);
-  controls.enabled=false;
+  // Pre-unlock framing: camera close to the phone on the desk; user can orbit but nothing else exists yet
+  camera.position.copy(PHONE_FOCUS_POS);
+  controls.target.copy(PHONE_FOCUS_TGT);
+  controls.update();
+  controls.enabled=true;
   controls.autoRotate=false;
   loadAll(()=>{
     if(loaded.iphone){
       iphoneGlow=new THREE.PointLight(0xffc678,.35,1.5,2);
       iphoneGlow.position.set(MODELS.iphone.position[0],MODELS.iphone.position[1]+.35,MODELS.iphone.position[2]);
+      iphoneGlow.userData.preUnlockKeep=true;  // stays lit pre-unlock
       scene.add(iphoneGlow);
+      loaded.iphone.userData.preUnlockKeep=true;  // stays visible pre-unlock
     }
     /* ─── MERCEDES DIAGNOSTIC ─── */
     if(loaded.mercedes){
@@ -673,33 +1321,35 @@ loadWood(woodTex=>{
         new THREE.BoxGeometry(1.6,0.55,2.0),
         new THREE.MeshStandardMaterial({color:0x1a0a10,emissive:0xff2848,emissiveIntensity:1.0,transparent:true,opacity:0.4})
       );
-      phFill.position.set(3.6,0.44,1.2);
+      phFill.position.set(4.2,0.44,0.8);
       scene.add(phFill);
       const phWire=new THREE.Mesh(
         new THREE.BoxGeometry(1.62,0.57,2.02),
         new THREE.MeshBasicMaterial({color:0xff4060,wireframe:true})
       );
-      phWire.position.set(3.6,0.44,1.2);
+      phWire.position.set(4.2,0.44,0.8);
       scene.add(phWire);
     }
-    /* ─── 'M' key → frame the pedestal so you can always find it ─── */
+    /* ─── 'M' key → frame the pedestal (post-unlock only) ─── */
     document.addEventListener('keydown',(e)=>{
-      if((e.key==='m'||e.key==='M')&&controls&&controls.enabled&&!flyInActive){
-        camera.position.set(6.1,1.9,4.7);
-        controls.target.set(3.6,0.8,1.2);
+      if((e.key==='m'||e.key==='M')&&isUnlocked&&controls&&controls.enabled&&!presetActive){
+        camera.position.set(6.7,1.9,4.3);
+        controls.target.set(4.2,0.8,0.8);
         controls.autoRotate=false;
         controls.update();
         console.log('%c→ camera framed on the pedestal. drag to orbit it.','color:#89f');
       }
     });
+    // LOCK THE SCENE — hides everything except desk + phone + base lights
+    lockScene();
     updateVeil(1);
     setTimeout(()=>{
-      // start the fly-in simultaneously with the veil fade
-      flyInActive=true;flyInT=0;
+      // Fade the veil away to reveal just the phone on the desk in darkness
       document.getElementById('veil').classList.add('gone');
       setTimeout(()=>document.getElementById('veil').style.display='none',2500);
-      document.getElementById('ambient').classList.add('on');
-      document.getElementById('clock').classList.add('on');
+      // Show the pre-unlock hint after the veil clears
+      setTimeout(()=>document.getElementById('phone-hint').classList.add('on'),600);
+      // ambient + clock stay hidden until unlock (revealed in triggerUnlock post-animation)
     },900);
   });
   tick();
