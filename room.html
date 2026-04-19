@@ -106,6 +106,7 @@ canvas{display:block}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
@@ -520,6 +521,10 @@ function buildScene(woodTex){
 
 function loadAll(onDone){
   const loader=new THREE.GLTFLoader();
+  // DRACO decoder — the Mercedes GLB uses KHR_draco_mesh_compression (required)
+  const draco=new THREE.DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+  loader.setDRACOLoader(draco);
   const keys=Object.keys(MODELS);
   function next(i){
     if(i>=keys.length){onDone();return}
@@ -645,6 +650,48 @@ loadWood(woodTex=>{
       iphoneGlow.position.set(MODELS.iphone.position[0],MODELS.iphone.position[1]+.35,MODELS.iphone.position[2]);
       scene.add(iphoneGlow);
     }
+    /* ─── MERCEDES DIAGNOSTIC ─── */
+    if(loaded.mercedes){
+      const bb=new THREE.Box3().setFromObject(loaded.mercedes);
+      const sz=bb.getSize(new THREE.Vector3());
+      console.log(
+        '%c✓ MERCEDES LOADED','color:#6fa;font-weight:bold;font-size:13px',
+        `— bbox: ${sz.x.toFixed(2)} × ${sz.y.toFixed(2)} × ${sz.z.toFixed(2)} units`
+      );
+      console.log('   pivot world position:',loaded.mercedes.position);
+    } else {
+      console.warn(
+        '%c⚠ MERCEDES DID NOT LOAD','color:#f90;font-weight:bold;font-size:14px'
+      );
+      console.warn('Expected URL:',MODEL_BASE+'mercedes.glb');
+      console.warn('Checks to run:');
+      console.warn('  1. Open that URL directly in a new tab — does it download?');
+      console.warn('  2. Is the filename exactly "mercedes.glb" (lowercase)?');
+      console.warn('  3. If you just pushed to git, wait 60–90s for GitHub Pages to rebuild, then hard-refresh (Cmd/Ctrl+Shift+R).');
+      // visible placeholder so the pedestal isn't empty
+      const phFill=new THREE.Mesh(
+        new THREE.BoxGeometry(1.6,0.55,2.0),
+        new THREE.MeshStandardMaterial({color:0x1a0a10,emissive:0xff2848,emissiveIntensity:1.0,transparent:true,opacity:0.4})
+      );
+      phFill.position.set(3.6,0.44,1.2);
+      scene.add(phFill);
+      const phWire=new THREE.Mesh(
+        new THREE.BoxGeometry(1.62,0.57,2.02),
+        new THREE.MeshBasicMaterial({color:0xff4060,wireframe:true})
+      );
+      phWire.position.set(3.6,0.44,1.2);
+      scene.add(phWire);
+    }
+    /* ─── 'M' key → frame the pedestal so you can always find it ─── */
+    document.addEventListener('keydown',(e)=>{
+      if((e.key==='m'||e.key==='M')&&controls&&controls.enabled&&!flyInActive){
+        camera.position.set(6.1,1.9,4.7);
+        controls.target.set(3.6,0.8,1.2);
+        controls.autoRotate=false;
+        controls.update();
+        console.log('%c→ camera framed on the pedestal. drag to orbit it.','color:#89f');
+      }
+    });
     updateVeil(1);
     setTimeout(()=>{
       // start the fly-in simultaneously with the veil fade
