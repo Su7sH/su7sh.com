@@ -373,14 +373,14 @@ body::before {
   display: inline-flex;
   align-items: center;
   gap: .75rem;
-  font-size: .72rem;
+  font-size: .82rem;
   font-weight: 400;
   letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--w-70);
   margin-bottom: 1.5rem;
 }
-@media (min-width: 768px) { .hero-role { font-size: .82rem; margin-bottom: 2rem; } }
+@media (min-width: 768px) { .hero-role { font-size: .95rem; margin-bottom: 2rem; } }
 .hero-role .dot {
   width: 6px; height: 6px;
   border-radius: 999px;
@@ -403,6 +403,15 @@ body::before {
 .hero-title .shiny-text {
   font-size: inherit;
   letter-spacing: -.02em;
+}
+.hero-title .line.hero-coords {
+  font-size: clamp(1.1rem, 3.2vw, 2.2rem);
+  line-height: 1.2;
+  margin-top: .55em;
+  font-weight: 400;
+}
+.hero-title .line.hero-coords .shiny-text {
+  letter-spacing: .015em;
 }
 
 .hero-ctas {
@@ -1022,9 +1031,9 @@ body::before {
 <!-- ─────────────── TOPBAR ─────────────── -->
 <header class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="#top" class="logo" aria-label="Dr. Suyash">
+    <a href="#top" class="logo" aria-label="Suyash">
       <span class="logo-mark"></span>
-      <span class="logo-name">Dr. Suyash</span>
+      <span class="logo-name">Suyash</span>
     </a>
     <nav class="nav" aria-label="primary">
       <a href="#experience">Experience</a>
@@ -1053,7 +1062,7 @@ body::before {
   <div class="mobile-menu-head">
     <a href="#top" class="logo" data-close>
       <span class="logo-mark"></span>
-      <span class="logo-name">Dr. Suyash</span>
+      <span class="logo-name">Suyash</span>
     </a>
     <button class="mobile-menu-close" data-close aria-label="Close menu">×</button>
   </div>
@@ -1084,7 +1093,7 @@ body::before {
   <div class="hero-content">
     <div class="hero-intro">
       <p>Radiologist and clinical AI lead building safe, clinically-grounded evaluation pipelines for frontier language models &mdash; currently leading a team of international doctors at xAI.</p>
-      <p>MD Radiology · MBBS · ISB Executive (Clinician X) · Member RCR, RSNA, IRIA.</p>
+      <p>MD Radiology · MBBS · ISB Executive (Clinician&nbsp;X) · Member RCR, RSNA, IRIA.</p>
     </div>
 
     <div class="hero-center">
@@ -1093,8 +1102,8 @@ body::before {
         Expert Team Lead @ xAI · MD Radiology
       </div>
       <h1 class="hero-title">
-        <span class="line">Radiologist.</span>
-        <span class="line"><span class="shiny-text">Clinical AI Lead.</span></span>
+        <span class="line">Suyash.</span>
+        <span class="line hero-coords"><span class="shiny-text" id="heroCoords">18°40′56″ N · 73°55′11″ E</span></span>
       </h1>
       <div class="hero-ctas">
         <a href="#experience" class="btn btn-primary">See experience
@@ -1117,13 +1126,6 @@ body::before {
   </div>
 </section>
 
-<!-- ─────────────── STATS MARQUEE ─────────────── -->
-<section class="stats">
-  <div class="marquee-track" id="marqueeTrack">
-    <!-- filled by JS — doubled for seamless -50% loop -->
-  </div>
-</section>
-
 <!-- ─────────────── ABOUT (seam lives here) ─────────────── -->
 <section class="about reveal" id="about">
   <div class="about-inner">
@@ -1134,20 +1136,20 @@ body::before {
       </div>
       <div>
         <p class="about-prose">
-          I'm a radiologist. Most days I work on the medical safety of a language model &mdash; leading a team of clinicians at xAI who teach it what to say with care / what to say plainly / where it should simply stop speaking. Previously, Managing Director of a 105-bed charitable hospital, a nursing college, and an 1,100-student school serving rural and tribal communities in Maharashtra. Between the clinic and the machine there is still a thin wall, and most of what interests me now lives in finding the <span class="seam" id="seam" tabindex="0" role="link" aria-label="a quiet way through">quiet</span> ways through.
+          I'm a radiologist. Most days I work on the medical safety and clinical accuracy of a language model, leading a team of clinicians at xAI who shape how it reasons, what it defers, and where the evidence runs out. Previously, Managing Director of a charitable hospital, a nursing college, and a school serving rural and tribal communities in Maharashtra. Between the human and the machine there is a boundary still being drawn, and most of what interests me now lives in the <span class="seam" id="seam" tabindex="0" role="link" aria-label="a quiet way through">quiet</span> work of drawing it well.
         </p>
         <div class="about-meta">
           <span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            Maharashtra, India · Remote, Global
+            Maharashtra, India
           </span>
           <a href="mailto:suyashgunjal07@gmail.com">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
             suyashgunjal07@gmail.com
           </a>
-          <a href="tel:+917744076076">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg>
-            +91 77440 76076
+          <a href="https://wa.me/917744076076" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.999-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.886 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></svg>
+            WhatsApp &mdash; +91 77440 76076
           </a>
         </div>
       </div>
@@ -1177,8 +1179,6 @@ body::before {
           </div>
           <div class="job-meta">
             <span>Sept 2025 &mdash; Present</span>
-            <span class="sep-dot">·</span>
-            <span>Remote · Global</span>
           </div>
           <ul class="job-bullets">
             <li><span>Promoted to lead a team of international doctors contributing to Grok's medical accuracy and safety.</span></li>
@@ -1196,8 +1196,6 @@ body::before {
           </div>
           <div class="job-meta">
             <span>Jan 2025 &mdash; Sept 2025</span>
-            <span class="sep-dot">·</span>
-            <span>Remote · Global</span>
           </div>
           <ul class="job-bullets">
             <li><span>Selected as one of the first clinical contributors to enhance the medical accuracy and safety of Grok, xAI's language model.</span></li>
@@ -1219,12 +1217,11 @@ body::before {
             <span class="sep-dot">·</span>
             <span>Alephata, Maharashtra</span>
             <span class="sep-dot">·</span>
-            <span class="italic">105-bed charitable hospital</span>
+            <span class="italic">Charitable hospital</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Leading hospital expansion from 60 to 100 beds to improve access to pediatric, neurology, and urology care for underserved rural populations.</span></li>
-            <li><span>Supervised recruitment of doctors and paramedical staff, financial management, and 100% legal compliance.</span></li>
-            <li><span>Drove 10% YoY admissions growth, adding 20+ new patients per month through operational efficiency and patient service optimization.</span></li>
+            <li><span>Led hospital expansion to broaden access to pediatric, neurology, and urology care for underserved rural communities.</span></li>
+            <li><span>Oversaw clinical recruitment, institutional operations, and regulatory stewardship.</span></li>
           </ul>
         </div>
 
@@ -1243,9 +1240,8 @@ body::before {
             <span class="italic">Nursing education degree program</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Managed the Fee Regulating Authority submission process, securing course fee finalization through strategic regulatory compliance.</span></li>
-            <li><span>Launched targeted marketing campaigns, fulfilling the college's 60-student capacity via 100+ inquiries and 20% enrollment growth in a single academic year.</span></li>
-            <li><span>Led the college through regulatory inspections, securing official recognition and uninterrupted program operations.</span></li>
+            <li><span>Stewarded the college through regulatory approvals, inspections, and institutional recognition.</span></li>
+            <li><span>Built community outreach that filled each intake and sustained program continuity.</span></li>
           </ul>
         </div>
 
@@ -1261,11 +1257,11 @@ body::before {
             <span class="sep-dot">·</span>
             <span>Alephata, Maharashtra</span>
             <span class="sep-dot">·</span>
-            <span class="italic">1,100 students &mdash; 500 residential from tribal areas</span>
+            <span class="italic">Serving rural and tribal communities</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Increased admissions by 20% &mdash; 200 students (100 residential) &mdash; through data-driven campaigns targeting tribal communities.</span></li>
-            <li><span>Building CSR partnerships to introduce tribal students to AI, robotics, and modern sports &amp; learning infrastructure &mdash; enabling transformative career and life outcomes.</span></li>
+            <li><span>Grew admissions through sustained outreach to tribal and rural families.</span></li>
+            <li><span>Building CSR partnerships to bring AI, robotics, and modern learning infrastructure to tribal students.</span></li>
           </ul>
         </div>
 
@@ -1281,13 +1277,12 @@ body::before {
             <span class="sep-dot">·</span>
             <span>Igatpuri, Maharashtra</span>
             <span class="sep-dot">·</span>
-            <span class="italic">North Maharashtra's largest charitable hospital (1,150 beds)</span>
+            <span class="italic">North Maharashtra's largest charitable hospital</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Performed 5,000+ imaging procedures; led diagnostic imaging for 1,000+ suspected COVID-19 cases essential for life-saving triage.</span></li>
-            <li><span>Streamlined workflow, reducing patient wait times by 20% and maintaining operations during outages.</span></li>
-            <li><span>Mentored 6 junior radiologists and 12+ technicians, improving diagnostic accuracy and patient care.</span></li>
-            <li><span>Delivered 70+ lectures to undergraduate and graduate students; led radiology services at 10+ health camps for underserved communities.</span></li>
+            <li><span>Led diagnostic imaging across a high-volume department, including triage during the most acute phase of the pandemic.</span></li>
+            <li><span>Mentored junior radiologists and technicians while teaching undergraduate and graduate students.</span></li>
+            <li><span>Led radiology services at health camps for underserved rural communities.</span></li>
           </ul>
         </div>
 
@@ -1304,9 +1299,8 @@ body::before {
             <span>Alephata, Maharashtra</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Founded and led a dedicated COVID-19 health center serving 10,000+ people, treating 300+ inpatients, and screening 1,000+ outpatients.</span></li>
-            <li><span>Managed permissions, space, equipment, staffing, treatment planning, marketing, and financials end-to-end.</span></li>
-            <li><span>Transitioned daily duties to a manager in Aug 2020 while continuing strategic oversight remotely, balancing residency commitments.</span></li>
+            <li><span>Founded and led a dedicated COVID-19 health center during the most acute phase of the pandemic.</span></li>
+            <li><span>Built the center from the ground up &mdash; permissions, space, equipment, staffing, and care &mdash; then transitioned day-to-day operations to a dedicated manager while completing radiology residency.</span></li>
           </ul>
         </div>
 
@@ -1326,8 +1320,7 @@ body::before {
     <div class="ed-grid">
       <div class="ed-card">
         <div class="ed-period">Jan 2025 &mdash; Jun 2025</div>
-        <div class="ed-degree">Executive Education &mdash; MPM (Clinician X)</div>
-        <div class="ed-field">Business Administration &amp; Management, Healthcare</div>
+        <div class="ed-degree">Executive Education &mdash; MPM (Clinician&nbsp;X)</div>
         <div class="ed-school">Indian School of Business</div>
       </div>
       <div class="ed-card">
@@ -1420,7 +1413,7 @@ body::before {
     <div class="section-head">
       <div class="tag">Recognition</div>
       <h2 class="display">Peer review, editorial, and community work.</h2>
-      <p class="sub">Contributions to RSNA, Radiology: AI, BMJ Digital Health &amp; AI, and community platforms reaching 1.2M+ radiologists annually.</p>
+      <p class="sub">Contributions to RSNA, Radiology: AI, BMJ Digital Health &amp; AI, and international radiology communities.</p>
     </div>
 
     <div class="re-grid">
@@ -1449,11 +1442,10 @@ body::before {
       </div>
       <div class="re-card">
         <div class="re-title">Radiogyan.com &mdash; Team Member</div>
-        <div class="re-detail">Community engagement for an international radiology platform with 1.2M+ annual views.</div>
+        <div class="re-detail">Community engagement for an international radiology platform.</div>
       </div>
       <div class="re-card">
         <div class="re-title">Board Member &mdash; International Student Cell, SMBTIMSRC</div>
-        <div class="re-detail">Collaborated with management to achieve GMC &amp; ECFMG recognition, enabling students to qualify for PLAB and USMLE.</div>
       </div>
       <div class="re-card">
         <div class="re-title">Insights Community &mdash; RSNA</div>
@@ -1465,13 +1457,6 @@ body::before {
       </div>
       <div class="re-card">
         <div class="re-title">Alumni Association &mdash; Founding Lead</div>
-        <div class="re-detail">Raised ₹10 lakhs (~$12,000 USD) for scholarships and student welfare projects.</div>
-      </div>
-      <div class="re-card">
-        <div class="re-title">GMAT FE 655 (classic 710, 93%)</div>
-      </div>
-      <div class="re-card">
-        <div class="re-title">Athletics &mdash; Captain, UG &amp; PG Cricket / Football</div>
       </div>
     </div>
   </div>
@@ -1521,9 +1506,9 @@ body::before {
         suyashgunjal07@gmail.com
         <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
-      <a href="tel:+917744076076" class="btn btn-ghost">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg>
-        +91 77440 76076
+      <a href="https://wa.me/917744076076" class="btn btn-ghost" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.999-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.886 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></svg>
+        WhatsApp
       </a>
     </div>
 
@@ -1531,7 +1516,7 @@ body::before {
       <div>© <span id="year"></span> Dr. Suyash P. Gunjal. All rights reserved.</div>
       <div class="loc">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        Maharashtra, India · Remote, Global
+        Maharashtra, India
       </div>
     </div>
   </div>
@@ -1576,27 +1561,6 @@ document.querySelectorAll('[data-close]').forEach(el => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && mobileMenu.classList.contains('open')) closeMenu();
 });
-
-/* ─── stats marquee — built at runtime for seamless loop ─── */
-const statsData = [
-  { value: '5,000+',  label: 'Imaging procedures performed' },
-  { value: '10,000+', label: 'Patients served via COVID center' },
-  { value: '₹10L',    label: 'Raised for student scholarships' },
-];
-(function buildMarquee() {
-  const track = document.getElementById('marqueeTrack');
-  if (!track) return;
-  const sparkSVG = '<svg class="spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>';
-  // duplicate enough times so translateX(-50%) always has track off-screen
-  const repeats = 6;
-  let html = '';
-  for (let i = 0; i < repeats; i++) {
-    for (const s of statsData) {
-      html += `<div class="marquee-item"><div class="stat"><span class="stat-value">${s.value}</span><span class="stat-label">${s.label}</span></div>${sparkSVG}</div>`;
-    }
-  }
-  track.innerHTML = html;
-})();
 
 /* ─── background video — forced play + click-to-play fallback ─── */
 (function initVideo() {
@@ -1649,6 +1613,36 @@ if (seam) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
   });
 }
+
+/* ─── live coordinates — pushed from phone via gist ─── */
+(function initLiveCoords(){
+  const el = document.getElementById('heroCoords');
+  if (!el) return;
+  const GIST_URL = 'https://gist.githubusercontent.com/Su7sH/84fabfc945bedff9520c9831455f903b/raw/location.json';
+  const STALE_MS = 30 * 24 * 60 * 60 * 1000;  // 30 days
+  const decToDMS = (dec, posChar, negChar) => {
+    const hemi = dec >= 0 ? posChar : negChar;
+    const abs = Math.abs(dec);
+    let d = Math.floor(abs);
+    const minFloat = (abs - d) * 60;
+    let m = Math.floor(minFloat);
+    let s = Math.round((minFloat - m) * 60);
+    if (s === 60) { s = 0; m += 1; }
+    if (m === 60) { m = 0; d += 1; }
+    return `${d}°${String(m).padStart(2,'0')}′${String(s).padStart(2,'0')}″ ${hemi}`;
+  };
+  fetch(GIST_URL, { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      if (typeof data.lat !== 'number' || typeof data.lng !== 'number') return;
+      if (data.updated) {
+        const age = Date.now() - Date.parse(data.updated);
+        if (!isFinite(age) || age > STALE_MS) return;
+      }
+      el.textContent = `${decToDMS(data.lat,'N','S')} · ${decToDMS(data.lng,'E','W')}`;
+    })
+    .catch(() => {});
+})();
 
 /* ─── year stamp ─── */
 document.getElementById('year').textContent = new Date().getFullYear();
