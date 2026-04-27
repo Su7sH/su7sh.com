@@ -41,24 +41,100 @@ canvas{display:block}
 #veil-line{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(200,210,230,.25);letter-spacing:.04em;text-align:center;padding:0 30px;opacity:0;transition:opacity 1.6s ease 1s;max-width:520px;line-height:1.5}
 #veil.show-line #veil-line{opacity:1}
 
-/* Lock overlay — passcode gate */
-#lock-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,6,10,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;transition:opacity .35s ease-out}
+/* ─── iOS Lock Screen — full-viewport, wallpaper-backed ─── */
+#lock-overlay{
+  position:fixed;inset:0;z-index:200;display:none;
+  background:#000;
+  background-image:url('models/wallpaper.jpg');
+  background-size:cover;background-position:center;
+  opacity:0;transition:opacity .55s ease-out;
+  flex-direction:column;align-items:center;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  color:#fff;
+  overflow:hidden;
+}
 #lock-overlay.show{display:flex;opacity:1}
-.lock-panel{padding:36px 32px 22px;border-radius:22px;background:rgba(18,20,26,.96);border:1px solid rgba(255,255,255,.06);box-shadow:0 24px 70px rgba(0,0,0,.55);min-width:272px;transform:translateY(10px);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.2,1),opacity .4s ease-out}
-#lock-overlay.show .lock-panel{transform:translateY(0);opacity:1}
-.lock-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:19px;color:#e4e4e7;text-align:center;letter-spacing:.02em;margin-bottom:18px}
-.lock-dots{display:flex;gap:13px;justify-content:center;margin-bottom:26px}
-.lock-dots span{width:11px;height:11px;border-radius:50%;border:1.4px solid rgba(255,255,255,.32);transition:all .14s ease-out}
-.lock-dots span.filled{background:#fff;border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.35)}
-.lock-keypad{display:grid;grid-template-columns:repeat(3,56px);gap:10px 16px;justify-content:center}
-.lock-keypad button{width:56px;height:56px;border-radius:50%;border:none;background:rgba(255,255,255,.055);color:#e4e4e7;font-family:'Inter',sans-serif;font-size:21px;font-weight:300;cursor:pointer;transition:all .1s ease-out}
-.lock-keypad button:hover{background:rgba(255,255,255,.12)}
-.lock-keypad button:active{background:rgba(255,255,255,.2);transform:scale(.94)}
-.lock-keypad button.spacer{visibility:hidden;cursor:default}
-.lock-keypad button.del{background:transparent;font-size:17px}
-.lock-hint{margin-top:18px;text-align:center;font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;color:rgba(255,255,255,.35);letter-spacing:.04em}
-.lock-panel.shake{animation:lock-shake .42s cubic-bezier(.36,.07,.19,.97)}
-@keyframes lock-shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+#lock-overlay::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.15) 35%,rgba(0,0,0,.15) 65%,rgba(0,0,0,.55) 100%);
+  pointer-events:none;
+}
+#lock-overlay > *{position:relative;z-index:1}
+
+/* Status bar — time left, indicators right */
+.ios-status{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 32px 0;font-size:17px;font-weight:600;letter-spacing:-.01em;
+  flex-shrink:0;
+}
+.ios-status .si-time{font-variant-numeric:tabular-nums}
+.ios-status .si-icons{display:inline-flex;align-items:center;gap:6px}
+.ios-status .si-icons svg{display:block}
+
+/* Big clock and date */
+.ios-clock-block{
+  margin-top:34px;text-align:center;flex-shrink:0;
+  text-shadow:0 2px 18px rgba(0,0,0,.35);
+}
+.ios-date{
+  font-size:16px;font-weight:600;letter-spacing:.01em;
+  opacity:.95;margin-bottom:-4px;
+}
+.ios-clock{
+  font-size:84px;font-weight:300;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Lock glyph + Enter Passcode label */
+.ios-padlock{
+  margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:14px;
+  flex-shrink:0;
+}
+.ios-padlock-icon{width:30px;height:30px;opacity:.95;transition:transform .35s cubic-bezier(.2,.9,.2,1)}
+.ios-padlock-icon.unlocked{transform:translateY(-2px) scale(1.05)}
+.ios-padlock-label{font-size:14px;font-weight:400;letter-spacing:.01em;opacity:.9}
+
+/* Six dots */
+.ios-dots{
+  margin-top:18px;display:flex;gap:22px;justify-content:center;flex-shrink:0;
+}
+.ios-dots span{
+  width:13px;height:13px;border-radius:50%;
+  border:1.4px solid rgba(255,255,255,.85);
+  transition:background .15s ease-out, transform .15s ease-out;
+}
+.ios-dots span.filled{background:#fff}
+.ios-dots.shake{animation:ios-shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes ios-shake{
+  10%,90%{transform:translateX(-3px)}
+  20%,80%{transform:translateX(6px)}
+  30%,50%,70%{transform:translateX(-10px)}
+  40%,60%{transform:translateX(10px)}
+}
+
+/* iOS keypad — 3x4, with letters under digits */
+.ios-keypad{
+  margin:36px 0 56px;
+  display:grid;grid-template-columns:repeat(3,78px);gap:14px 28px;
+  justify-content:center;flex-shrink:0;
+}
+.ios-key{
+  width:78px;height:78px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.18);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  color:#fff;font-family:inherit;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;padding:0;
+  transition:background .12s ease-out,transform .08s ease-out;
+}
+.ios-key:hover{background:rgba(255,255,255,.26)}
+.ios-key:active{background:rgba(255,255,255,.42);transform:scale(.96)}
+.ios-key .ios-num{font-size:36px;font-weight:300;line-height:1;letter-spacing:-.01em}
+.ios-key .ios-letters{font-size:10px;font-weight:600;letter-spacing:.18em;opacity:.95;height:11px}
+.ios-key.spacer{visibility:hidden;pointer-events:none}
+.ios-key.action{background:transparent;font-size:15px;font-weight:400}
+.ios-key.action:hover{background:transparent;text-decoration:underline}
 
 /* Pre-unlock floating hint */
 #phone-hint{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);z-index:60;font-family:'Instrument Serif',serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.5);letter-spacing:.05em;pointer-events:none;opacity:0;transition:opacity 1.2s ease-out 1s;text-align:center}
@@ -181,28 +257,55 @@ canvas{display:block}
 <!-- pre-unlock floating hint (appears once veil fades) -->
 <div id="phone-hint">tap the phone</div>
 
-<!-- passcode lock overlay -->
+<!-- iOS Lock Screen overlay (full viewport, wallpaper-backed) -->
 <div id="lock-overlay" aria-hidden="true">
-  <div class="lock-panel">
-    <div class="lock-title">enter passcode</div>
-    <div class="lock-dots" id="lock-dots">
-      <span></span><span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="lock-keypad" id="lock-keypad">
-      <button data-k="1">1</button>
-      <button data-k="2">2</button>
-      <button data-k="3">3</button>
-      <button data-k="4">4</button>
-      <button data-k="5">5</button>
-      <button data-k="6">6</button>
-      <button data-k="7">7</button>
-      <button data-k="8">8</button>
-      <button data-k="9">9</button>
-      <button class="spacer" tabindex="-1"></button>
-      <button data-k="0">0</button>
-      <button class="del" data-del>⌫</button>
-    </div>
-    <div class="lock-hint">six sevens</div>
+  <!-- Status bar -->
+  <div class="ios-status">
+    <span class="si-time" id="ios-status-time">9:41</span>
+    <span class="si-icons" aria-hidden="true">
+      <!-- signal -->
+      <svg width="18" height="11" viewBox="0 0 18 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="5" y="5" width="3" height="6" rx=".5"/><rect x="10" y="2" width="3" height="9" rx=".5"/><rect x="15" y="0" width="3" height="11" rx=".5"/></svg>
+      <!-- wifi -->
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 1.5C5.6 1.5 2.9 2.6.9 4.5c-.3.3-.3.7 0 1l.6.6c.3.3.7.3 1 0 1.6-1.5 3.7-2.4 6-2.4s4.4.9 6 2.4c.3.3.7.3 1 0l.6-.6c.3-.3.3-.7 0-1C14.1 2.6 11.4 1.5 8.5 1.5zm0 3.7c-1.9 0-3.6.7-4.9 1.9-.3.3-.3.7 0 1l.6.6c.3.3.7.3 1 0 .9-.8 2-1.3 3.3-1.3s2.4.5 3.3 1.3c.3.3.7.3 1 0l.6-.6c.3-.3.3-.7 0-1-1.3-1.2-3-1.9-4.9-1.9zm0 3.7c-.9 0-1.7.3-2.3.9-.3.3-.3.7 0 1l1.8 1.8c.3.3.7.3 1 0l1.8-1.8c.3-.3.3-.7 0-1-.6-.6-1.4-.9-2.3-.9z"/></svg>
+      <!-- battery -->
+      <svg width="27" height="12" viewBox="0 0 27 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="2.5" stroke="currentColor" stroke-opacity=".5"/><rect x="2" y="2" width="19" height="8" rx="1.2" fill="currentColor"/><rect x="23.5" y="4" width="1.5" height="4" rx=".5" fill="currentColor" fill-opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <!-- Big clock + date -->
+  <div class="ios-clock-block">
+    <div class="ios-date" id="ios-date">Tuesday, April 28</div>
+    <div class="ios-clock" id="ios-clock">9:41</div>
+  </div>
+
+  <!-- Lock glyph + label -->
+  <div class="ios-padlock">
+    <svg id="ios-padlock" class="ios-padlock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="10" rx="2"/>
+      <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+    </svg>
+    <div class="ios-padlock-label">Enter Passcode</div>
+  </div>
+
+  <!-- Six dots -->
+  <div class="ios-dots" id="ios-dots">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- iOS keypad with letters -->
+  <div class="ios-keypad" id="ios-keypad">
+    <button class="ios-key" data-k="1"><span class="ios-num">1</span><span class="ios-letters">&nbsp;</span></button>
+    <button class="ios-key" data-k="2"><span class="ios-num">2</span><span class="ios-letters">A B C</span></button>
+    <button class="ios-key" data-k="3"><span class="ios-num">3</span><span class="ios-letters">D E F</span></button>
+    <button class="ios-key" data-k="4"><span class="ios-num">4</span><span class="ios-letters">G H I</span></button>
+    <button class="ios-key" data-k="5"><span class="ios-num">5</span><span class="ios-letters">J K L</span></button>
+    <button class="ios-key" data-k="6"><span class="ios-num">6</span><span class="ios-letters">M N O</span></button>
+    <button class="ios-key" data-k="7"><span class="ios-num">7</span><span class="ios-letters">P Q R S</span></button>
+    <button class="ios-key" data-k="8"><span class="ios-num">8</span><span class="ios-letters">T U V</span></button>
+    <button class="ios-key" data-k="9"><span class="ios-num">9</span><span class="ios-letters">W X Y Z</span></button>
+    <button class="ios-key spacer" tabindex="-1"></button>
+    <button class="ios-key" data-k="0"><span class="ios-num">0</span><span class="ios-letters">+</span></button>
+    <button class="ios-key action" data-del>Delete</button>
   </div>
 </div>
 
@@ -416,6 +519,27 @@ function raycastPhone(x,y){
   return raycaster.intersectObject(loaded.iphone,true).length>0;
 }
 
+function flyIntoPhone(){
+  // Quick camera dolly-into-phone before the Lock Screen overlay appears.
+  // The camera tween reuses the preset-tween machinery; on completion, lock overlay shows.
+  if(presetActive||flyInActive)return;
+  const phonePos=MODELS.iphone.position;
+  // Target: very close to the phone, looking straight down at its screen
+  presetStartPos.copy(camera.position);
+  presetStartTarget.copy(controls.target);
+  presetTargetPos.set(phonePos[0]+.05,phonePos[1]+.55,phonePos[2]+.05);
+  presetTargetTgt.set(phonePos[0],phonePos[1],phonePos[2]);
+  presetT=0;
+  currentTweenDuration=0.7;          // quick, decisive entry
+  presetActive=true;
+  controls.enabled=false;
+  controls.autoRotate=false;
+  // Hide the hint as we begin the dive
+  document.getElementById('phone-hint').classList.remove('on');
+  // Show the Lock Screen just before the camera lands, so it covers the bezel pop
+  setTimeout(showLockOverlay,560);
+}
+
 function showLockOverlay(){
   document.getElementById('lock-overlay').classList.add('show');
   document.getElementById('phone-hint').classList.remove('on');
@@ -426,7 +550,7 @@ function hideLockOverlay(){
   document.getElementById('lock-overlay').classList.remove('show');
 }
 function updateLockDots(){
-  const dots=document.querySelectorAll('#lock-dots span');
+  const dots=document.querySelectorAll('#ios-dots span');
   dots.forEach((d,i)=>{
     if(i<unlockCodeEntered.length)d.classList.add('filled');
     else d.classList.remove('filled');
@@ -446,12 +570,15 @@ function onKeypadDelete(){
 }
 function checkPasscode(){
   if(unlockCodeEntered===CORRECT_CODE){
-    triggerUnlock();
+    // open the padlock glyph briefly before triggering the rest
+    const pad=document.getElementById('ios-padlock');
+    if(pad)pad.classList.add('unlocked');
+    setTimeout(triggerUnlock,260);
   }else{
-    // wrong: shake + clear
-    const panel=document.querySelector('.lock-panel');
-    panel.classList.add('shake');
-    setTimeout(()=>panel.classList.remove('shake'),450);
+    // wrong: shake the dots (iOS-accurate, not the panel)
+    const dots=document.getElementById('ios-dots');
+    dots.classList.add('shake');
+    setTimeout(()=>dots.classList.remove('shake'),450);
     setTimeout(()=>{unlockCodeEntered='';updateLockDots();},500);
   }
 }
@@ -465,16 +592,8 @@ function triggerUnlock(){
   controls.zoomSpeed=1.0;
   // fade the overlay out
   hideLockOverlay();
-  // stagger-reveal hidden objects (stars first for dramatic "sky turns on" effect, then desk objects)
-  // sort so Points (stars) come first, then large groups, then small
-  const revealOrder=[...lockedObjects].sort((a,b)=>{
-    const aStar=a.isPoints?0:1;
-    const bStar=b.isPoints?0:1;
-    return aStar-bStar;
-  });
-  revealOrder.forEach((obj,i)=>{
-    setTimeout(()=>{obj.visible=true;},80+i*22);
-  });
+  // Reveal all hidden objects together — phone-in-void → room arrives as one moment
+  lockedObjects.forEach(obj=>{obj.visible=true;});
   // ramp lights smoothly over camera-pullback duration
   unlockLightRampActive=true;
   unlockLightRampT=0;
@@ -495,12 +614,13 @@ function triggerUnlock(){
   },3600);
 }
 
-/* wire up the keypad buttons once DOM is ready */
+/* wire up the keypad buttons + live clock once DOM is ready */
 document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('#lock-keypad button[data-k]').forEach(btn=>{
+  document.querySelectorAll('#ios-keypad .ios-key[data-k]').forEach(btn=>{
     btn.addEventListener('click',()=>onKeypadPress(btn.dataset.k));
   });
-  document.querySelector('#lock-keypad button[data-del]').addEventListener('click',onKeypadDelete);
+  const delBtn=document.querySelector('#ios-keypad .ios-key[data-del]');
+  if(delBtn)delBtn.addEventListener('click',onKeypadDelete);
   // physical keyboard support
   document.addEventListener('keydown',(e)=>{
     if(!document.getElementById('lock-overlay').classList.contains('show'))return;
@@ -508,6 +628,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     else if(e.key==='Backspace')onKeypadDelete();
     else if(e.key==='Escape')hideLockOverlay();
   });
+  // live status-bar clock + big clock + date (visitor's local time)
+  const fmtTime=d=>{
+    let h=d.getHours(),m=d.getMinutes();
+    return h+':'+(m<10?'0':'')+m;
+  };
+  const fmtDate=d=>{
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return days[d.getDay()]+', '+months[d.getMonth()]+' '+d.getDate();
+  };
+  function tickClock(){
+    const d=new Date();
+    const t=fmtTime(d);
+    const tEl=document.getElementById('ios-status-time');if(tEl)tEl.textContent=t;
+    const cEl=document.getElementById('ios-clock');if(cEl)cEl.textContent=t;
+    const dEl=document.getElementById('ios-date');if(dEl)dEl.textContent=fmtDate(d);
+  }
+  tickClock();
+  setInterval(tickClock,15000);
 });
 
 /* ═══════════════ MONITOR TERMINAL ═══════════════
@@ -670,14 +809,14 @@ function buildScene(woodTex){
   controls.rotateSpeed=0.65;
   controls.zoomSpeed=0.75;
   controls.autoRotate=true;
-  controls.autoRotateSpeed=0.35;             // very slow drift when idle
+  controls.autoRotateSpeed=0.12;             // slow drift when idle (was 0.35, was chaotic)
   controls.addEventListener('start',()=>{
     controls.autoRotate=false;
     if(idleTimer){clearTimeout(idleTimer);idleTimer=null}
   });
   controls.addEventListener('end',()=>{
     if(idleTimer)clearTimeout(idleTimer);
-    idleTimer=setTimeout(()=>{controls.autoRotate=true},5000);
+    idleTimer=setTimeout(()=>{controls.autoRotate=true},8000);
   });
 
   /* ─── BLOOM POST-PROCESSING — the cinematic lift ─── */
@@ -758,10 +897,10 @@ function buildScene(woodTex){
     const dy=Math.abs(e.clientY-pdY);
     const dt=Date.now()-pdT;
     if(dx<6&&dy<6&&dt<400){
-      // ─── pre-unlock: tap phone → open keypad ───
+      // ─── pre-unlock: tap phone → camera flies into phone, then keypad ───
       if(!isUnlocked){
         if(raycastPhone(e.clientX,e.clientY)){
-          showLockOverlay();
+          flyIntoPhone();
         }
         return;   // nothing else is interactive pre-unlock
       }
@@ -854,12 +993,12 @@ function buildScene(woodTex){
   const warmPocket=new THREE.PointLight(0xffa66a,.28,5,2);
   warmPocket.position.set(-1,1.5,2.5);scene.add(warmPocket);
 
-  /* Desk — stays visible pre-unlock (it's the table the phone rests on) */
+  /* Desk — hidden pre-unlock (phone floats in void); revealed on unlock */
   const desk=new THREE.Mesh(
     new THREE.BoxGeometry(15,.2,7.5),
     new THREE.MeshStandardMaterial({map:woodTex,color:0xa89078,metalness:.05,roughness:.68,envMapIntensity:.6})
   );
-  desk.receiveShadow=true;desk.userData.preUnlockKeep=true;scene.add(desk);
+  desk.receiveShadow=true;scene.add(desk);
 
   const lip=new THREE.Mesh(new THREE.BoxGeometry(15,.04,.04),new THREE.MeshStandardMaterial({color:0x5a3e24,roughness:.55}));
   lip.position.set(0,.12,3.75);scene.add(lip);
