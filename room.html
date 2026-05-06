@@ -816,7 +816,7 @@ function buildScene(woodTex){
   });
   controls.addEventListener('end',()=>{
     if(idleTimer)clearTimeout(idleTimer);
-    idleTimer=setTimeout(()=>{controls.autoRotate=true},8000);
+    idleTimer=setTimeout(()=>{controls.autoRotate=true},5000);
   });
 
   /* ─── BLOOM POST-PROCESSING — the cinematic lift ─── */
@@ -1303,7 +1303,7 @@ function tick(){
       controls.target.copy(baseCamLook);
       controls.update();
       controls.enabled=true;
-      setTimeout(()=>{if(!flyInActive)controls.autoRotate=true},2500);
+      setTimeout(()=>{if(!flyInActive)controls.autoRotate=true},5000);
     }
   } else if(presetActive){
     // ── preset camera tween (1–5 keys, or unlock pullback) ──

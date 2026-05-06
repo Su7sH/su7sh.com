@@ -16,8 +16,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Dr. Suyash P. Gunjal — radiologist and clinical AI lead. Expert Team Lead at xAI. Building evaluation pipelines and medical safety for frontier language models.">
+<meta name="description" content="Suyash Gunjal — radiologist and clinical AI lead at xAI. Clinical evaluation, safety, and evidence-grounded reasoning in frontier AI.">
 <meta name="theme-color" content="#07080a">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://su7sh.com/">
+<meta property="og:title" content="Suyash Gunjal — Clinical AI Lead at xAI">
+<meta property="og:description" content="Radiologist and clinical AI lead at xAI. Clinical evaluation, safety, and evidence-grounded reasoning in frontier AI.">
+<meta property="og:site_name" content="su7sh.com">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Su7sH">
+<meta name="twitter:creator" content="@Su7sH">
+<meta name="twitter:title" content="Suyash Gunjal — Clinical AI Lead at xAI">
+<meta name="twitter:description" content="Radiologist and clinical AI lead at xAI. Clinical evaluation, safety, and evidence-grounded reasoning in frontier AI.">
 <title>Dr. Suyash P. Gunjal — Radiologist &amp; Clinical AI Lead</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,20 +193,41 @@ body::before {
   flex-shrink: 0;
 }
 .logo-mark {
-  width: 28px; height: 28px;
-  border: 2px solid var(--w);
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
-}
-.logo-mark::after {
-  content: '';
-  width: 10px; height: 10px;
-  border-radius: 999px;
-  background: var(--w);
+  color: var(--w);
   display: block;
+}
+.logo-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform-origin: center;
+  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: sigilEnter .9s cubic-bezier(0.16, 1, 0.3, 1) .3s both;
+}
+.logo:hover .logo-mark svg {
+  transform: scale(1.08) rotate(-2deg);
+}
+@keyframes sigilEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(.86);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-mark svg {
+    animation: none;
+    transition: none;
+  }
+  .logo:hover .logo-mark svg {
+    transform: none;
+  }
 }
 .logo-name {
   font-size: 15px;
@@ -470,56 +506,6 @@ body::before {
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(6px); }
-}
-
-/* ───── STATS MARQUEE ───── */
-.stats {
-  padding: 4rem 0;
-  border-top: 1px solid var(--w-05);
-  border-bottom: 1px solid var(--w-05);
-  overflow: hidden;
-  position: relative;
-}
-@media (min-width: 768px) { .stats { padding: 6rem 0; } }
-.marquee-track {
-  display: flex;
-  gap: 4rem;
-  white-space: nowrap;
-  animation: marquee 60s linear infinite;
-  will-change: transform;
-}
-@media (min-width: 768px) { .marquee-track { gap: 6rem; } }
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.marquee-item {
-  display: flex;
-  align-items: center;
-  gap: 4rem;
-  flex-shrink: 0;
-}
-@media (min-width: 768px) { .marquee-item { gap: 6rem; } }
-.stat { display: flex; align-items: baseline; gap: 1rem; }
-.stat-value {
-  font-weight: 500;
-  letter-spacing: -.025em;
-  line-height: 1;
-  font-size: 3rem;
-  color: var(--w);
-}
-@media (min-width: 768px) { .stat-value { font-size: 4.5rem; } }
-.stat-label {
-  color: var(--w-50);
-  font-size: .9rem;
-  max-width: 240px;
-  white-space: normal;
-}
-@media (min-width: 768px) { .stat-label { font-size: 1rem; } }
-.spark {
-  width: 20px; height: 20px;
-  color: rgba(100,206,251,.6);
-  flex-shrink: 0;
 }
 
 /* ───── ABOUT ───── */
@@ -991,6 +977,29 @@ body::before {
   gap: .75rem;
   justify-content: center;
 }
+.contact-socials {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.contact-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--w-15);
+  color: var(--w-70);
+  transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.contact-socials a:hover {
+  color: var(--w);
+  border-color: var(--w-40);
+  background: var(--w-05);
+  transform: translateY(-1px);
+}
 .contact-footer {
   margin-top: 5rem;
   padding-top: 2.5rem;
@@ -1032,7 +1041,7 @@ body::before {
 <header class="topbar" id="topbar">
   <div class="topbar-inner">
     <a href="#top" class="logo" aria-label="Suyash">
-      <span class="logo-mark"></span>
+      <span class="logo-mark"><svg viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path d="M14 1.5 C9 8 5 15.5 2.6 24.5 C3.4 26.2 5 26.4 6.5 25.4 L14 19 L24.5 25.2 C22.6 16.5 19 8.6 14 1.5 Z"/></svg></span>
       <span class="logo-name">Suyash</span>
     </a>
     <nav class="nav" aria-label="primary">
@@ -1061,7 +1070,7 @@ body::before {
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <div class="mobile-menu-head">
     <a href="#top" class="logo" data-close>
-      <span class="logo-mark"></span>
+      <span class="logo-mark"><svg viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path d="M14 1.5 C9 8 5 15.5 2.6 24.5 C3.4 26.2 5 26.4 6.5 25.4 L14 19 L24.5 25.2 C22.6 16.5 19 8.6 14 1.5 Z"/></svg></span>
       <span class="logo-name">Suyash</span>
     </a>
     <button class="mobile-menu-close" data-close aria-label="Close menu">×</button>
@@ -1092,7 +1101,7 @@ body::before {
 
   <div class="hero-content">
     <div class="hero-intro">
-      <p>Radiologist and clinical AI lead building safe, clinically-grounded evaluation pipelines for frontier language models &mdash; currently leading a team of international doctors at xAI.</p>
+      <p>Radiologist and clinical AI lead, heading a team of clinicians at xAI on clinical evaluation, safety, and evidence-grounded reasoning in frontier language models.</p>
       <p>MD Radiology · MBBS · ISB Executive (Clinician&nbsp;X) · Member RCR, RSNA, IRIA.</p>
     </div>
 
@@ -1136,20 +1145,32 @@ body::before {
       </div>
       <div>
         <p class="about-prose">
-          I'm a radiologist. Most days I work on the medical safety and clinical accuracy of a language model, leading a team of clinicians at xAI who shape how it reasons, what it defers, and where the evidence runs out. Previously, Managing Director of a charitable hospital, a nursing college, and a school serving rural and tribal communities in Maharashtra. Between the human and the machine there is a boundary still being drawn, and most of what interests me now lives in the <span class="seam" id="seam" tabindex="0" role="link" aria-label="a quiet way through">quiet</span> work of drawing it well.
+          I'm a radiologist. Most days I work on the medical safety and clinical accuracy of a language model, leading a team of clinicians at xAI to evaluate clinical reasoning, uncertainty, and evidence-grounded behavior in medical AI outputs. Previously, Managing Director of a charitable hospital, a nursing college, and a school serving rural and tribal communities in Maharashtra. Between the human and the machine there is a boundary still being drawn, and most of what interests me now lives in the <span class="seam" id="seam" tabindex="0" role="link" aria-label="a quiet way through">quiet</span> work of drawing it well.
         </p>
         <div class="about-meta">
           <span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             Maharashtra, India
           </span>
-          <a href="mailto:suyashgunjal07@gmail.com">
+          <a href="mailto:su7sh@protonmail.com">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-            suyashgunjal07@gmail.com
+            su7sh@protonmail.com
           </a>
           <a href="https://wa.me/917744076076" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.999-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.886 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></svg>
             WhatsApp &mdash; +91 77440 76076
+          </a>
+          <a href="https://www.x.com/Su7sH" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            x.com/Su7sH
+          </a>
+          <a href="https://www.linkedin.com/in/su7sh" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.063 2.063 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            linkedin.com/in/su7sh
+          </a>
+          <a href="https://www.instagram.com/su7sh" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            instagram.com/su7sh
           </a>
         </div>
       </div>
@@ -1163,7 +1184,7 @@ body::before {
     <div class="section-head">
       <div class="tag">Experience</div>
       <h2 class="display">A decade across clinical practice, hospital leadership, and frontier AI.</h2>
-      <p class="sub">From pandemic-era triage to building evaluation pipelines for one of the world's most used language models.</p>
+      <p class="sub">From pandemic-era triage to evaluation pipelines for frontier language models.</p>
     </div>
 
     <div class="timeline">
@@ -1181,9 +1202,9 @@ body::before {
             <span>Sept 2025 &mdash; Present</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Promoted to lead a team of international doctors contributing to Grok's medical accuracy and safety.</span></li>
-            <li><span>Spearhead collaborative initiatives with LLM researchers, engineers, and evaluators to enhance clinical quality, ensure alignment in AI outputs, and design robust medical safety pipelines.</span></li>
-            <li><span>Designing evaluation frameworks and training protocols grounded in clinical safety, ethical compliance, and domain-specific rigor.</span></li>
+            <li><span>Lead clinical evaluation work focused on medical accuracy, safety, uncertainty, and evidence-grounded reasoning in AI outputs.</span></li>
+            <li><span>Work with medical experts and cross-functional teams to improve evaluation quality, reviewer alignment, and clinical reliability.</span></li>
+            <li><span>Develop clinical review frameworks, high-complexity prompts, and safety-oriented rubrics across medical domains, with a focus on radiology.</span></li>
           </ul>
         </div>
 
@@ -1198,10 +1219,10 @@ body::before {
             <span>Jan 2025 &mdash; Sept 2025</span>
           </div>
           <ul class="job-bullets">
-            <li><span>Selected as one of the first clinical contributors to enhance the medical accuracy and safety of Grok, xAI's language model.</span></li>
+            <li><span>Selected as one of the first clinical contributors to medical accuracy and safety in frontier language models.</span></li>
             <li><span>Led efforts to align AI outputs with global clinical standards.</span></li>
-            <li><span>Developed high-complexity medical prompts across clinical domains with a focus on radiology for model training and evaluation.</span></li>
-            <li><span>Initiated cross-timezone workflows, maintaining productivity across a distributed team of researchers and tutors.</span></li>
+            <li><span>Developed high-complexity medical prompts across clinical domains, with a focus on radiology, for model evaluation, clinical review, and quality assessment.</span></li>
+            <li><span>Initiated cross-timezone workflows, maintaining productivity across a distributed team of clinical contributors.</span></li>
           </ul>
         </div>
 
@@ -1340,7 +1361,7 @@ body::before {
       <ul class="licensure-list">
         <li>M.D. (Radiology) &mdash; Maharashtra University of Health Sciences</li>
         <li>Maharashtra Medical Council &mdash; MBBS + MD</li>
-        <li>Member, RCR &mdash; Royal College of Radiology, United Kingdom</li>
+        <li>Member, RCR &mdash; The Royal College of Radiologists, United Kingdom</li>
         <li>International Member, RSNA &mdash; Radiological Society of North America</li>
         <li>Lifetime Member, IRIA &mdash; Indian Radiological and Imaging Association</li>
       </ul>
@@ -1501,14 +1522,26 @@ body::before {
     <p class="contact-sub">Open to collaborations on clinical AI evaluation, radiology vision-language models, and medical safety research.</p>
 
     <div class="contact-ctas">
-      <a href="mailto:suyashgunjal07@gmail.com" class="btn btn-primary">
+      <a href="mailto:su7sh@protonmail.com" class="btn btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-        suyashgunjal07@gmail.com
+        su7sh@protonmail.com
         <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
       <a href="https://wa.me/917744076076" class="btn btn-ghost" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.999-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.886 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></svg>
         WhatsApp
+      </a>
+    </div>
+
+    <div class="contact-socials">
+      <a href="https://www.x.com/Su7sH" target="_blank" rel="noopener" aria-label="X (Twitter)">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://www.linkedin.com/in/su7sh" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.063 2.063 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/su7sh" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
       </a>
     </div>
 
