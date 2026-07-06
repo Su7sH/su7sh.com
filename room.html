@@ -782,10 +782,17 @@ function raycastMonitor(x,y){
 }
 
 function enterAtlas(){
-  document.body.style.transition='opacity 1.1s cubic-bezier(.4,0,.2,1)';
+  document.body.style.transition='opacity 1s cubic-bezier(.4,0,.2,1)';
   document.body.style.opacity='0';
-  setTimeout(()=>{window.location.href='atlas.html'},950);
+  setTimeout(()=>{window.location.href='atlas.html'},900);
 }
+/* bfcache sanity: browser-back from the atlas must never return to a dark room */
+window.addEventListener('pageshow',e=>{
+  if(e.persisted){
+    document.body.style.transition='none';
+    document.body.style.opacity='1';
+  }
+});
 
 function buildScene(woodTex){
   scene=new THREE.Scene();

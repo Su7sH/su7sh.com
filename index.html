@@ -576,6 +576,16 @@ body::before {
   text-shadow: 0 0 26px rgba(100,206,251,.3);
   outline: none;
 }
+/* the coordinate resolves — a brief flare as the map opens */
+.atlas-gate.firing {
+  animation: gateFire .95s ease both;
+}
+@keyframes gateFire {
+  0%   { filter: brightness(1); }
+  30%  { filter: brightness(1.7); text-shadow: 0 0 46px rgba(100,206,251,.75), 0 0 12px rgba(100,206,251,.5); letter-spacing: .04em; }
+  100% { filter: brightness(1.25); text-shadow: 0 0 30px rgba(100,206,251,.4); letter-spacing: .06em; }
+}
+@media (prefers-reduced-motion: reduce) { .atlas-gate.firing { animation: none; } }
 
 /* ───── generic long-form section ───── */
 .long-sec {
@@ -1629,9 +1639,10 @@ if (seam) {
 const atlasGate = document.getElementById('heroCoords');
 if (atlasGate) {
   const enterAtlas = () => {
-    document.body.style.transition = 'opacity 1.1s cubic-bezier(.4,0,.2,1)';
+    atlasGate.classList.add('firing');
+    document.body.style.transition = 'opacity 1s cubic-bezier(.4,0,.2,1)';
     document.body.style.opacity = '0';
-    setTimeout(() => { window.location.href = 'atlas.html'; }, 950);
+    setTimeout(() => { window.location.href = 'atlas.html'; }, 900);
   };
   atlasGate.addEventListener('click', e => { e.preventDefault(); enterAtlas(); });
   atlasGate.addEventListener('keydown', e => {
@@ -1641,6 +1652,16 @@ if (atlasGate) {
     }
   });
 }
+
+/* ─── bfcache sanity: coming back from a deeper layer must never leave the face dark ─── */
+window.addEventListener('pageshow', e => {
+  if (e.persisted) {
+    document.body.style.transition = 'none';
+    document.body.style.opacity = '1';
+    const g = document.getElementById('heroCoords');
+    if (g) g.classList.remove('firing');
+  }
+});
 
 /* ─── live coordinates — pushed from phone via gist ─── */
 (function initLiveCoords(){
