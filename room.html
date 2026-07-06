@@ -781,6 +781,12 @@ function raycastMonitor(x,y){
   return raycaster.intersectObject(loaded.monitor,true).length>0;
 }
 
+function enterAtlas(){
+  document.body.style.transition='opacity 1.1s cubic-bezier(.4,0,.2,1)';
+  document.body.style.opacity='0';
+  setTimeout(()=>{window.location.href='atlas.html'},950);
+}
+
 function buildScene(woodTex){
   scene=new THREE.Scene();
   scene.background=new THREE.Color(0x04060a);
@@ -904,9 +910,9 @@ function buildScene(woodTex){
         }
         return;   // nothing else is interactive pre-unlock
       }
-      // ─── post-unlock: Monitor click → open terminal ───
+      // ─── post-unlock: Monitor click → open atlas ───
       if(raycastMonitor(e.clientX,e.clientY)){
-        showTerminalOverlay();
+        enterAtlas();
         return;
       }
       // ─── post-unlock: Mercedes click ───

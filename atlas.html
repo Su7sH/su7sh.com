@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>The Atlas · Frontier AI Self-Education Command Center</title>
+<style>
+  :root{
+    --bg:#0d1117; --bg2:#161b22; --bg3:#1c2330; --border:#2d3644; --text:#e6edf3;
+    --muted:#8b98a9; --accent:#e8935a; --accent2:#5aa9e8; --green:#4ec97a; --red:#e85a6a;
+    --gold:#e8c95a; --purple:#b28ae8; --radius:10px; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;font-size:15px}
+  a{color:var(--accent2);text-decoration:none} a:hover{text-decoration:underline}
+  header{padding:28px 24px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#141a24,var(--bg))}
+  header h1{font-size:22px;letter-spacing:.3px}
+  header h1 span{color:var(--accent)}
+  header p{color:var(--muted);font-size:13px;margin-top:4px;max-width:900px}
+  .progresswrap{max-width:900px;margin-top:14px}
+  .pbar{height:8px;background:var(--bg3);border-radius:6px;overflow:hidden}
+  .pbar div{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));width:0%;transition:width .4s}
+  .pmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:5px}
+  .pbtns{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .pbtns button{background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-size:11.5px;padding:4px 10px;border-radius:6px;cursor:pointer}
+  .pbtns button:hover{color:var(--text);border-color:var(--muted)}
+  nav{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);display:flex;gap:2px;overflow-x:auto;padding:0 16px}
+  nav button{background:none;border:none;color:var(--muted);padding:12px 13px;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+  nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+  nav button:hover{color:var(--text)}
+  main{max-width:1200px;margin:0 auto;padding:26px 22px 80px}
+  section{display:none} section.active{display:block}
+  h2{font-size:19px;margin-bottom:6px} .sub{color:var(--muted);font-size:13.5px;margin-bottom:20px;max-width:880px}
+  .chip{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;vertical-align:middle}
+  .c-core{background:#3a2417;color:var(--accent)} .c-rec{background:#17293a;color:var(--accent2)}
+  .c-opt{background:#242a33;color:var(--muted)} .c-spec{background:#2b2140;color:var(--purple)}
+  .c-cost{background:#3a3117;color:var(--gold)} .c-free{background:#16301f;color:var(--green)}
+  .c-cat{background:#242a33;color:#aab6c5}
+  /* stage cards */
+  details.stage{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+  details.stage summary{cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;list-style:none}
+  details.stage summary::-webkit-details-marker{display:none}
+  .snum{font-family:var(--mono);font-size:12px;color:var(--accent);background:#3a2417;border-radius:6px;padding:3px 8px;min-width:56px;text-align:center;flex-shrink:0}
+  .stitle{font-weight:600;font-size:14.5px;flex:1}
+  .sdur{color:var(--muted);font-size:12px;white-space:nowrap}
+  .sbody{padding:2px 18px 16px;border-top:1px solid var(--border);font-size:14px}
+  .sbody h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin:14px 0 4px}
+  .sbody h4.alt{color:var(--accent2)} .sbody h4.warn{color:var(--red)} .sbody h4.gate{color:var(--gold)}
+  .sbody p{color:#c8d2dd;margin-bottom:2px}
+  label.done{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--muted);cursor:pointer}
+  /* micro-milestones */
+  .micro{margin-top:6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 18px}
+  .micro label{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#c8d2dd;cursor:pointer;padding:3px 4px;border-radius:5px}
+  .micro label:hover{background:#141a24}
+  .micro label.checked{color:var(--muted);text-decoration:line-through;text-decoration-color:#3a4656}
+  .micro .hrs{color:var(--muted);font-size:11px;font-family:var(--mono);white-space:nowrap;margin-left:auto;padding-left:8px}
+  .sprog{display:flex;align-items:center;gap:7px;min-width:110px}
+  .sbar{width:64px;height:5px;background:var(--bg3);border-radius:4px;overflow:hidden;flex-shrink:0}
+  .sbar>span{display:block;height:100%;background:var(--green);width:0%;transition:width .3s}
+  .stxt{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+  .pace{font-size:12px;color:var(--green);margin-top:5px}
+  input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+  /* filters + table */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .filters input,.filters select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-size:13px}
+  .filters input{flex:1;min-width:180px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--border);position:sticky;top:47px;background:var(--bg)}
+  td{padding:9px 8px;border-bottom:1px solid #1d2530;vertical-align:top}
+  tr:hover td{background:#141a24}
+  .rname{font-weight:600} .rwhy{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .count{color:var(--muted);font-size:12px;margin-bottom:10px}
+  /* generic cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px}
+  .card h3{font-size:14px;margin-bottom:6px}
+  .card p{font-size:13px;color:#c0cad6}
+  .card .meta{font-size:12px;color:var(--muted);margin-top:8px}
+  .gaterow{display:flex;gap:12px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:9px}
+  .gaterow .gid{font-family:var(--mono);color:var(--gold);font-size:13px;min-width:38px;padding-top:1px}
+  .gaterow b{font-size:14px} .gaterow p{font-size:13px;color:var(--muted);margin-top:2px}
+  .tier{margin-bottom:22px}
+  .tier h3{font-size:15px;color:var(--accent);margin-bottom:8px}
+  .paper{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1px solid #1d2530;font-size:13.5px}
+  .paper .pw{color:var(--muted);font-size:12.5px}
+  ol.traps{margin-left:20px} ol.traps li{margin-bottom:9px;font-size:14px} ol.traps li b{color:var(--red)}
+  .bibgroup{margin-bottom:18px} .bibgroup h3{font-size:14px;color:var(--accent2);margin-bottom:6px}
+  .bibgroup p{font-size:13px;color:#b8c3d0}
+  footer{border-top:1px solid var(--border);color:var(--muted);font-size:12px;text-align:center;padding:20px}
+  @media(max-width:640px){th{position:static}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Frontier AI <span>Self-Education Command Center</span></h1>
+  <p>From weak fundamentals to frontier-lab technical competence. All resources free (💰 = optional compute cost, free-scale path always exists). Calibrated to 20–30 hrs/week ≈ 2.5–3.5 years. Compiled &amp; link-verified July 2026.<br>
+  <b style="color:var(--gold)">Progress means externally legible artifacts, not completed resources.</b></p>
+  <div class="progresswrap">
+    <div class="pbar"><div id="pfill"></div></div>
+    <div class="pmeta"><span id="ptext">0 / 0 complete</span><span>Progress saved in this browser</span></div>
+    <div class="pace" id="pace"></div>
+    <div class="pbtns">
+      <button onclick="exportProgress()">Export progress</button>
+      <button onclick="importProgress()">Import progress</button>
+      <button onclick="resetProgress()">Reset</button>
+    </div>
+  </div>
+</header>
+
+<nav id="nav">
+  <button data-s="roadmap" class="active">Roadmap</button>
+  <button data-s="resources">Resource Bank</button>
+  <button data-s="gates">Gates</button>
+  <button data-s="capstones">Capstones</button>
+  <button data-s="papers">Papers</button>
+  <button data-s="insights">Practitioner Insight</button>
+  <button data-s="traps">Traps</button>
+  <button data-s="compute">Free Compute</button>
+  <button data-s="bib">Bibliography</button>
+</nav>
+
+<main>
+
+<!-- ================= ROADMAP ================= -->
+<section id="roadmap" class="active">
+  <h2>Staged Roadmap</h2>
+  <p class="sub">Stages overlap deliberately (math ∥ CS; systems ∥ specialization). Never advance past a failed gate — the gates exist because self-assessment is unreliable. <b>Progress means externally legible artifacts, not completed resources</b> — every stage terminates in a completion contract, not a feeling.</p>
+  <div class="card" id="auditcard" style="margin-bottom:14px;border-color:var(--gold)">
+    <h3 style="color:var(--gold)">🗓 Quarterly resource audit</h3>
+    <p>Every 3 months: <b>remove</b> stale resources · <b>add</b> new frontier papers/tools · <b>check for updates</b> to CS336, Inspect, TRL, vLLM, ARENA, GPU MODE · <b>rewrite</b> the next 90-day plan in your learning log.</p>
+    <p class="meta" id="auditstatus"></p>
+    <div class="pbtns" style="margin-top:8px"><button onclick="logAudit()">Mark audit done today</button></div>
+  </div>
+  <div id="stages"></div>
+</section>
+
+<!-- ================= RESOURCES ================= -->
+<section id="resources">
+  <h2>Resource Bank</h2>
+  <p class="sub"><b style="color:var(--accent)">Core</b> = skipping caps your ceiling · <b style="color:var(--accent2)">Recommended</b> = strong add · Optional = deepening · <b style="color:var(--purple)">Specialization</b> = lane-only. Bold rows are the primary choice for their topic.</p>
+  <div class="filters">
+    <input id="q" type="search" placeholder="Search resources…">
+    <select id="ftopic"><option value="">All topics</option></select>
+    <select id="flevel"><option value="">All levels</option><option>beginner</option><option>intermediate</option><option>advanced</option></select>
+    <select id="ftier"><option value="">All tiers</option><option value="core">Core</option><option value="rec">Recommended</option><option value="opt">Optional</option><option value="spec">Specialization</option></select>
+    <select id="fcost"><option value="">Any cost</option><option value="0">Fully free</option><option value="1">💰 compute may cost</option></select>
+  </div>
+  <div class="count" id="rcount"></div>
+  <table><thead><tr><th style="width:26px">✓</th><th>Resource</th><th>Topic</th><th>Type</th><th>Level</th><th>Tier</th></tr></thead><tbody id="rbody"></tbody></table>
+</section>
+
+<!-- ================= GATES ================= -->
+<section id="gates">
+  <h2>Diagnostic Gates</h2>
+  <p class="sub">Hard checkpoints: closed-book, from a blank file, pushed to GitHub with a write-up. Failing a gate and returning to the stage is the system working, not failing.</p>
+  <div id="gatelist"></div>
+</section>
+
+<!-- ================= CAPSTONES ================= -->
+<section id="capstones">
+  <h2>Capstone Ladder</h2>
+  <p class="sub">Each capstone = public repo + README + write-up. Together they are the portfolio a frontier lab actually evaluates.</p>
+  <div class="grid" id="caplist"></div>
+</section>
+
+<!-- ================= PAPERS ================= -->
+<section id="papers">
+  <h2>Sequenced Paper Reading List</h2>
+  <p class="sub">Read in tier order. Every paper comes with a reproduction idea — reading without implementing is entertainment.</p>
+  <div id="tierlist"></div>
+</section>
+
+<!-- ================= INSIGHTS ================= -->
+<section id="insights">
+  <h2>X / Practitioner Insight</h2>
+  <p class="sub">High-signal posts from people doing the work. Marked Practitioner/X insight — not primary academic evidence. Each includes the concrete action it implies.</p>
+  <div class="grid" id="inslist"></div>
+</section>
+
+<!-- ================= TRAPS ================= -->
+<section id="traps">
+  <h2>Dangerous Illusions &amp; Traps</h2>
+  <p class="sub">The failure modes that consume career-changers. Reread this list quarterly.</p>
+  <ol class="traps" id="traplist"></ol>
+</section>
+
+<!-- ================= COMPUTE ================= -->
+<section id="compute">
+  <h2>Free Compute Strategy</h2>
+  <p class="sub">Total realistic spend over 3 years: ~$250–350. Everything else is $0. Rule one: debug on CPU with tiny tensors before any GPU touches your code.</p>
+  <div class="grid" id="complist"></div>
+</section>
+
+<!-- ================= BIBLIOGRAPHY ================= -->
+<section id="bib">
+  <h2>Bibliography by Type</h2>
+  <p class="sub">The full universe, grouped. Everything here appears with context in the Resource Bank, Papers, or Insights tabs.</p>
+  <div id="biblist"></div>
+</section>
+
+</main>
+<footer>Frontier AI Self-Education Command Center · compiled July 2026 · links verified at compile time · pair with <span style="font-family:var(--mono)">frontier_ai_curriculum.md</span> for full annotations</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+const STAGES=[
+{n:"0",t:"Setup & technical literacy",d:"2 weeks",goal:"Working dev environment + accurate mental map of the field.",res:[["Missing Semester 2026 (first 3 lectures)","https://missing.csail.mit.edu/"],["Karpathy — Deep Dive into LLMs (orientation)","https://www.youtube.com/@AndrejKarpathy"]],del:"Dotfiles repo · public learning-log repo (weekly entries, forever) · one-page field map in your own words.",gate:"Terminal + git clone/branch/commit/push without lookups.",trap:"Tool perfectionism; watching orientation videos as entertainment."},
+{n:"1",t:"Python, shell, Git, software engineering",d:"2.5–3 months",goal:"Clean, tested Python; shell fluency; Git like breathing.",res:[["CS50P (all 10 psets)","https://cs50.harvard.edu/python/"],["Missing Semester (complete)","https://missing.csail.mit.edu/"],["Learn Git Branching","https://learngitbranching.js.org/"],["Pro Git ch.1–3,5","https://git-scm.com/book/en/v2"],["Good Research Code Handbook","https://goodresearch.dev/"],["pytest + GitHub Actions","https://docs.pytest.org/en/stable/"]],del:"3 CLI projects with tests, CI badge, README, pyproject.toml.",gate:"H0 + H1: unseen medium problem <45 min; pytest green in CI on push.",trap:"Tutorial loops; skipping tests 'until later'."},
+{n:"2",t:"Math foundations",d:"4–5 months (parallel)",goal:"Working fluency: LA, calculus intuition, probability, statistics, optimization, information theory.",res:[["3B1B Essence of LA → MIT 18.06","https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/"],["Harvard Stat 110 + Blitzstein book","https://stat110.hsites.harvard.edu/"],["MIT 18.05 (statistics half)","https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/"],["Mathematics for ML (reference)","https://mml-book.github.io/"],["MacKay info theory (ch.1–11)","https://www.inference.org.uk/itprnn/book.pdf"],["Boyd Convex Opt ch.1–5,9","https://web.stanford.edu/~boyd/cvxbook/"],["Statistical Rethinking 2024 lectures","https://github.com/rmcelreath/stat_rethinking_2024"]],del:"NumPy notebooks: LU/QR/SVD from scratch, hand-derived gradient descent, Monte Carlo, full hypothesis-test + power analysis.",gate:"18.06 + 18.05 past exams ≥80% cold; derive softmax-cross-entropy gradient by hand.",trap:"'ML math summaries' shortcuts; real analysis (wrong tool); math without code."},
+{n:"3",t:"CS foundations",d:"3 months (parallel)",goal:"Algorithmic maturity + mental model of the machine (memory, processes, network, DB).",res:[["MIT 6.006","https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"],["Nand2Tetris Part I (free site)","https://www.nand2tetris.org/"],["OSTEP (virtualization + concurrency)","https://pages.cs.wisc.edu/~remzi/OSTEP/"],["CS50x weeks 1–5 (C + memory)","https://cs50.harvard.edu/x/"],["Kurose networking ch.1–3","https://gaia.cs.umass.edu/kurose_ross/online_lectures.htm"],["CMU 15-445 lectures 1–10","https://15445.courses.cs.cmu.edu/fall2025/"]],del:"6.006 psets · Nand2Tetris projects 1–6 · a C segfault + why-writeup · ~50 algorithm problems (cap it).",gate:"Hash map/heap/BFS/DFS/DP from scratch under time pressure; explain python train.py → pixels in one page.",trap:"LeetCode addiction; treating this stage as optional."},
+{n:"4",t:"Classical ML",d:"2 months",goal:"The statistical-learning worldview: generalization, regularization, calibration, metrics, error analysis.",res:[["ISLP ch.1–10 + labs","https://www.statlearning.com/"],["INRIA scikit-learn MOOC","https://inria.github.io/scikit-learn-mooc/"],["StatQuest (supplement)","https://www.youtube.com/@statquest"],["Kaggle Learn (reps)","https://www.kaggle.com/learn"]],del:"2 end-to-end projects: leakage-free CV, calibration curves, error taxonomy; logistic regression + boosting core loop from scratch; one competition entry.",gate:"New dataset → justified pipeline + metric + calibration assessment in a day; explain why CV overestimates deployment.",trap:"Skipping to DL (this stage is where evaluation discipline is built); fit/predict without ever implementing."},
+{n:"5",t:"Deep learning & PyTorch",d:"3–4 months",goal:"Mechanical mastery: backprop, optimization, init, normalization, CNNs — built by hand once, then fluent in PyTorch.",res:[["Karpathy Zero to Hero (type everything)","https://karpathy.ai/zero-to-hero.html"],["microgpt (2026 consolidation)","https://karpathy.github.io/2026/02/12/microgpt/"],["CS231n backprop/opt notes","https://cs231n.github.io/"],["Understanding Deep Learning","https://udlbook.github.io/udlbook/"],["PyTorch tutorials","https://pytorch.org/tutorials/"],["Karpathy — Recipe for Training NNs","https://karpathy.github.io/2019/04/25/recipe/"]],del:"micrograd reimplemented blind · CNN >90% CIFAR-10 with own loop + W&B + LR sweep · 'training pathology zoo' notebook.",gate:"H2 + H3: NumPy backprop matching PyTorch to 1e-6; CIFAR-10 CNN with own loop.",trap:"High-level wrappers before raw loops; watching without typing."},
+{n:"6",t:"Transformers & LLMs (keystone)",d:"4–5 months",goal:"GPT from a blank file; tokenization, pretraining, data curation, scaling laws, inference — mechanically understood.",res:[["Illustrated Transformer → Let's build GPT + Tokenizer","https://www.youtube.com/watch?v=kCc8FmEb1nY"],["nanoGPT + build-nanogpt","https://github.com/karpathy/nanoGPT"],["Stanford CS336 (assignments!)","https://stanford-cs336.github.io/spring2025/"],["Raschka LLMs-from-scratch","https://github.com/rasbt/LLMs-from-scratch"],["Transformer Math 101 + Chinchilla","https://blog.eleuther.ai/transformer-math/"],["HF LLM course","https://huggingface.co/learn/llm-course/chapter1/1"],["Smol Training Playbook","https://huggingface.co/spaces/HuggingFaceTB/smol-training-playbook"],["TinyStories playground","https://arxiv.org/abs/2305.07759"]],del:"Tiny LM on TinyStories from own code · BPE tokenizer from scratch · CS336 A1 (ideally 1–5) · 3-size scaling mini-study · data-curation exercise (dedup/filter a CC slice).",gate:"H4 + H5: working GPT written blind in <1 day; explain KV-cache and why inference is memory-bound.",trap:"Fine-tuning before you can pretrain a toy; CS336 lectures without assignments; paying for what TinyStories teaches free."},
+{n:"7",t:"Evals, model behavior & post-training",d:"3–4 months",goal:"Your highest-leverage stage: measuring models, and changing their behavior — with real statistics.",res:[["HF Evaluation Guidebook","https://huggingface.co/spaces/OpenEvals/evaluation-guidebook"],["Inspect (UK AISI) — learn deeply","https://inspect.aisi.org.uk/"],["Eugene Yan — LLM-evaluators (κ/α)","https://eugeneyan.com/writing/llm-evaluators/"],["MT-Bench + EvalGen + minefield critiques","https://arxiv.org/abs/2306.05685"],["Anthropic — statistical approach to evals","https://www.anthropic.com/research/statistical-approach-to-model-evals"],["RLHF Book + 2026 lectures","https://rlhfbook.com"],["Spinning Up (VPG→PPO)","https://spinningup.openai.com"],["InstructGPT + DPO papers","https://arxiv.org/abs/2305.18290"],["TRL + Alignment Handbook + smol-course","https://huggingface.co/docs/trl"],["Tulu 3 + open-instruct","https://github.com/allenai/open-instruct"],["DeepSeek-R1 + open-r1","https://github.com/huggingface/open-r1"]],del:"Inspect eval suite with judge validated vs ≥150 human labels (κ, bias checks) · SFT→DPO on a 1–8B model with pre-registered eval · toy PPO + DPO from scratch · a published benchmark autopsy.",gate:"H6–H9; whiteboard reward hacking, KL penalties, and why DPO ≈ RLHF's closed form.",trap:"Unvalidated LLM judges (the field's #1 sin — your rubric experience is the antidote); evals without error bars."},
+{n:"8",t:"Agents & tool use",d:"2 months (overlaps 7)",goal:"Agents as loops-with-tools built bare; agent evaluation as a frontier discipline.",res:[["Lilian Weng — Autonomous Agents","https://lilianweng.github.io/posts/2023-06-23-agent/"],["Anthropic — Building effective agents","https://www.anthropic.com/engineering/building-effective-agents"],["ReAct paper","https://arxiv.org/abs/2210.03629"],["Inspect agents + sandboxing","https://inspect.aisi.org.uk/"],["METR autonomy guide + task-standard","https://metr.github.io/autonomy-evals-guide/"],["RE-Bench + time-horizons papers","https://arxiv.org/abs/2411.15114"]],del:"From-scratch agent scaffold (no frameworks) · METR-style task family (5–10 tasks, human-baseline times) in Inspect · failure taxonomy from ≥50 transcripts.",gate:"H12; explain function-calling at the token level.",trap:"Framework-first learning; demos instead of evals; no logged transcripts = no science."},
+{n:"9",t:"Systems: GPU / CUDA / Triton / distributed / inference",d:"3–4 months (interleaves 7–8)",goal:"Roofline mental model; real kernels written and profiled; multi-GPU at toy scale; inference economics.",res:[["Horace He — Go Brrrr (read first)","https://horace.io/brrr_intro.html"],["Rush puzzle ladder: Tensor→GPU→Triton→LLM-Training","https://github.com/srush/GPU-Puzzles"],["GPU MODE lectures + Discord","https://github.com/gpu-mode/lectures"],["Triton tutorials","https://triton-lang.org/main/getting-started/tutorials/"],["Ultra-Scale Playbook","https://huggingface.co/spaces/nanotron/ultrascale-playbook"],["kipply — Inference Arithmetic","https://kipp.ly/transformer-inference-arithmetic/"],["vLLM + PagedAttention + FlashAttention","https://docs.vllm.ai/en/stable/"],["Boehm — CUDA matmul","https://siboehm.com/articles/22/CUDA-MMM"]],del:"Triton kernel benchmarked vs eager + roofline analysis · inference profiling case study (batch 1 vs 32) · 2-GPU DDP/FSDP runs (~$5–10) checked against Ultra-Scale math · int8/int4 quantization study.",gate:"H10 + H11; predict tokens/sec within 2× before measuring.",trap:"Buying hardware; CUDA before the puzzles; benchmarking without warm-up/variance control."},
+{n:"10",t:"Specialization: interp / safety / multimodal",d:"3 months",goal:"Genuine depth in ONE lane; literacy in the others. Choose from two years of revealed preference.",res:[["Interp: ARENA 3.0 + Nanda getting-started","https://github.com/callummcdougall/ARENA_3.0"],["Interp: Anthropic circuits sequence","https://transformer-circuits.pub/2021/framework/index.html"],["Safety: BlueDot Alignment + control/scheming papers","https://bluedot.org/courses/alignment"],["Safety: MATS + SPAR applications","https://www.matsprogram.org/"],["Multimodal: CLIP → LLaVA → diffusion (Weng + HF + fast.ai pt2)","https://huggingface.co/blog/vlms"]],del:"Interp: induction heads + superposition replicated, one small novel finding. Safety: a dangerous-capability/scheming-style eval in Inspect. Multimodal: LLaVA-style projector fine-tune + a multimodal eval.",gate:"A specialization artifact a domain researcher would call competent, published with code.",trap:"Choosing by prestige; dabbling in all three; beautiful visualizations mistaken for validated claims."},
+{n:"11",t:"Research replication",d:"3 months",goal:"Reproduce published results end-to-end — the most respected self-study credential.",res:[["Schulman — Opinionated Guide","http://joschu.net/blog/opinionated-guide-ml-research.html"],["Olah — Research Taste Exercises","https://colah.github.io/notes/taste/"],["Nanda — How to Write ML Papers","https://www.lesswrong.com/posts/eJGptPbbFPZGLpjsp/highly-opinionated-advice-on-how-to-write-ml-papers"]],del:"1–2 full reproductions (DPO deltas, TinyStories curves, an interp result, or benchmark numbers via Inspect) with public repos + reports: matched, didn't, why, what the paper under-specified. Issues filed upstream.",gate:"A reproduction report a reviewer would trust — numbers, error bars, deviations documented.",trap:"Compute-infeasible targets; rerunning authors' code without understanding; not writing up negatives."},
+{n:"12",t:"Original research portfolio",d:"6+ months, ongoing",goal:"One original contribution per ~4 months in your lane + visible OSS presence = frontier-lab interviews.",res:[["200 Concrete Open Problems (interp)","https://www.alignmentforum.org/posts/LbrPTJ4fmABEdEnLf/200-concrete-open-problems-in-mechanistic-interpretability"],["ARC Prize","https://arcprize.org"],["MATS / SPAR / lab residencies","https://www.matsprogram.org/"]],del:"An original eval with validation study, or a small-model finding with ablations, or a systems contribution — as an arXiv-quality technical report (H13) · sustained OSS in one ecosystem · applications out.",gate:"H13: an artifact an interviewer spends 20 minutes on because it's genuinely interesting.",trap:"Perfectionism non-publishing; novelty without ablations; working in secret; confusing reading with doing."}
+];
+
+/* Do-not-advance blockers: one brutal, binary test per stage. */
+const BLOCK={
+"0":"Do not advance if you still look up basic git commands or can't navigate in the terminal.",
+"1":"Do not advance if you cannot write and debug tests alone.",
+"2":"Do not advance if you cannot derive basic gradients and explain a confidence interval to a colleague.",
+"3":"Do not advance if you cannot implement a hash map or BFS from scratch under time pressure.",
+"4":"Do not advance if you cannot spot data leakage in someone else's pipeline.",
+"5":"Do not advance if you cannot diagnose a bad loss curve (LR? init? bug? data?).",
+"6":"Do not advance if you cannot implement a tiny transformer from a blank file.",
+"7":"Do not advance if you cannot validate an LLM judge against human labels and report κ.",
+"8":"Do not advance if your agent eval has no logged transcripts and no human baselines.",
+"9":"Do not advance if you cannot explain where inference time and memory actually go.",
+"10":"Do not advance if your lane artifact would not survive review by a researcher in that lane.",
+"11":"Do not advance if your reproduction report does not document deviations and negative results.",
+"12":"There is no advancing out of this stage — only shipping the next artifact."};
+
+/* Stage completion contract: a stage is complete ONLY when all four exist. */
+const CONTRACT=["Working public repo or notebook","Short technical write-up","Measurable result or benchmark","Failure analysis — what broke / what you misunderstood"];
+
+/* Specialization lanes (lock one after Stage 7 for 6–12 months). */
+const LANES=["Post-training / evals / model behavior","Agents","Systems / inference","Interpretability / safety","Multimodal / VLMs","Core ML research"];
+
+/* Micro-milestones: one checkbox ≈ one 2–4h study session (or one small deliverable). */
+const MICRO={
+"0":[["Install Python (uv/conda), VS Code, Git; dotfiles repo pushed",3],["Learning-log repo created + first entry written",2],["Karpathy 'Deep Dive into LLMs' watched with structured notes",4],["'How I use LLMs' + one-page field map in your own words",3]],
+"1":[["CS50P psets 0–2",6],["CS50P psets 3–5",8],["CS50P psets 6–8",8],["CS50P pset 9 + final project",8],["Missing Semester lectures 1–3 + exercises",5],["Missing Semester lectures 4–end + exercises",5],["Learn Git Branching: all main+remote levels",4],["Pro Git ch.1–3 + ch.5, with a practice repo",5],["goodresearch.dev read; one project restructured to its pattern",5],["First pytest suite: fixtures + parametrize on a real project",4],["GitHub Actions: pytest-on-push CI live on one repo",3],["CLI project #1 shipped (tests, README, packaging)",8],["CLI project #2 shipped",8],["CLI project #3 shipped → Gate H0/H1 attempt",8]],
+"2":[["3B1B Essence of Linear Algebra (all) + notes",5],["18.06 lectures 1–10 + psets",12],["18.06 lectures 11–22 + psets",14],["18.06 lectures 23–35 + psets",14],["18.06 past exam ≥80% closed-book",4],["3B1B Essence of Calculus + chain-rule exercises",4],["Softmax-cross-entropy gradient derived by hand",3],["Stat 110 lectures 1–12 + strategic practice",14],["Stat 110 lectures 13–24 + practice",14],["Stat 110 lectures 25–34 + practice",12],["18.05: probability half + psets",10],["18.05: statistics half (testing, CIs, Bayes) + exam ≥80%",12],["NumPy notebook: LU/QR/SVD from scratch",5],["NumPy notebook: Monte Carlo + hypothesis test + power analysis",5],["MacKay ch.1–5 + lecture 1–4 notes",8],["Statistical Rethinking lectures 1–10 + homework (parallel track)",15]],
+"3":[["6.006 lectures 1–8 + pset",12],["6.006 lectures 9–16 + pset",12],["6.006 lectures 17–24 + pset",12],["6.006 lectures 25–32 + past exam",10],["NeetCode: first 25 problems",10],["NeetCode: 50 total, timed re-solves of misses",10],["Nand2Tetris projects 1–3",12],["Nand2Tetris projects 4–6",12],["OSTEP virtualization piece + homework sims",10],["OSTEP concurrency piece + homework sims",10],["CS50x weeks 1–2 (C basics)",8],["CS50x weeks 3–5 (memory, data structures) + segfault write-up",10],["Kurose ch.1–3 lectures + one Wireshark lab",8],["15-445 lectures 1–10 watched with notes",10]],
+"4":[["ISLP ch.1–4 + labs",10],["ISLP ch.5–7 + labs (resampling, regularization)",10],["ISLP ch.8–10 + labs (trees, SVM, deep intro)",10],["Logistic regression from scratch (NumPy, own gradient)",4],["Gradient-boosting core loop from scratch",5],["INRIA sklearn MOOC: modules 1–3",8],["INRIA sklearn MOOC: modules 4–end",8],["Project #1: leakage-free pipeline + calibration + error taxonomy write-up",10],["Kaggle competition entry submitted + write-up",10]],
+"5":[["micrograd video typed along, working",4],["micrograd reimplemented blind → Gate H2 (match PyTorch 1e-6)",5],["makemore parts 1–2 typed + exercises",8],["makemore parts 3–4 typed + exercises",8],["makemore part 5 + wavenet exercises",5],["microgpt: every line annotated; rebuilt from memory",6],["CS231n backprop + optimization notes reproduced on paper",5],["UDL core chapters (MLPs→CNNs→training) + problems",12],["CIFAR-10 MLP baseline, raw PyTorch loop + W&B",5],["CNN >90% CIFAR-10 + LR sweep → Gate H3",8],["'Pathology zoo' notebook: 8 induced+fixed failure modes",8],["Karpathy Recipe applied as literal checklist to one run",3]],
+"6":[["Illustrated Transformer + 3B1B GPT/attention chapters, notes",4],["'Let's build GPT' typed along, working",6],["GPT written blind in <1 day → Gate H4",8],["Tokenizer video + BPE tokenizer from scratch",6],["nanoGPT Shakespeare run + config exploration",5],["build-nanogpt video + annotated read of the repo",8],["TinyStories tiny LM trained, coherent samples → Gate H5",8],["Scaling mini-study: 3 model sizes, power-law fit, write-up",8],["Transformer Math 101 + Chinchilla: memory/FLOPs calcs for 3 models",5],["CS336 assignment 1 (BPE + transformer + training)",25],["CS336 assignment 2 (systems/Triton) — or deep lecture notes if skipping",25],["Data-curation exercise: dedup + filter a Common Crawl/FineWeb slice",6],["HF LLM course core chapters + one pipeline",8],["Smol Training Playbook read with decision-journal notes",6],["📄 MANDATORY REPRODUCTION: one published result (e.g., build-nanogpt loss curve, TinyStories finding) + matched-vs-failed write-up",8]],
+"7":[["HF Evaluation Guidebook read + notes",6],["Inspect tutorial: first working eval (dataset/solver/scorer)",5],["Eval suite with CIs + error analysis → Gate H6",10],["150+ items hand-labeled; judge validated, κ + bias checks → Gate H7",12],["MT-Bench paper + position-bias replication (200 pairs)",6],["Spinning Up: VPG reimplemented in modern PyTorch",8],["Spinning Up: PPO reimplemented",10],["DPO paper: loss derived from RLHF objective on paper",4],["Toy DPO from scratch on synthetic preferences",6],["Toy PPO on same task; compare → Gate H9",8],["RLHF Book ch.1–8 + lecture videos",12],["RLHF Book ch.9–end (RLVR, evals) + notes",10],["SFT run on 1–8B open model (QLoRA)",6],["DPO run + pre-registered before/after eval → Gate H8",10],["Benchmark autopsy post published",8],["📄 MANDATORY REPRODUCTION: one published eval or post-training result (e.g., MT-Bench bias figures, a Zephyr/Tulu delta) + matched-vs-failed write-up",8]],
+"8":[["Weng agents post + both Anthropic agent posts, design notes",4],["ReAct loop from scratch (no frameworks)",5],["Scaffold: tool registry + sandboxed execution",6],["50 agent transcripts logged + failure taxonomy draft",6],["Inspect agent/sandbox tutorial completed",4],["METR-style task family: 5 tasks with difficulty ladder → Gate H12",12],["Human-baseline times collected for the task family",4],["Failure-taxonomy post published",5],["📄 MANDATORY REPRODUCTION: one published agent-eval number (e.g., SWE-bench-lite score for one model) + matched-vs-failed write-up",8]],
+"9":[["Horace He Brrrr + Modal GPU Glossary, notes",4],["Tensor Puzzles: all 21",5],["GPU Puzzles: all 14",8],["Triton Puzzles completed (interpreter mode)",8],["Triton tutorials: vector-add, fused softmax, matmul",8],["Own fused kernel benchmarked vs eager + roofline → Gate H11",10],["Inference profiling: batch 1 vs 32, bound analysis → Gate H10",8],["kipply inference arithmetic redone by hand for one model",4],["Ultra-Scale Playbook: data/tensor parallelism sections",8],["Ultra-Scale Playbook: pipeline/ZeRO/overlap sections",8],["2-GPU DDP toy run (rented) + throughput math check",5],["FSDP2 toy run + ZeRO-stage mapping notes",5],["Quantization study: fp16/int8/int4 quality-vs-latency",6],["LLM Training Puzzles completed",8],["📄 MANDATORY REPRODUCTION: one published systems number (e.g., a vLLM throughput claim, a Boehm kernel stage) + matched-vs-failed write-up",8]],
+"10":[["Lane chosen; one-page rationale from 2 years of evidence",3],["Lane core reading sequence completed with notes",15],["Lane tooling set up (ARENA ch.1 / BlueDot units / CLIP repro)",12],["Replication #1 in lane (e.g., induction heads / control protocol / projector tune)",15],["Replication #2 in lane",15],["One small novel observation documented",12],["Specialization artifact written up + code published",10],["Feedback gathered from the lane's community (Discord/forum/mentor)",3]],
+"11":[["Reproduction target chosen + feasibility scoped (compute, data)",4],["Environment + baselines reproduced",10],["Main result reproduction attempt complete",20],["Deviations + under-specifications documented",5],["Reproduction report written to reviewer standard",8],["Issues/PRs filed upstream; report published",3]],
+"12":[["Problem selected from open-problem lists / RFPs; claim sketched",5],["Proposal: one-sentence claim + figure-1 sketch (Nanda method)",4],["Experiments + full ablation table",30],["Technical report written → Gate H13",12],["Submitted: workshop / MATS / SPAR / arXiv",4],["OSS: 5 merged PRs in one ecosystem",20]]
+};
+
+const RES=[
+// topic, name, url, type, level, tier(core/rec/opt/spec), cost(0/1), primary(1/0), why
+["Math","MIT 18.06 Linear Algebra (Strang)","https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/","course","beginner","core",0,1,"Canonical LA course; full exams+solutions for self-testing"],
+["Math","3B1B — Essence of Linear Algebra","https://www.3blue1brown.com/topics/linear-algebra","video","beginner","core",0,0,"Geometric intuition first; watch before Strang"],
+["Math","3B1B — Essence of Calculus","https://www.3blue1brown.com/topics/calculus","video","beginner","core",0,1,"Chain-rule intuition = backprop"],
+["Math","Khan Academy math tracks","https://www.khanacademy.org/math/linear-algebra","interactive","beginner","rec",0,0,"Free mastery-based exercise engine (Math Academy is paid — excluded)"],
+["Math","Mathematics for Machine Learning","https://mml-book.github.io/","book","intermediate","core",0,1,"LA+calc+prob+opt scoped to ML; connective reference"],
+["Math","Harvard Stat 110 (Blitzstein)","https://stat110.hsites.harvard.edu/","course","intermediate","core",0,1,"Best probability teaching in the world; free book + edX"],
+["Math","Blitzstein & Hwang — Intro to Probability","https://probabilitybook.net","book","intermediate","core",0,0,"Official free PDF of the Stat 110 text"],
+["Math","MIT 18.05 Probability & Statistics","https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/","course","beginner","core",0,1,"The statistics half: testing, CIs, Bayes; 2022 format"],
+["Math","Seeing Theory","https://seeing-theory.brown.edu/","interactive","beginner","opt",0,0,"Beautiful visual warm-up for probability"],
+["Math","Statistical Rethinking 2024 (McElreath)","https://github.com/rmcelreath/stat_rethinking_2024","course","intermediate","rec",0,1,"Research-grade Bayesian + causal thinking; lectures/homework free"],
+["Math","Boyd — Convex Optimization","https://web.stanford.edu/~boyd/cvxbook/","book","advanced","rec",0,1,"The optimization vocabulary of ML; free PDF + slides"],
+["Math","MacKay — Information Theory (book + lectures)","https://www.inference.org.uk/itprnn/book.pdf","book","advanced","rec",0,1,"Entropy/Bayes classic; LLM loss IS cross-entropy"],
+["Math","fast.ai Computational Linear Algebra","https://github.com/fastai/numerical-linear-algebra","course","intermediate","rec",0,1,"Floating point, SVD, stability in real NumPy"],
+["CS","CS50P — Python","https://cs50.harvard.edu/python/","course","beginner","core",0,1,"Best-produced intro; auto-graded psets = feedback loop"],
+["CS","Think Python 3e","https://allendowney.github.io/ThinkPython/","book","beginner","opt",0,0,"Book-track alternative to CS50P; Colab-runnable"],
+["CS","Automate the Boring Stuff 3e","https://automatetheboringstuff.com/","book","beginner","opt",0,0,"Practical reps: files, regex, scraping"],
+["CS","MIT Missing Semester (2026)","https://missing.csail.mit.edu/","course","beginner","core",0,1,"Shell/git/debugging + 2026 agentic-coding lectures"],
+["CS","Pro Git","https://git-scm.com/book/en/v2","book","beginner","core",0,1,"Canonical Git; ch.1–3,5 now, internals later"],
+["CS","Learn Git Branching","https://learngitbranching.js.org/","interactive","beginner","core",0,0,"Branch/rebase muscle memory in 4 hours"],
+["CS","MIT 6.006 Algorithms","https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/","course","intermediate","core",0,1,"The right algorithmic depth for research; Python-based"],
+["CS","NeetCode 150 (free tier)","https://neetcode.io/","practice","intermediate","opt",0,0,"~50 problems of fluency, not 500; Pro unnecessary"],
+["CS","Nand2Tetris (free website)","https://www.nand2tetris.org/","course","beginner","rec",0,1,"Build a computer from NAND gates; Coursera version paid — use site"],
+["CS","OSTEP — Operating Systems","https://pages.cs.wisc.edu/~remzi/OSTEP/","book","intermediate","core",0,1,"Processes/VM/concurrency → dataloaders, GPU memory"],
+["CS","CS50x weeks 1–5 (C + memory)","https://cs50.harvard.edu/x/","course","beginner","rec",0,1,"Highest-value C intro for this path"],
+["CS","Kurose & Ross networking lectures","https://gaia.cs.umass.edu/kurose_ross/online_lectures.htm","video","beginner","rec",0,1,"Standard networking, free from authors; ch.1–3 suffice"],
+["CS","CMU 15-445 Databases","https://15445.courses.cs.cmu.edu/fall2025/","course","intermediate","rec",0,1,"Storage/indexing concepts → data pipelines; lectures only"],
+["CS","Beej's Guide to Network Programming","https://beej.us/guide/bgnet/","guide","intermediate","opt",0,0,"Sockets in C; what NCCL does underneath"],
+["CS","learncpp.com","https://www.learncpp.com/","tutorial","intermediate","spec",0,0,"Park until CUDA/PyTorch internals need it"],
+["CS","CS:APP labs (CMU)","https://csapp.cs.cmu.edu/","labs","intermediate","opt",0,0,"Bomb/Cache Lab teach machine-level thinking (book paid)"],
+["SWE","Good Research Code Handbook","https://goodresearch.dev/","book","beginner","core",0,1,"Written for researchers without CS training — your exact profile"],
+["SWE","Software Engineering at Google","https://abseil.io/resources/swe-book","book","intermediate","rec",0,0,"Testing culture, code review; free HTML"],
+["SWE","pytest docs","https://docs.pytest.org/en/stable/","docs","beginner","core",0,1,"The testing tool; incl. flaky-test + CI guidance"],
+["SWE","py-spy + cProfile","https://github.com/benfred/py-spy","tool","intermediate","rec",0,1,"Attach to a running training loop; the standard trick"],
+["SWE","Python Packaging User Guide","https://packaging.python.org/en/latest/","docs","beginner","rec",0,1,"pyproject.toml + src layout = installable research code"],
+["SWE","GitHub Actions docs","https://docs.github.com/en/actions","docs","beginner","core",0,1,"Free CI for public repos; pytest-on-push everywhere"],
+["SWE","Google Python Style Guide","https://google.github.io/styleguide/pyguide.html","guide","beginner","opt",0,0,"Settles style debates; adopt a formatter"],
+["SWE","Weights & Biases (free tier)","https://docs.wandb.ai/","docs","beginner","core",0,1,"Community-standard tracking; MLflow = fully-OSS fallback"],
+["SWE","Hydra","https://hydra.cc/docs/intro/","docs","intermediate","rec",0,0,"Config/sweep standard in research codebases"],
+["ML","ISLP — Intro to Statistical Learning (Python)","https://www.statlearning.com/","book","intermediate","core",0,1,"Canonical classical-ML text, free PDF, Python labs"],
+["ML","StatQuest","https://www.youtube.com/@statquest","video","beginner","rec",0,0,"Unbeatable intuition; run at 1.5–2×"],
+["ML","INRIA scikit-learn MOOC","https://inria.github.io/scikit-learn-mooc/","course","intermediate","core",0,1,"Pipelines/CV/tuning done properly, by sklearn's creators"],
+["ML","Kaggle Learn","https://www.kaggle.com/learn","interactive","beginner","opt",0,0,"Zero-friction reps with free GPUs"],
+["ML","Google ML Crash Course","https://developers.google.com/machine-learning/crash-course","course","beginner","opt",0,0,"Fast modern survey; alternative to Ng audit-limits"],
+["ML","Bishop — PRML (+ free Bishop DL book)","https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf","book","advanced","opt",0,0,"Bayesian reference; bishopbook.com is the modern companion"],
+["DL","Karpathy — Neural Networks: Zero to Hero","https://karpathy.ai/zero-to-hero.html","course","intermediate","core",0,1,"THE spine: micrograd→makemore→GPT, typed live"],
+["DL","Karpathy — microgpt (2026)","https://karpathy.github.io/2026/02/12/microgpt/","project","intermediate","core",0,1,"200-line dependency-free GPT; the consolidation checkpoint"],
+["DL","Understanding Deep Learning (Prince)","https://udlbook.github.io/udlbook/","book","advanced","core",0,1,"Best current DL textbook; replaces Goodfellow"],
+["DL","CS231n notes","https://cs231n.github.io/","notes","intermediate","core",0,1,"Clearest written backprop/optimization treatment anywhere"],
+["DL","fast.ai Practical DL (pt1 + pt2)","https://course.fast.ai/","course","intermediate","rec",0,0,"Top-down complement; pt2 builds Stable Diffusion from scratch"],
+["DL","Dive into Deep Learning (d2l.ai)","https://d2l.ai","book","intermediate","opt",0,0,"Comprehensive runnable reference; don't read linearly"],
+["DL","Little Book of Deep Learning (Fleuret)","https://fleuret.org/francois/lbdl.html","book","intermediate","rec",0,0,"The field in 160 pages; v1.3 May 2026"],
+["DL","PyTorch official tutorials","https://pytorch.org/tutorials/","docs","beginner","core",0,1,"Basics/autograd/compile/DDP canon"],
+["DL","3B1B — Neural networks (+GPT/attention)","https://www.3blue1brown.com/topics/neural-networks","video","beginner","rec",0,0,"Best geometric intuition for backprop + attention"],
+["DL","MIT 6.S191","https://introtodeeplearning.com/","course","beginner","opt",0,0,"Annually-refreshed survey"],
+["DL","NYU Deep Learning (LeCun/Canziani)","https://atcold.github.io/NYU-DLSP20/","course","advanced","opt",0,0,"EBMs/SSL worldview; uniquely valuable deepening"],
+["LLM","Illustrated Transformer (Alammar)","https://jalammar.github.io/illustrated-transformer/","blog","beginner","core",0,0,"The visual on-ramp; read before Let's-build-GPT"],
+["LLM","Karpathy — Let's build GPT + Tokenizer","https://www.youtube.com/watch?v=kCc8FmEb1nY","video","intermediate","core",0,1,"Full GPT + BPE from blank file; most-recommended LLM videos ever"],
+["LLM","nanoGPT + build-nanogpt","https://github.com/karpathy/nanoGPT","repo","advanced","core",1,1,"Canonical minimal GPT-2 training; 💰 only for full GPT-2 repro"],
+["LLM","nanochat","https://github.com/karpathy/nanochat","repo","advanced","rec",1,1,"Whole ChatGPT pipeline in 8k lines for ~$100; deep read is free"],
+["LLM","Stanford CS336 — LM from Scratch","https://stanford-cs336.github.io/spring2025/","course","advanced","core",1,1,"Closest public thing to frontier-lab onboarding; do the assignments"],
+["LLM","Raschka — LLMs-from-scratch (repo)","https://github.com/rasbt/LLMs-from-scratch","repo","intermediate","rec",0,0,"Reading-track parallel to Karpathy; book paid, code free"],
+["LLM","Annotated Transformer","https://nlp.seas.harvard.edu/annotated-transformer/","notebook","intermediate","opt",0,0,"Line-by-line encoder-decoder original"],
+["LLM","Stanford CS224n","https://web.stanford.edu/class/cs224n/","course","intermediate","opt",0,0,"Academic NLP bridge; superseded by CS336 for builders"],
+["LLM","Stanford CS25 — Transformers United","https://web.stanford.edu/class/cs25/","seminar","intermediate","opt",0,0,"Frontier guest talks; greatest-hits viewing"],
+["LLM","HF LLM course","https://huggingface.co/learn/llm-course/chapter1/1","course","intermediate","core",0,1,"The ecosystem you'll actually use daily"],
+["LLM","EleutherAI — Transformer Math 101 + cookbook","https://blog.eleuther.ai/transformer-math/","blog","advanced","core",0,1,"THE compute/memory arithmetic page; pairs with Chinchilla"],
+["LLM","TinyStories","https://arxiv.org/abs/2305.07759","paper","intermediate","rec",0,0,"Emergence at <10M params on free Colab"],
+["LLM","modded-nanogpt (speedrun)","https://github.com/KellerJordan/modded-nanogpt","repo","advanced","opt",1,0,"README history = free research-methods masterclass"],
+["LLM","HF Smol Training Playbook","https://huggingface.co/spaces/HuggingFaceTB/smol-training-playbook","book","advanced","rec",0,1,"How a real team made every training decision (SmolLM3)"],
+["LLM","Lilian Weng — Lil'Log","https://lilianweng.github.io/","blog","advanced","rec",0,0,"Gold-standard surveys: attention, agents, reward hacking, Why We Think"],
+["Post-training","RLHF Book (Lambert) + 2026 course","https://rlhfbook.com","book","advanced","core",0,1,"Canonical post-training text: SFT→RM→PPO/GRPO/DPO→RLVR"],
+["Post-training","Spinning Up in Deep RL","https://spinningup.openai.com","course","intermediate","core",0,1,"VPG→PPO grounding; reimplement in modern PyTorch"],
+["Post-training","InstructGPT paper","https://arxiv.org/abs/2203.02155","paper","advanced","core",0,1,"The RLHF pipeline paper; everything descends from it"],
+["Post-training","DPO paper","https://arxiv.org/abs/2305.18290","paper","advanced","core",0,1,"Derive the loss by hand; implement on synthetic prefs"],
+["Post-training","TRL + Alignment Handbook + smol-course","https://huggingface.co/docs/trl","docs","intermediate","core",1,1,"The practical hands: SFT/DPO/GRPO trainers + recipes; 💰 QLoRA-scale"],
+["Post-training","Tulu 3 + open-instruct","https://github.com/allenai/open-instruct","repo","advanced","rec",1,1,"First fully open frontier-grade recipe; the thing to reproduce"],
+["Post-training","DeepSeek-R1 + open-r1","https://github.com/huggingface/open-r1","repo","advanced","rec",1,0,"Reasoning via RLVR + its open reproduction; 💰 rented GPU for GRPO"],
+["Post-training","Raschka — reasoning-from-scratch","https://github.com/rasbt/reasoning-from-scratch","repo","advanced","opt",0,0,"Gentlest hands-on reasoning-model path"],
+["Post-training","Schulman — joschu.net notes","http://joschu.net","notes","advanced","rec",0,0,"'Approximating KL Divergence' is required RLHF reading"],
+["Post-training","verl / OpenRLHF","https://github.com/volcengine/verl","repo","advanced","spec",1,0,"Industrial RL-for-LLMs; read architecture even if never run"],
+["Post-training","Anthropic HH-RLHF paper","https://arxiv.org/abs/2204.05862","paper","advanced","rec",0,0,"Preference-modeling companion to InstructGPT"],
+["Post-training","The Llama 3 Herd of Models","https://arxiv.org/abs/2407.21783","report","advanced","rec",0,0,"Fullest open account of modern data/training/post-training decisions"],
+["Evals","Inspect (UK AISI)","https://inspect.aisi.org.uk/","framework","intermediate","core",0,1,"De facto frontier-evals standard (AISI, METR, lighteval backend)"],
+["Evals","HF Evaluation Guidebook","https://huggingface.co/spaces/OpenEvals/evaluation-guidebook","guide","beginner","core",0,1,"Best single doc: benchmarks, human eval, judges, reproducibility"],
+["Evals","lm-evaluation-harness","https://github.com/EleutherAI/lm-evaluation-harness","framework","intermediate","core",1,0,"Standard logprob benchmarking for open models"],
+["Evals","lighteval","https://github.com/huggingface/lighteval","toolkit","intermediate","opt",0,0,"Sample-by-sample inspection; Inspect-compatible"],
+["Evals","OpenAI Cookbook eval guides","https://developers.openai.com/cookbook/topic/evals","notebooks","beginner","rec",0,0,"Fastest zero→working model-graded eval (openai/evals repo = legacy)"],
+["Evals","Hamel Husain — Your AI Product Needs Evals","https://hamel.dev/blog/posts/evals/","blog","intermediate","core",0,1,"The canonical 3-level eval system"],
+["Evals","Eugene Yan — LLM-evaluators survey","https://eugeneyan.com/writing/llm-evaluators/","blog","intermediate","core",0,1,"Judge alignment incl. Cohen's κ / Krippendorff's α — your IRR on-ramp"],
+["Evals","MT-Bench / Judging LLM-as-a-Judge","https://arxiv.org/abs/2306.05685","paper","intermediate","core",0,1,"Foundational judge paper: position/verbosity/self-bias"],
+["Evals","EvalGen — Who Validates the Validators?","https://arxiv.org/abs/2404.12272","paper","intermediate","rec",0,0,"'Criteria drift' — grading changes your criteria"],
+["Evals","HELM (Stanford CRFM)","https://crfm.stanford.edu/helm/","benchmark","intermediate","rec",0,0,"The holistic multi-metric eval philosophy"],
+["Evals","Anthropic — statistical approach to evals","https://www.anthropic.com/research/statistical-approach-to-model-evals","post","intermediate","core",0,1,"Error bars + clustered SEs on eval scores; rare rigor"],
+["Evals","Evaluating LLMs is a minefield (Narayanan/Kapoor)","https://www.cs.princeton.edu/~arvindn/talks/evaluating_llms_minefield/","talk","intermediate","rec",0,0,"Contamination, construct validity, prompt sensitivity"],
+["Evals","BetterBench + Leaderboard Illusion","https://arxiv.org/abs/2411.12990","paper","intermediate","rec",0,0,"Benchmark quality standards + how rankings distort"],
+["Evals","Benchmarks: SWE-bench · GPQA · MMLU-Pro · HLE · GDPval","https://arxiv.org/abs/2311.12022","papers","intermediate","rec",0,0,"Read as designs, not leaderboards"],
+["Evals","METR — autonomy guide + RE-Bench + time-horizons","https://metr.github.io/autonomy-evals-guide/","guide","advanced","core",0,1,"State of the art in long-horizon agent task design"],
+["Evals","LMArena + response trilogy","https://lmarena.ai/","platform","intermediate","opt",0,0,"Human preference at scale, and its distortions"],
+["Evals","Model-Written Evaluations (Perez et al.)","https://arxiv.org/abs/2212.09251","paper","advanced","rec",0,0,"Models generating evals that surface sycophancy & hidden behaviors"],
+["Evals","A Survey on LLM-as-a-Judge","https://arxiv.org/abs/2411.15594","survey","advanced","rec",0,0,"Formal reliability/bias map; write a judge policy from it"],
+["Evals","LMs (Mostly) Know What They Know","https://arxiv.org/abs/2207.05221","paper","advanced","rec",0,0,"Calibration & self-knowledge (P(True), P(IK)) — core for calibration evals"],
+["Evals","Weng — Extrinsic Hallucinations in LLMs","https://lilianweng.github.io/posts/2024-07-07-hallucination/","blog","advanced","rec",0,0,"Evaluation-centric hallucination/factuality survey"],
+["Human data","Argilla (docs + repo)","https://argilla.io/","tool","intermediate","rec",0,1,"Open annotation-workflow engineering: guidelines, multi-annotator, feeds training loops"],
+["Human data","cleanlab","https://github.com/cleanlab/cleanlab","library","intermediate","rec",0,1,"Standard label-quality / data-centric AI library — finds mislabeled & ambiguous items"],
+["Human data","Braylan et al. — Measuring Annotator Agreement Generally","https://arxiv.org/abs/2212.09503","paper","advanced","rec",0,0,"Agreement beyond naive κ for structured & free-text annotation"],
+["Human data","HelpSteer3-Preference (paper + dataset)","https://arxiv.org/abs/2505.11475","dataset","advanced","rec",0,0,"Modern open preference data (40k+, agreement-filtered) → train a small reward model"],
+["Agents","Lilian Weng — LLM Powered Autonomous Agents","https://lilianweng.github.io/posts/2023-06-23-agent/","blog","intermediate","core",0,1,"Canonical planning/memory/tool-use decomposition"],
+["Agents","Anthropic — Building effective agents","https://www.anthropic.com/engineering/building-effective-agents","post","intermediate","core",0,1,"Workflows vs agents; the no-frameworks argument"],
+["Agents","ReAct paper","https://arxiv.org/abs/2210.03629","paper","intermediate","rec",0,0,"The loop underneath every agent"],
+["Agents","Anthropic — Demystifying agent evals","https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents","post","intermediate","rec",0,0,"How a lab thinks about agent evals"],
+["Agents","HF Agents course","https://huggingface.co/learn","course","beginner","opt",0,0,"Tooling reps AFTER your bare scaffold"],
+["Agents","GAIA benchmark","https://arxiv.org/abs/2311.12983","paper","advanced","opt",0,0,"Human-easy/AI-hard tool-use tasks; internalize the design philosophy"],
+["Systems","Horace He — Making DL Go Brrrr","https://horace.io/brrr_intro.html","blog","intermediate","core",0,1,"THE mental model: compute vs memory vs overhead bound"],
+["Systems","Modal GPU Glossary","https://modal.com/gpu-glossary","reference","beginner","rec",0,0,"GPU vocabulary incl. rooflines + coalescing"],
+["Systems","Rush puzzles: Tensor→GPU→Triton→LLM-Training","https://github.com/srush/GPU-Puzzles","puzzles","advanced","core",0,1,"The hands-on spine; Triton puzzles need no GPU"],
+["Systems","GPU MODE lectures + Discord","https://github.com/gpu-mode/lectures","lectures","advanced","rec",0,1,"100+ lectures and THE community for this lane"],
+["Systems","Boehm — CUDA matmul optimization","https://siboehm.com/articles/22/CUDA-MMM","blog","advanced","rec",0,0,"The classic worked kernel-optimization example"],
+["Systems","Triton docs + tutorials","https://triton-lang.org/main/getting-started/tutorials/","docs","advanced","core",0,1,"Vector-add → softmax → matmul → flash attention"],
+["Systems","CUDA Programming Guide","https://docs.nvidia.com/cuda/cuda-programming-guide/index.html","docs","advanced","spec",0,0,"Authoritative reference (new canonical URL)"],
+["Systems","HF Ultra-Scale Playbook","https://huggingface.co/spaces/nanotron/ultrascale-playbook","book","advanced","core",0,1,"DP/TP/PP/CP + ZeRO from 4,100 real experiments"],
+["Systems","How To Scale Your Model (DeepMind)","https://jax-ml.github.io/scaling-book/","book","advanced","opt",0,0,"Rooflines + sharded matmuls from first principles"],
+["Systems","PyTorch DDP / FSDP2 tutorials","https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html","docs","intermediate","core",1,1,"The APIs you'll call; 💰 ~$5–10 for 2-GPU labs"],
+["Systems","Stas Bekman — ML Engineering","https://github.com/stas00/ml-engineering","book","advanced","rec",0,0,"Hard-won large-scale training ops knowledge"],
+["Systems","kipply — Transformer Inference Arithmetic","https://kipp.ly/transformer-inference-arithmetic/","blog","advanced","core",0,1,"The napkin math of inference: KV cache, latency"],
+["Systems","vLLM + PagedAttention + Anatomy of vLLM","https://docs.vllm.ai/en/stable/","docs","advanced","rec",0,1,"The standard serving stack and why it wins"],
+["Systems","FlashAttention paper","https://arxiv.org/abs/2205.14135","paper","advanced","core",0,1,"IO-aware attention; mandatory systems reading"],
+["Systems","BentoML LLM Inference Handbook","https://bentoml.com/llm/","handbook","intermediate","opt",0,0,"TTFT/TPS, prefix caching, batching economics"],
+["Systems","Quantization: bitsandbytes/GPTQ/AWQ/llama.cpp","https://huggingface.co/docs/bitsandbytes/index","docs","intermediate","rec",0,0,"The quality-vs-speed frontier"],
+["Systems","torchtitan / Megatron-LM / SGLang (code reading)","https://github.com/pytorch/torchtitan","repos","advanced","spec",0,0,"Production codebases to READ"],
+["Interp","ARENA 3.0","https://github.com/callummcdougall/ARENA_3.0","curriculum","advanced","spec",0,1,"The standard MATS/AISI skilling-up path"],
+["Interp","Neel Nanda — Getting Started in Mech Interp","https://www.neelnanda.io/mechanistic-interpretability/getting-started","guide","beginner","spec",0,1,"The field's canonical on-ramp"],
+["Interp","TransformerLens (+ nnsight/NDIF)","https://github.com/TransformerLensOrg/TransformerLens","library","advanced","spec",0,1,"Standard interp library; NDIF = free big-model compute"],
+["Interp","Anthropic circuits sequence (2021→2025)","https://transformer-circuits.pub/2021/framework/index.html","papers","advanced","spec",0,1,"Framework→Superposition→SAEs→Attribution graphs, in order"],
+["Interp","Distill — Zoom In (Circuits)","https://distill.pub/2020/circuits/zoom-in/","article","intermediate","spec",0,0,"The features/circuits manifesto; read first"],
+["Interp","SAELens + Neuronpedia + circuit-tracer","https://github.com/jbloomAus/SAELens","tools","advanced","spec",0,0,"Train/browse SAEs, generate attribution graphs yourself"],
+["Interp","200 Concrete Open Problems","https://www.alignmentforum.org/posts/LbrPTJ4fmABEdEnLf/200-concrete-open-problems-in-mechanistic-interpretability","sequence","advanced","spec",0,0,"The first-project picker"],
+["Safety","BlueDot — AI Alignment course","https://bluedot.org/courses/alignment","course","beginner","spec",0,1,"The structured map (ex-AGI Safety Fundamentals); curriculum free"],
+["Safety","Anthropic — Core Views on AI Safety","https://www.anthropic.com/news/core-views-on-ai-safety","doc","beginner","rec",0,0,"A frontier lab's worldview, plainly stated"],
+["Safety","Constitutional AI","https://arxiv.org/abs/2212.08073","paper","advanced","rec",0,0,"RLAIF's foundation"],
+["Safety","Alignment Faking + Sleeper Agents + Model Organisms","https://arxiv.org/abs/2412.14093","papers","advanced","spec",0,1,"The empirical-deception research program"],
+["Safety","Weak-to-Strong Generalization","https://arxiv.org/abs/2312.09390","paper","advanced","spec",0,0,"Superalignment testbed; cheaply replicable"],
+["Safety","AI Control + Ctrl-Z (Redwood)","https://arxiv.org/abs/2312.06942","papers","advanced","spec",0,1,"Control: now a core lab safety workstream"],
+["Safety","In-context Scheming (Apollo)","https://arxiv.org/abs/2412.04984","paper","advanced","spec",0,0,"The scheming-evals template"],
+["Safety","Stealth & Situational Awareness (DeepMind)","https://arxiv.org/abs/2505.01420","paper","advanced","spec",0,0,"Evals for scheming prerequisites — narrow, mechanistically motivated probes"],
+["Safety","Anthropic — Alignment auditing agents","https://alignment.anthropic.com/2025/automated-auditing/","blog","advanced","spec",0,0,"Automated auditing: investigator agents, hidden-goal discovery"],
+["Safety","DeepMind dangerous-capability evals + repo","https://arxiv.org/abs/2403.13793","paper","advanced","spec",0,0,"What safety evals operationally mean"],
+["Safety","Specification gaming (DeepMind) + examples","https://deepmind.google/discover/blog/specification-gaming-the-flip-side-of-ai-ingenuity/","blog","beginner","rec",0,0,"The classic failure catalogue"],
+["Safety","Lilian Weng — Reward Hacking","https://lilianweng.github.io/posts/2024-11-28-reward-hacking/","blog","intermediate","rec",0,1,"Classic reward hacking → RLHF-era hacking"],
+["Safety","MATS + SPAR","https://www.matsprogram.org/","program","advanced","spec",0,1,"Free, funded; the actual pipeline into lab safety teams"],
+["Multimodal","HF — VLMs Explained (+2025)","https://huggingface.co/blog/vlms","blog","intermediate","spec",0,1,"The maintained VLM map; read before papers"],
+["Multimodal","CLIP (+ Flamingo)","https://arxiv.org/abs/2103.00020","paper","intermediate","spec",0,1,"Contrastive pretraining under all VLMs"],
+["Multimodal","LLaVA","https://arxiv.org/abs/2304.08485","paper","advanced","spec",1,0,"Simplest LLM→VLM recipe; 💰 for fine-tune, free to study"],
+["Multimodal","Weng — Diffusion Models + HF Diffusion course","https://lilianweng.github.io/posts/2021-07-11-diffusion-models/","blog+course","advanced","spec",0,1,"Theory + practice halves of diffusion"],
+["Research","Schulman — Opinionated Guide to ML Research","http://joschu.net/blog/opinionated-guide-ml-research.html","essay","all","core",0,1,"Goal-driven problem selection; the notebook habit"],
+["Research","Olah — Research Taste Exercises","https://colah.github.io/notes/taste/","essay","all","core",0,1,"Five exercises for deliberate taste-building"],
+["Research","Karpathy — Recipe for Training NNs","https://karpathy.github.io/2019/04/25/recipe/","essay","intermediate","core",0,1,"The paranoid-empiricist method; reread annually"],
+["Research","Nanda — How to Write ML Papers","https://www.lesswrong.com/posts/eJGptPbbFPZGLpjsp/highly-opinionated-advice-on-how-to-write-ml-papers","essay","advanced","rec",0,0,"One claim + rigorous evidence; compression is the value"],
+["Research","Mukobi — Levelling Up in AI Safety RE","https://www.lesswrong.com/posts/uLstPRyYwzfrx3enG/levelling-up-in-ai-safety-research-engineering","guide","all","rec",0,0,"The 8-level skill tree; self-locate every 6 months"],
+["Research","80,000 Hours — 67 upskilling resources","https://80000hours.org/2025/06/technical-ai-safety-upskilling-resources/","list","all","opt",0,0,"Vetted meta-list of programs + resources"],
+["Research","Ilya Sutskever's ~30 papers","https://punkx.org/jackdoe/30.html","list","advanced","rec",0,0,"The famous foundations syllabus (provenance unofficial)"],
+["Research","Brockman — How I became an ML practitioner","https://blog.gregbrockman.com/how-i-became-a-machine-learning-practitioner","essay","all","opt",0,0,"Permission to be a beginner"],
+["Research","Chip Huyen — ML Interviews Book","https://huyenchip.com/ml-interviews-book/","book","intermediate","opt",0,0,"200+ questions as a fundamentals self-audit"]
+];
+
+const GATES=[
+["H0","Shell/Git fluency","Navigate, branch, rebase, resolve a conflict, bisect a bug — no lookups.","Stage 1"],
+["H1","Programming fluency","Unseen medium problem <45 min; project with tests passing in CI.","Stage 1"],
+["H2","Backprop from scratch","NumPy MLP with manual backward pass; gradients match PyTorch to 1e-6.","Stage 5"],
+["H3","Train MLP/CNN","CNN >90% on CIFAR-10, own training loop, LR sweep, W&B log, write-up.","Stage 5"],
+["H4","Tiny transformer","GPT (attention/MLP/LN/residuals/AdamW) written blind in <1 day; sane loss curve.","Stage 6"],
+["H5","Train a tiny language model","TinyStories/Shakespeare model with coherent samples; BPE tokenizer from scratch.","Stage 6"],
+["H6","Build an eval harness","Inspect suite: dataset, solver, scorer, report with confidence intervals.","Stage 7"],
+["H7","Model-graded eval","LLM judge validated vs ≥150 human labels; κ reported; position/length bias checks.","Stage 7"],
+["H8","Fine-tune an open model","SFT + DPO on 1–8B; before/after on a held-out eval defined in advance.","Stage 7"],
+["H9","DPO + PPO toy versions","Both from scratch on synthetic preferences; DPO loss derived on paper.","Stage 7"],
+["H10","Profile transformer inference","Batch-1 vs batch-32 profile; compute- vs memory-bound identified; predictions within 2×.","Stage 9"],
+["H11","CUDA/Triton kernel","Fused softmax or matmul benchmarked vs PyTorch eager; roofline analysis.","Stage 9"],
+["H12","Agent eval","METR-style task family (≥5 tasks, difficulty ladder, human time baselines) in Inspect.","Stage 8"],
+["H13","Technical report","Reproduction or original study written to arXiv-workshop standard, published.","Stages 11–12"]
+];
+
+const CAPS=[
+["1. Beginner programming","A CLI tool you use weekly (arXiv-fetcher with tagging), tested, packaged, CI badge."],
+["2. Math/statistics","'Statistics for model evaluation' notebook series: power analysis, multiple comparisons, bootstrap CIs, κ/α — on a public model-comparison dataset. Doubles as your evals calling card."],
+["3. Classical ML","Kaggle entry with full write-up: leakage audit, calibration analysis, error taxonomy, one from-scratch algorithm."],
+["4. PyTorch/deep learning","'Training pathology zoo': 8 induced-and-fixed failure modes with diagnosis narratives. More distinctive than another MNIST repo."],
+["5. Tiny transformer","Single-file GPT annotated line-by-line + TinyStories emergence mini-study (loss + sample quality vs size)."],
+["6. LLM fine-tuning","SFT→DPO pipeline on an open 1–8B model for a concrete behavior; pre-registered eval; honest failure discussion."],
+["7. Evals/model behavior","Original Inspect eval for a capability nobody measures well: validated judge (κ vs 150+ own labels), bias checks, error bars, public leaderboard of 5+ open models."],
+["8. Post-training/reward modeling","Train a reward model on public preferences; quantify reward hacking via best-of-n against it; write up the Goodhart divergence curves."],
+["9. Agent evals","METR-style task family in your expertise domain: human baselines, difficulty ladder, failure taxonomy from ≥50 transcripts."],
+["10. Systems/inference","'Anatomy of inference' report: profile → quantize → batch → serve one model; roofline + custom Triton kernel; predicted vs measured costs."],
+["11. Interpretability/safety","ARENA-based replication (induction heads + superposition) + one small novel observation — or a control/scheming-style eval in Inspect."],
+["12. Original research","One genuinely novel artifact in your lane, with ablations and a technical report; submitted (workshop / MATS / arXiv). The interview centerpiece."]
+];
+
+const TIERS=[
+["Tier 1 — Beginner-accessible (Stages 5–6)",[
+["AlexNet","https://papers.nips.cc/paper_files/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html","Where the modern era started","Train a small CNN; relive depth+data+GPU at toy scale"],
+["ResNet","https://arxiv.org/abs/1512.03385","Residual connections: the load-bearing trick","Ablate skips on a 20-layer net; watch it fail without them"],
+["Attention Is All You Need","https://arxiv.org/abs/1706.03762","The architecture","Annotated Transformer pass, then blind implementation"],
+["GPT-2","https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf","Next-token prediction as multitask learning","nanoGPT Shakespeare; then build-nanogpt"],
+["TinyStories","https://arxiv.org/abs/2305.07759","Emergence at 10M params","Reproduce coherence-vs-size curves on free Colab"]]],
+["Tier 2 — Foundational (Stage 6)",[
+["GPT-3","https://arxiv.org/abs/2005.14165","In-context learning discovered","Measure few-shot vs zero-shot deltas on a small model"],
+["Kaplan scaling laws","https://arxiv.org/abs/2001.08361","Loss is predictable","Fit a power law to your own 3-size sweep"],
+["Chinchilla","https://arxiv.org/abs/2203.15556","Tokens-per-parameter correction","Recompute optimal size for your budget vs Kaplan"],
+["Adam / BatchNorm / Dropout","https://arxiv.org/abs/1412.6980","The training toolkit's origins","Implement Adam from pseudocode; verify vs torch.optim"],
+["The Bitter Lesson","http://www.incompleteideas.net/IncIdeas/BitterLesson.html","The meta-lesson","One-page 'does my project scale?' audit"],
+["Ilya's ~30-papers list","https://punkx.org/jackdoe/30.html","The rest of the foundations tier","One learning-log write-up per paper"]]],
+["Tier 3 — Modern LLM / post-training / evals (Stage 7)",[
+["InstructGPT","https://arxiv.org/abs/2203.02155","The RLHF pipeline","SFT a small model; measure deltas with a validated judge"],
+["DPO","https://arxiv.org/abs/2305.18290","Preference optimization without RL","Derive from the RLHF objective; implement (Gate H9)"],
+["Constitutional AI","https://arxiv.org/abs/2212.08073","RLAIF","Toy critique-revision loop with a small critic"],
+["Tulu 3","https://arxiv.org/abs/2411.15124","The open frontier recipe","Reproduce one stage at 1B scale"],
+["DeepSeek-R1","https://arxiv.org/abs/2501.12948","Reasoning via verifiable-reward RL","Tiny GRPO on GSM8K-style problems"],
+["MT-Bench / LLM-as-judge","https://arxiv.org/abs/2306.05685","Judge biases quantified","Replicate position bias with 200 paired comparisons"],
+["GPQA","https://arxiv.org/abs/2311.12022","A benchmark built for scalable oversight","Build one GPQA-style item in your expert domain"],
+["SWE-bench","https://arxiv.org/abs/2310.06770","Agentic evals at scale","Run -lite on one model; analyze 10 failure transcripts"],
+["RE-Bench (METR)","https://arxiv.org/abs/2411.15114","AI vs human researchers, baselined","Design one RE-Bench-style task in your domain"],
+["METR time-horizons","https://arxiv.org/abs/2503.14499","The time-horizon framing of capability","Recompute their curve from released data; critique it"],
+["The Leaderboard Illusion","https://arxiv.org/abs/2504.20879","How rankings distort","One-page implications for your own eval design"],
+["Model-Written Evaluations","https://arxiv.org/abs/2212.09251","Models generating evals that surface hidden behaviors","Build one model-written eval; audit its items by hand"],
+["A Survey on LLM-as-a-Judge","https://arxiv.org/abs/2411.15594","Formal judge reliability/bias map","Write a judge policy: triage vs ground truth"],
+["LMs (Mostly) Know What They Know","https://arxiv.org/abs/2207.05221","Calibration & self-knowledge","Confidence-vs-accuracy curves on an open model"],
+["Anthropic HH-RLHF","https://arxiv.org/abs/2204.05862","Preference modeling for helpful/harmless","Pipeline compare/contrast with InstructGPT"],
+["Llama 3 Herd of Models","https://arxiv.org/abs/2407.21783","Fullest open account of a modern training run","Summarize its post-training + eval sections"],
+["HelpSteer3-Preference","https://arxiv.org/abs/2505.11475","Modern agreement-filtered open preference data","Train a small reward model on a subset"]]],
+["Tier 4 — Systems (Stage 9)",[
+["FlashAttention","https://arxiv.org/abs/2205.14135","IO-aware exact attention","Explain from memory hierarchy; run the Triton version"],
+["PagedAttention / vLLM","https://arxiv.org/abs/2309.06180","Virtual memory for the KV cache","Measure vLLM vs naive generate throughput yourself"],
+["ZeRO","https://arxiv.org/abs/1910.02054","Sharded optimizer states","Map stages 1–3 onto FSDP2 settings in a toy run"],
+["Megatron-LM","https://arxiv.org/abs/1909.08053","Tensor parallelism","Hand-draw the sharded matmul; verify shapes in code"],
+["Speculative decoding","https://arxiv.org/abs/2211.17192","Draft-verify","Toy 2-model implementation; measure acceptance rate"],
+["GPTQ / AWQ","https://arxiv.org/abs/2210.17323","Post-training quantization","Int4-quantize a model; perplexity + latency deltas"]]],
+["Tier 5 — Interpretability / safety (Stage 10)",[
+["Zoom In: Circuits","https://distill.pub/2020/circuits/zoom-in/","The manifesto","Framing read"],
+["Mathematical Framework for Transformer Circuits","https://transformer-circuits.pub/2021/framework/index.html","QK/OV, induction heads","Reproduce induction heads in TransformerLens"],
+["Toy Models of Superposition","https://transformer-circuits.pub/2022/toy_model/index.html","Features ≠ neurons","Reproduce fully on free Colab"],
+["Towards + Scaling Monosemanticity","https://transformer-circuits.pub/2023/monosemantic-features","SAEs","Train a small SAE with SAELens on GPT-2"],
+["Circuit Tracing + Biology of an LLM","https://transformer-circuits.pub/2025/attribution-graphs/biology.html","Attribution graphs on a production model","Generate one with circuit-tracer on an open model"],
+["Sleeper Agents + Alignment Faking","https://arxiv.org/abs/2401.05566","Empirical deception","Mini model-organism on a 1B model"],
+["Weak-to-Strong Generalization","https://arxiv.org/abs/2312.09390","The oversight testbed","GPT-2-small supervising GPT-2-large on classification"],
+["AI Control","https://arxiv.org/abs/2312.06942","Safety despite subversion","Trusted-monitoring protocol in an Inspect sandbox"],
+["In-context Scheming","https://arxiv.org/abs/2412.04984","Scheming-evals methodology","Adapt one scenario into your own Inspect eval"],
+["Stealth & Situational Awareness","https://arxiv.org/abs/2505.01420","Evals for scheming prerequisites","Design one narrow, mechanistically motivated probe suite"],
+["Alignment auditing agents (Anthropic)","https://alignment.anthropic.com/2025/automated-auditing/","Automated auditing with investigator agents","Reproduce a mini auditing game on a toy model"]]],
+["Tier 6 — Frontier open problems (Stages 11–12)",[
+["Concrete Problems in AI Safety","https://arxiv.org/abs/1606.06565","The 2016 list — what's still open?","Write '2026 status of each problem'"],
+["On the Measure of Intelligence","https://arxiv.org/abs/1911.01547","Generalization vs skill","Attempt ARC-AGI; analyze why LLMs struggle"],
+["GDPval","https://arxiv.org/abs/2510.04374","Measuring real economic work","One profession-grade task with expert rubric (your wheelhouse)"],
+["Dangerous Capabilities (DeepMind)","https://arxiv.org/abs/2403.13793","The dangerous-capabilities methodology","Study design only — don't build dual-use evals independently"]]]
+];
+
+const INS=[
+["Karpathy — on shortification of learning","https://x.com/karpathy/status/1756380066580455557","career-strategy","Learning must feel like effortful gym sessions, not content snacking.","Schedule 2–3h deep blocks; video-watching is scheduling, not studying."],
+["Karpathy — How to become expert at thing","https://x.com/karpathy/status/1325154823856033793","career-strategy","Concrete projects depth-first; teach everything; compare only to younger you.","This curriculum's project-first, log-everything structure operationalizes it."],
+["Karpathy — Recipe for Training Neural Networks","https://karpathy.github.io/2019/04/25/recipe/","technical","Training fails silently; be paranoid, visualize, overfit one batch first.","The literal checklist for every run, Stages 5–12."],
+["Karpathy — Yes you should understand backprop","https://karpathy.medium.com/yes-you-should-understand-backprop-e2f06eab496b","technical","Backprop is a leaky abstraction (dead ReLUs, vanishing sigmoids).","Hand-derive backward passes once — justifies Gate H2."],
+["Karpathy — Software 2.0","https://karpathy.medium.com/software-2-0-a64152b37c35","research-taste","Datasets are source code; curation is programming.","Treat data work in Stages 6–7 as first-class engineering."],
+["Karpathy — nanochat release","https://github.com/karpathy/nanochat/discussions/1","technical","The full ChatGPT pipeline is now a ~$100, 8k-line readable artifact.","The Stage 6–7 bridge capstone."],
+["Schulman — Opinionated Guide to ML Research","http://joschu.net/blog/opinionated-guide-ml-research.html","research-taste","Goal-driven beats idea-driven; keep one notebook; progress + growth loops.","Adopt the notebook habit at Stage 5; reread at Stage 11."],
+["Olah — Research Taste Exercises","https://colah.github.io/notes/taste/","research-taste","Five exercises: e.g. 'rival scooped you — relieved or upset?'","Run quarterly against your project list from Stage 10 on."],
+["Sutton — The Bitter Lesson","http://www.incompleteideas.net/IncIdeas/BitterLesson.html","research-taste","General methods that scale beat clever engineering, for 70 years.","Before adding any inductive bias, ask 'does this scale?'"],
+["Hyung Won Chung — Don't teach. Incentivize.","https://www.youtube.com/watch?v=kYWUEV_e2ss","research-taste","Incentivize general capability rather than teaching behaviors.","Apply 'what does this objective incentivize?' to every fine-tune."],
+["Jason Wei — Some intuitions about LLMs","https://ai4comm.media.mit.edu/slides/emergence.pdf","technical","Aggregate loss is smooth; individual abilities jump.","Use the 'loss smooth / tasks jumpy' lens on every scaling paper."],
+["Nathan Lambert — RLHF resources + My path into AI","https://www.interconnects.ai/p/rlhf-resources","resource-discovery","The curated post-training reading stack + honest career account.","Subscribe to Interconnects as your post-training news layer."],
+["Hamel Husain — Your AI Product Needs Evals","https://hamel.dev/blog/posts/evals/","technical","Failed AI products share one root cause: no systematic evals.","The 3-level harness pattern for the Stage 7 capstone."],
+["Yan/Husain et al. — A Year of Building with LLMs","https://www.oreilly.com/radar/what-we-learned-from-a-year-of-building-with-llms-part-i/","technical","Tactical/operational/strategic lessons from actually shipping.","Implement the eval-first loop before adding features."],
+["Chip Huyen — ML Interviews Book (free)","https://huyenchip.com/ml-interviews-book/","career-strategy","200+ questions doubling as a fundamentals self-audit.","Use Part II as your Stage 4–6 self-audit."],
+["Brockman — How I became an ML practitioner","https://blog.gregbrockman.com/how-i-became-a-machine-learning-practitioner","career-strategy","OpenAI's co-founder stalled 3 years; the blocker was beginner-ego.","Explicit permission for a physician to be terrible at something for a year."],
+["Howard/Thomas — fast.ai teaching philosophy","https://www.fast.ai/posts/2016-10-08-teaching-philosophy.html","career-strategy","Top-down 'whole game' learning: play first, formalize later.","Run fast.ai top-down in parallel with Karpathy bottom-up."],
+["Chollet — On the Measure of Intelligence + ARC","https://arcprize.org","research-taste","Intelligence = skill-acquisition efficiency, not skill.","ARC as a Stage 12 portfolio option."],
+["Sasha Rush — the puzzle suite","https://github.com/srush/Triton-Puzzles","resource-discovery","Systems knowledge as puzzle ladders.","The Stage 9 spine: Tensor→GPU→Triton→LLM-Training, in order."],
+["Keller Jordan — Muon + modded-nanogpt","https://kellerjordan.github.io/posts/muon/","research-taste","Speedrunning as honest empirical methodology; Muon emerged from it.","Use the speedrun as a cheap honest benchmark for training ideas."],
+["Nanda — How to Write ML Papers","https://www.lesswrong.com/posts/eJGptPbbFPZGLpjsp/highly-opinionated-advice-on-how-to-write-ml-papers","research-taste","A paper = one narrative claim + rigorous evidence.","Write the claim + figure-1 sketch before final experiments."],
+["Mukobi — Levelling Up in AI Safety RE","https://www.lesswrong.com/posts/uLstPRyYwzfrx3enG/levelling-up-in-ai-safety-research-engineering","career-strategy","An 8-level skill tree from zero to frontier-ready.","Locate your level every 6 months; do that level's goals."],
+["Rogers-Smith — Career in technical AI alignment","https://forum.effectivealtruism.org/posts/7WXPkpqKGKewAymJf/how-to-pursue-a-career-in-technical-ai-alignment","career-strategy","Empirical vs theoretical tracks; contributor roles need no PhD.","Decide empirical-vs-theoretical by end of Stage 7 (for you: empirical)."],
+["Ilya's ~30 papers (mirror)","https://punkx.org/jackdoe/30.html","resource-discovery","'Learn these and you know 90% of what matters.'","Section G Tier 2's foundation; provenance unofficial, content excellent."]
+];
+
+const TRAPS=[
+["Course collecting","Finishing videos feels like progress; only artifacts count. No new course until the current deliverable is on GitHub."],
+["Prompt-only AI work","Prompt craft is a commodity; it builds none of the capability-map skills."],
+["Skipping math","You'll survive Stages 5–6 on pattern-matching, then hit a wall in RLHF objectives, scaling laws, eval statistics — your target lanes."],
+["Skipping CS","'I only need ML' collapses at Stage 9; frontier engineering is systems engineering."],
+["Weak coding","The #1 rejection reason for career-changers at labs. If H1 was a struggle, stay in Stage 1."],
+["API-wrapper projects","Product instinct, not research capability. Fine for fun; not portfolio."],
+["Shallow evals","Accuracy on 100 vibes-picked examples is not an eval. No CIs, no validated grader, no error analysis = no evidence."],
+["Overtrusting LLM judges","The field's most common sin (position/length/self-preference bias). Never publish an unvalidated judge."],
+["Poor statistics","Uncorrected multiple comparisons, cherry-picked seeds, no power analysis. Your medical-stats instincts are an unfair advantage — use them."],
+["No reproducibility","Unseeded, unversioned, undocumented experiments are anecdotes."],
+["No ablations","'It works' without 'which part makes it work' is engineering, not research."],
+["Reading ≠ research","500 papers read ≠ 1 result produced. Cap reading at ~30% of study time from Stage 5 on."],
+["Frontier-scale too early","$500 on a botched 7B pretrain teaches less than 50 free TinyStories experiments. Scale is the last thing you learn."],
+["Not publishing","Unpublished work is invisible work. Ship every stage."],
+["Optimizing for certificates","No frontier lab has ever hired for a certificate. Artifacts, references, interviews — that's the whole game."]
+];
+
+const COMPUTE=[
+["Local machine","Stages 0–5 entirely. CPU-first debugging forever: make bugs fail fast on tiny tensors before any GPU touches your code."],
+["Google Colab (free)","T4 sessions: micrograd → nanoGPT-Shakespeare, TinyStories, LoRA on 1–3B, ARENA notebooks, Triton interpreter. Checkpoint to Drive."],
+["Kaggle (free)","30 GPU-hrs/week (P100/T4×2), longer sessions than Colab — the Stage 4–6 workhorse. Datasets + competitions built in."],
+["Hugging Face","Free model/dataset hosting + Spaces. Host every artifact here and on GitHub."],
+["Free cloud credits","Rotating student/researcher programs (Modal, Lambda, Together, provider trials). GPU MODE / MATS / SPAR provide compute to participants. Never pre-buy hardware."],
+["Rented GPUs 💰","$1–3/hr A100/H100 spot. Budget: ~$20 Stage 7 DPO + ~$30 Stage 9 multi-GPU + ~$100 optional nanochat + ~$100–200 reproductions ≈ $250–350 total / 3 years."],
+["Small open models","Qwen3 0.6–8B, Llama 3.x 1–8B, SmolLM3, Gemma. Everything in Stages 7–12 works ≤8B; GPT-2-class remains the interp standard."],
+["LoRA/QLoRA","4-bit + adapters = 7–8B fine-tuning on a free T4/L4. Default QLoRA; full-parameter only when the experiment demands it."],
+["Toy-scale experiments","TinyStories, makemore data, GSM8K slices for GRPO. The pedagogically optimal scale is smaller than pride suggests."],
+["Synthetic + public datasets","Generate preference pairs/eval items with open models — dataset synthesis is itself half of modern post-training. FineWeb-Edu slices for curation practice."]
+];
+
+const BIB=[
+["Courses","MIT 18.06 · MIT 18.05 · Stat 110 · Statistical Rethinking · fast.ai Comp LA · CS50P · CS50x · Missing Semester 2026 · MIT 6.006 · Nand2Tetris · CMU 15-445 · Kurose · ISLP videos · INRIA sklearn MOOC · Kaggle Learn · Google MLCC · Karpathy Zero to Hero · fast.ai 1&2 · MIT 6.S191 · NYU DL · CS231n · CS224n · CS25 · CS336 · HF LLM/smol/Agents/Diffusion courses · RLHF Book course · ARENA 3.0 · BlueDot Alignment · GPU MODE · Spinning Up"],
+["Textbooks (all free)","MML · Blitzstein & Hwang · Boyd · MacKay · ISLP · PRML · Bishop DL · UDL (Prince) · Little Book of DL · d2l.ai · Think Python · Automate the Boring Stuff · Pro Git · OSTEP · SWE at Google · Good Research Code Handbook · RLHF Book · Ultra-Scale Playbook · Smol Training Playbook · How To Scale Your Model · Stas Bekman ML Engineering · BentoML Inference Handbook · HF Evaluation Guidebook · ML Interviews Book"],
+["Docs","Python tutorial · pytest · packaging.python.org · GitHub Actions · Google Python Style · W&B · MLflow · Hydra · PyTorch · TRL · bitsandbytes · HF quantization · Inspect · lm-eval-harness · lighteval · OpenAI Cookbook · Anthropic eval docs · Triton · CUDA Guide · vLLM · Modal GPU Glossary"],
+["Repos","micrograd · makemore · nn-zero-to-hero · microgpt · nanoGPT · build-nanogpt · nanochat · modded-nanogpt · LLMs-from-scratch · reasoning-from-scratch · stanford-cs336 · alignment-handbook · open-instruct · open-r1 · verl · OpenRLHF · nanotron · torchtitan · Megatron-LM · llama.cpp · SGLang · flash-attention · Rush puzzle suite · TransformerLens · SAELens · circuit-tracer · Neuronpedia · ARENA_3.0 · METR task-standard · dangerous-capability-evaluations · EleutherAI cookbook · fastbook · numerical-linear-algebra · stat_rethinking_2024 · py-spy"],
+["Papers","See the Papers tab (Tiers 1–6): AlexNet → ResNet → Transformer → GPT-2/3 → Kaplan/Chinchilla → InstructGPT/DPO/CAI → Tulu 3/R1 → MT-Bench/GPQA/SWE-bench/RE-Bench/GDPval → FlashAttention/PagedAttention/ZeRO/Megatron → circuits sequence → Sleeper Agents/Alignment Faking/Weak-to-Strong/Control/Scheming → CLIP/Flamingo/LLaVA"],
+["Blogs","karpathy.github.io · colah.github.io · lilianweng.github.io · joschu.net · jasonwei.net · interconnects.ai · hamel.dev · eugeneyan.com · huyenchip.com · sebastianraschka.com/magazine · horace.io · siboehm.com · kipp.ly · kellerjordan.github.io · blog.eleuther.ai · blog.vllm.ai · transformer-circuits.pub · distill.pub · neelnanda.io · blog.redwoodresearch.org · metr.org/blog · anthropic.com/research · deepmind.google blog · aisnakeoil.com · fast.ai · blog.gregbrockman.com · incompleteideas.net"],
+["X / practitioner","See the Practitioner Insight tab — 24 verified items with links, categories, and actions"],
+["Communities","GPU MODE Discord · EleutherAI Discord · Alignment Forum / LessWrong (curated sequences) · Hugging Face Hub/forums · Kaggle · MATS · SPAR · ARC Prize · CS336/ARENA study groups"]
+];
+
+/* ---------------- STATE ---------------- */
+const KEY="faicc-progress-v1";
+let state={};
+try{state=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){state={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+
+/* ---------------- RENDER ---------------- */
+function cb(id){return `<input type="checkbox" data-pid="${id}" ${state[id]?"checked":""}>`}
+
+// stages
+document.getElementById("stages").innerHTML=STAGES.map((s,i)=>{
+  const micro=(MICRO[s.n]||[]).map((m,mi)=>{
+    const id="m"+s.n+"_"+mi;
+    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span>${esc(m[0])}</span><span class="hrs">~${m[1]}h</span></label>`;
+  }).join("");
+  const contract=CONTRACT.map((c,ci)=>{
+    const id="c"+s.n+"_"+ci;
+    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span>${esc(c)}</span></label>`;
+  }).join("");
+  const lock = s.n==="7" ? `
+<div class="card" id="lanecard" style="margin-bottom:12px;border-color:var(--purple)">
+  <h3 style="color:var(--purple)">🔒 Specialization lock (after Stage 7)</h3>
+  <p>Pick ONE primary lane and commit for 6–12 months. Everything else drops to literacy-level. Without this, the curriculum stays broad but never sharp.</p>
+  <div id="lanestatus" class="meta" style="margin-top:8px"></div>
+  <div class="pbtns" style="margin-top:8px">
+    <select id="lanesel" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 9px;border-radius:6px;font-size:12.5px">
+      ${LANES.map(l=>`<option>${l}</option>`).join("")}
+    </select>
+    <button onclick="lockLane()">Lock it in</button>
+    <button onclick="unlockLane()">Unlock (requires confirmation)</button>
+  </div>
+</div>` : "";
+  return `
+<details class="stage" ${i===0?"open":""}>
+  <summary><span class="snum">Stage ${s.n}</span><span class="stitle">${s.t}</span>
+    <span class="sprog"><span class="sbar"><span id="sb-${s.n}"></span></span><span class="stxt" id="st-${s.n}"></span></span>
+    <span class="sdur">${s.d}</span></summary>
+  <div class="sbody">
+    <h4>Goal</h4><p>${s.goal}</p>
+    <h4 class="alt">Best resources</h4><p>${s.res.map(r=>`<a href="${r[1]}" target="_blank">${esc(r[0])}</a>`).join(" · ")}</p>
+    <h4 style="color:var(--green)">Session milestones (~2–4h each — check one per sitting)</h4>
+    <div class="micro">${micro}</div>
+    <h4>Deliverables</h4><p>${s.del}</p>
+    <h4 class="gate">Gate</h4><p>${s.gate}</p>
+    <p style="color:var(--red);font-size:13px;margin-top:4px"><b>⛔ ${esc(BLOCK[s.n])}</b></p>
+    <h4 class="warn">Traps</h4><p>${s.trap}</p>
+    <h4 style="color:var(--gold)">Stage completion contract — all four must exist, publicly</h4>
+    <div class="micro">${contract}</div>
+    <label class="done">${cb("stage"+s.n)} Stage ${s.n} complete <span style="color:var(--muted)">(locked until the contract above is fully checked)</span></label>
+  </div>
+</details>${lock}`;}).join("");
+
+function updateStageBars(){
+  STAGES.forEach(s=>{
+    const items=(MICRO[s.n]||[]);
+    const done=items.filter((_,mi)=>state["m"+s.n+"_"+mi]).length;
+    const pct=items.length?Math.round(100*done/items.length):0;
+    const bar=document.getElementById("sb-"+s.n), txt=document.getElementById("st-"+s.n);
+    if(bar){bar.style.width=pct+"%"; if(pct===100)bar.style.background="var(--gold)";}
+    if(txt)txt.textContent=done+"/"+items.length;
+  });
+}
+
+// resources
+const topics=[...new Set(RES.map(r=>r[0]))];
+const tsel=document.getElementById("ftopic");
+topics.forEach(t=>{const o=document.createElement("option");o.textContent=t;tsel.appendChild(o)});
+const tierName={core:"Core",rec:"Recommended",opt:"Optional",spec:"Specialization"};
+const tierCls={core:"c-core",rec:"c-rec",opt:"c-opt",spec:"c-spec"};
+function renderRes(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const ft=tsel.value, fl=document.getElementById("flevel").value,
+        fr=document.getElementById("ftier").value, fc=document.getElementById("fcost").value;
+  let rows="",n=0;
+  RES.forEach((r,i)=>{
+    const [topic,name,url,type,level,tier,cost,prim,why]=r;
+    if(ft&&topic!==ft)return; if(fl&&level!==fl&&level!=="all")return;
+    if(fr&&tier!==fr)return; if(fc!==""&&String(cost)!==fc)return;
+    if(q&&!(name+" "+why+" "+topic+" "+type).toLowerCase().includes(q))return;
+    n++;
+    rows+=`<tr><td>${cb("res"+i)}</td>
+      <td><div class="rname" ${prim?'style="color:var(--accent)"':''}><a href="${url}" target="_blank" ${prim?'style="color:var(--accent)"':''}>${esc(name)}</a>${cost?' <span class="chip c-cost">💰</span>':''}</div>
+      <div class="rwhy">${esc(why)}</div></td>
+      <td>${topic}</td><td>${type}</td><td>${level}</td>
+      <td><span class="chip ${tierCls[tier]}">${tierName[tier]}</span></td></tr>`;
+  });
+  document.getElementById("rbody").innerHTML=rows;
+  document.getElementById("rcount").textContent=`${n} resources shown (of ${RES.length}) · orange = primary choice for its topic`;
+  bindChecks();
+}
+["q","ftopic","flevel","ftier","fcost"].forEach(id=>document.getElementById(id).addEventListener("input",renderRes));
+
+// gates
+document.getElementById("gatelist").innerHTML=GATES.map((g,i)=>`
+<div class="gaterow">${cb("gate"+i)}<span class="gid">${g[0]}</span>
+<div><b>${g[1]}</b> <span class="chip c-cat">${g[3]}</span><p>${g[2]}</p></div></div>`).join("");
+
+// capstones
+document.getElementById("caplist").innerHTML=CAPS.map((c,i)=>`
+<div class="card"><h3>${cb("cap"+i)} ${c[0]}</h3><p>${c[1]}</p></div>`).join("");
+
+// papers
+document.getElementById("tierlist").innerHTML=TIERS.map((t,ti)=>`
+<div class="tier"><h3>${t[0]}</h3>${t[1].map((p,pi)=>`
+<div class="paper">${cb("pap"+ti+"_"+pi)}<div><a href="${p[1]}" target="_blank"><b>${esc(p[0])}</b></a> — ${esc(p[2])}<div class="pw">Reproduce: ${esc(p[3])}</div></div></div>`).join("")}</div>`).join("");
+
+// insights
+document.getElementById("inslist").innerHTML=INS.map(x=>`
+<div class="card"><h3><a href="${x[1]}" target="_blank">${esc(x[0])}</a></h3>
+<span class="chip c-cat">${x[2]}</span><span class="chip c-free" style="margin-left:6px">Practitioner/X insight</span>
+<p style="margin-top:8px">${esc(x[3])}</p><p class="meta"><b>Action:</b> ${esc(x[4])}</p></div>`).join("");
+
+// traps
+document.getElementById("traplist").innerHTML=TRAPS.map(t=>`<li><b>${t[0]}.</b> ${t[1]}</li>`).join("");
+
+// compute
+document.getElementById("complist").innerHTML=COMPUTE.map(c=>`<div class="card"><h3>${c[0]}</h3><p>${c[1]}</p></div>`).join("");
+
+// bibliography
+document.getElementById("biblist").innerHTML=BIB.map(b=>`<div class="bibgroup"><h3>${b[0]}</h3><p>${b[1]}</p></div>`).join("");
+
+/* ---------------- NAV ---------------- */
+document.getElementById("nav").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));
+  e.target.classList.add("active");
+  document.getElementById(e.target.dataset.s).classList.add("active");
+  window.scrollTo(0,0);
+});
+
+/* ---------------- PROGRESS ---------------- */
+function bindChecks(){
+  document.querySelectorAll("input[data-pid]").forEach(el=>{
+    el.onchange=()=>{
+      // Stage-complete is locked behind the completion contract
+      if(el.checked && el.dataset.pid.startsWith("stage")){
+        const n=el.dataset.pid.slice(5);
+        const missing=CONTRACT.filter((_,ci)=>!state["c"+n+"_"+ci]);
+        if(missing.length){
+          alert("Stage "+n+" contract not met. Still missing:\n\n• "+missing.join("\n• ")+"\n\nProgress means externally legible artifacts, not completed resources.");
+          el.checked=false; return;
+        }
+      }
+      if(el.checked)state[el.dataset.pid]=Date.now(); else delete state[el.dataset.pid];
+      save();
+      const lab=el.closest("label[data-mid]");
+      if(lab)lab.classList.toggle("checked",el.checked);
+      updateBar(); updateStageBars();
+    };
+  });
+}
+
+/* Specialization lock */
+function laneStatus(){
+  const el=document.getElementById("lanestatus"); if(!el)return;
+  const L=state["_lane"];
+  el.innerHTML = L ? `🔒 <b style="color:var(--purple)">${L.lane}</b> — locked ${new Date(L.ts).toLocaleDateString()} (commit 6–12 months; review at your quarterly audit)`
+                   : "No lane locked yet. Do this the week you pass Gate H9.";
+}
+function lockLane(){
+  const lane=document.getElementById("lanesel").value;
+  if(state["_lane"]&&!confirm("A lane is already locked ("+state["_lane"].lane+"). Replace it?"))return;
+  state["_lane"]={lane,ts:Date.now()}; save(); laneStatus();
+}
+function unlockLane(){
+  if(!state["_lane"])return;
+  if(confirm("Unlocking before 6 months usually means lane-hopping, not learning. Unlock anyway?")){delete state["_lane"];save();laneStatus();}
+}
+
+/* Quarterly audit */
+function auditStatus(){
+  const el=document.getElementById("auditstatus"); if(!el)return;
+  const t=state["_audit"];
+  if(!t){el.innerHTML="No audit logged yet.";return;}
+  const days=Math.floor((Date.now()-t)/864e5);
+  el.innerHTML = days>90 ? `<span style="color:var(--red)"><b>⚠ Audit overdue</b> — last audit ${days} days ago (${new Date(t).toLocaleDateString()})</span>`
+                         : `Last audit: ${new Date(t).toLocaleDateString()} (${days} days ago — next due in ${90-days} days)`;
+}
+function logAudit(){ state["_audit"]=Date.now(); save(); auditStatus(); }
+function updateBar(){
+  // count unique ids across the whole app (resources may be filtered out of DOM)
+  const totalIds=new Set();
+  STAGES.forEach(s=>totalIds.add("stage"+s.n));
+  STAGES.forEach(s=>CONTRACT.forEach((_,ci)=>totalIds.add("c"+s.n+"_"+ci)));
+  Object.keys(MICRO).forEach(k=>MICRO[k].forEach((_,mi)=>totalIds.add("m"+k+"_"+mi)));
+  RES.forEach((r,i)=>totalIds.add("res"+i));
+  GATES.forEach((g,i)=>totalIds.add("gate"+i));
+  CAPS.forEach((c,i)=>totalIds.add("cap"+i));
+  TIERS.forEach((t,ti)=>t[1].forEach((p,pi)=>totalIds.add("pap"+ti+"_"+pi)));
+  const total=totalIds.size;
+  const done=Object.keys(state).filter(k=>totalIds.has(k)).length;
+  document.getElementById("pfill").style.width=(100*done/total)+"%";
+  document.getElementById("ptext").textContent=`${done} / ${total} items complete (milestones, stages, resources, gates, capstones, papers)`;
+  // pace: check-offs are timestamped (older saves count as done but not toward pace)
+  const now=Date.now(), wk=now-7*864e5, mo=now-30*864e5;
+  let w=0,m=0;
+  Object.entries(state).forEach(([k,v])=>{ if(totalIds.has(k)&&typeof v==="number"&&v>1e12){ if(v>=wk)w++; if(v>=mo)m++; } });
+  const hrs=Object.entries(state).reduce((a,[k,v])=>{
+    const mm=k.match(/^m(\d+)_(\d+)$/);
+    return (mm&&MICRO[mm[1]]&&MICRO[mm[1]][+mm[2]]&&typeof v==="number"&&v>1e12&&v>=wk)?a+MICRO[mm[1]][+mm[2]][1]:a;
+  },0);
+  document.getElementById("pace").textContent =
+    done===0 ? "Check off session milestones as you go — pace shows up here." :
+    `Pace: ${w} check-off${w!==1?"s":""} this week (~${hrs}h of milestone work) · ${m} in the last 30 days`;
+}
+function exportProgress(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="faicc-progress.json";a.click();
+}
+function importProgress(){
+  const inp=document.createElement("input");inp.type="file";inp.accept=".json";
+  inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{try{state=JSON.parse(r.result);save();location.reload()}catch(e){alert("Invalid file")}};r.readAsText(f)};
+  inp.click();
+}
+function resetProgress(){ if(confirm("Reset all progress?")){state={};save();location.reload();} }
+
+renderRes(); bindChecks(); updateBar(); updateStageBars(); laneStatus(); auditStatus();
+</script>
+</body>
+</html>

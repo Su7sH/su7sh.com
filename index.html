@@ -566,6 +566,17 @@ body::before {
 .seam:hover::after,
 .seam:focus::after { opacity: .6; height: 1px; }
 
+.atlas-gate {
+  cursor: pointer;
+  transition: filter .9s ease, text-shadow .9s ease;
+}
+.atlas-gate:hover,
+.atlas-gate:focus {
+  filter: brightness(1.18);
+  text-shadow: 0 0 26px rgba(100,206,251,.3);
+  outline: none;
+}
+
 /* ───── generic long-form section ───── */
 .long-sec {
   position: relative;
@@ -1096,7 +1107,7 @@ body::before {
       </div>
       <h1 class="hero-title">
         <span class="line">Suyash.</span>
-        <span class="line hero-coords"><span class="shiny-text" id="heroCoords">18°40′56″ N · 73°55′11″ E</span></span>
+        <span class="line hero-coords"><span class="shiny-text atlas-gate" id="heroCoords" tabindex="0" role="link" aria-label="open the atlas">18°40′56″ N · 73°55′11″ E</span></span>
       </h1>
       <div class="hero-ctas">
         <a href="#experience" class="btn btn-primary">See experience
@@ -1614,6 +1625,23 @@ if (seam) {
   });
 }
 
+/* ─── the atlas — the map behind the work ─── */
+const atlasGate = document.getElementById('heroCoords');
+if (atlasGate) {
+  const enterAtlas = () => {
+    document.body.style.transition = 'opacity 1.1s cubic-bezier(.4,0,.2,1)';
+    document.body.style.opacity = '0';
+    setTimeout(() => { window.location.href = 'atlas.html'; }, 950);
+  };
+  atlasGate.addEventListener('click', e => { e.preventDefault(); enterAtlas(); });
+  atlasGate.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      enterAtlas();
+    }
+  });
+}
+
 /* ─── live coordinates — pushed from phone via gist ─── */
 (function initLiveCoords(){
   const el = document.getElementById('heroCoords');
@@ -1656,11 +1684,16 @@ console.log(
   '%cand behind the letter, a room.',
   'font-family:Inter,sans-serif;font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.2em'
 );
+console.log(
+  '%cand under the coordinates, an atlas.',
+  'font-family:Inter,sans-serif;font-size:10px;color:rgba(100,206,251,.5);letter-spacing:.2em'
+);
 
 /* ─── the written note, for those who look ─── */
 // The door is on this page — in the "About" section.
 // One word, mid-paragraph, in a sentence about passing through walls.
 // It reads as prose. It rewards slow reading.
+// The map is higher up, resting in the coordinates.
 </script>
 
 </body>
