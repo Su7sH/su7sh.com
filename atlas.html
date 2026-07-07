@@ -244,6 +244,9 @@
   ol.traps li{margin-bottom:.6rem;font-size:.86rem;color:var(--w-55)}
   ol.traps li::marker{color:var(--w-25);font-family:var(--mono);font-size:.7rem}
   ol.traps li b{color:var(--red);font-weight:500}
+  /* drift — untracked plates, a dimmer light */
+  #drift .tier h3{color:var(--accent2)}
+  #drift .paper{padding-left:.1rem}
   .bibgroup{margin-bottom:1.2rem}
   .bibgroup h3{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1rem;color:var(--accent2);margin-bottom:.3rem}
   .bibgroup p{font-size:.8rem;color:var(--w-45);line-height:1.7}
@@ -315,6 +318,7 @@
     <button data-s="capstones">capstones</button>
     <button data-s="papers">papers</button>
     <button data-s="insights">signals</button>
+    <button data-s="drift">drift</button>
     <button data-s="traps">illusions</button>
     <button data-s="compute">compute</button>
     <button data-s="bib">bibliography</button>
@@ -377,6 +381,13 @@
   <h2>X / Practitioner Insight</h2>
   <p class="sub">High-signal posts from people doing the work. Marked Practitioner/X insight — not primary academic evidence. Each includes the concrete action it implies.</p>
   <div class="grid" id="inslist"></div>
+</section>
+
+<!-- ================= DRIFT ================= -->
+<section id="drift">
+  <h2>drift</h2>
+  <p class="sub">for the evenings the mind is dim but the pull is still there. pick the layer the head allows tonight. nothing here is counted or checked — the current only keeps you in the water. anything marked <b>⌨</b> is reconnaissance: it must be re-done with hands on keyboard before it counts anywhere else in the atlas.</p>
+  <div id="driftlist"></div>
 </section>
 
 <!-- ================= TRAPS ================= -->
@@ -903,6 +914,39 @@ document.getElementById("inslist").innerHTML=INS.map(x=>`
 <div class="card"><h3><a href="${x[1]}" target="_blank">${esc(x[0])}</a></h3>
 <span class="chip c-cat">${x[2]}</span><span class="chip c-free" style="margin-left:6px">Practitioner/X insight</span>
 <p style="margin-top:8px">${esc(x[3])}</p><p class="meta"><b>Action:</b> ${esc(x[4])}</p></div>`).join("");
+
+// drift — passive plates by dimness. deliberately untracked: no ids, no checkboxes, no ledger.
+const DRIFT=[
+["i · shapes — pictures first, equations later",[
+["3Blue1Brown — Neural networks (incl. 'But what is a GPT?' + attention chapters)","https://www.3blue1brown.com/topics/neural-networks","s5·s6","","the geometry of the thing you are building"],
+["3Blue1Brown — Essence of Linear Algebra","https://www.3blue1brown.com/topics/linear-algebra","s2","","vectors as transformations; watch before Strang"],
+["3Blue1Brown — Essence of Calculus","https://www.3blue1brown.com/topics/calculus","s2","","the chain rule is backprop wearing a coat"],
+["StatQuest — core ML & statistics playlists","https://www.youtube.com/@statquest","s2·s4","","bias/variance, boosting, PCA — gently"],
+["Welch Labs — visual deep-learning explainers","https://www.youtube.com/@WelchLabsVideo","s5·s6","","beautifully produced; watch anything"]]],
+["ii · lectures — structured, watchable tired",[
+["Karpathy — Intro to Large Language Models (1h)","https://www.youtube.com/watch?v=zjkBMFhNj_g","s6","","the whole field in one talk"],
+["Karpathy — Deep Dive into LLMs like ChatGPT","https://www.youtube.com/watch?v=7xTGNNLPyMI","s6·s7","","pretrain → SFT → RLHF, hallucinations, tokenizer pathologies"],
+["Harvard Stat 110 lectures (Blitzstein)","https://stat110.hsites.harvard.edu/","s2","","story proofs; probability as narrative"],
+["Statistical Rethinking 2024 (McElreath)","https://www.youtube.com/playlist?list=PLDcUM9US4XdPz-KxHM4XHt7uUVGWWVSus","s2","","the most watchable statistics course alive"],
+["MacKay — Information Theory lectures","https://www.youtube.com/playlist?list=PLruBu5BI5n4aFpG32iMbdWoRVAA-Vcso6","s2·s6","","entropy with wit; LLM loss is this"],
+["MIT 6.S191 — Intro to Deep Learning","https://introtodeeplearning.com/","s5","","annually refreshed survey"],
+["Hyung Won Chung — Don't teach. Incentivize.","https://www.youtube.com/watch?v=kYWUEV_e2ss","s7","","what training objectives actually do"],
+["Jason Wei — Intuitions about large language models","https://www.youtube.com/watch?v=l898fqkjdFc","s6","","loss is smooth, abilities jump"],
+["Stanford CS25 — Transformers United (guest talks)","https://www.youtube.com/playlist?list=PLoROMvodv4rNiJRchCzutFw5ItR_Z27CM","s6+","","the field's pulse, one speaker at a time"]]],
+["iii · deep passes — reconnaissance for later hands",[
+["Karpathy — Zero to Hero (first viewing)","https://karpathy.ai/zero-to-hero.html","s5·s6","⌨","watch tonight, type this weekend — only the typed pass counts"],
+["Stanford CS336 — Language Modeling from Scratch (lectures)","https://www.youtube.com/playlist?list=PLoROMvodv4rOY23Y0BoGoBGgQ1zmU_MT_","s6","⌨","the assignments are the course; lectures are the map"],
+["RLHF Book — lecture course (Lambert)","https://rlhfbook.com","s7","⌨","post-training end to end"],
+["Stanford CS224n — NLP with Deep Learning","https://www.youtube.com/playlist?list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D","s6","","the academic bridge, selectively"],
+["NYU Deep Learning (LeCun & Canziani)","https://atcold.github.io/NYU-DLSP20/","s5","","energy-based models; a worldview no other course teaches"],
+["GPU MODE — lecture archive","https://www.youtube.com/@GPUMODE","s9","⌨","kernels and rooflines; watch, then puzzle"],
+["Neel Nanda — paper & code walkthroughs","https://www.youtube.com/@neelnanda2469","s10","⌨","interpretability over someone's shoulder"]]]
+];
+document.getElementById("driftlist").innerHTML=DRIFT.map(L=>`
+<div class="tier"><h3>${L[0]}</h3>${L[1].map(v=>`
+<div class="paper"><div><a href="${v[1]}" target="_blank"><b>${esc(v[0])}</b></a>
+ <span class="chip c-cat">${v[2]}</span>${v[3]?' <span class="chip c-cost">⌨ keyboard pass later</span>':''}
+<div class="pw">${esc(v[4])}</div></div></div>`).join("")}</div>`).join("");
 
 // traps
 document.getElementById("traplist").innerHTML=TRAPS.map(t=>`<li><b>${t[0]}.</b> ${t[1]}</li>`).join("");

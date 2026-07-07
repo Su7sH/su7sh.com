@@ -26,7 +26,8 @@ Never make hidden layers loud, public, or salesy. No marketing language. `atlas.
 
 ## Atlas engine (atlas.html) — functional contract
 
-All data lives in JS consts: `STAGES`, `MICRO`, `BLOCK`, `CONTRACT`, `LANES`, `RES`, `GATES`, `CAPS`, `TIERS`, `INS`, `TRAPS`, `COMPUTE`, `BIB`.
+All data lives in JS consts: `STAGES`, `MICRO`, `BLOCK`, `CONTRACT`, `LANES`, `RES`, `GATES`, `CAPS`, `TIERS`, `INS`, `DRIFT`, `TRAPS`, `COMPUTE`, `BIB`.
+The `drift` plate (passive watch queue, 3 dimness layers) is DELIBERATELY untracked: no checkboxes, no ids, no progress/ledger integration — keep it that way. Its ⌨ chip means "keyboard pass required later"; only that later pass touches gates.
 Progress persists in `localStorage` key `faicc-progress-v1` (checkbox ids in `data-pid`; values are timestamps; `_lane` and `_audit` are special keys). Export/import/reset buttons must keep working.
 Preserve these element ids: `pfill ptext pace nav stages q ftopic flevel ftier fcost rcount rbody gatelist caplist tierlist inslist traplist complist biblist veil return`.
 Stage completion is locked behind the 4-item completion contract (alert + revert). Tabs mirror to `location.hash` via `replaceState` only — never `pushState`.
