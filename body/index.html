@@ -4,64 +4,2517 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#05070a">
+<meta name="theme-color" content="#07080a">
 <title>·</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    background: #05070a;
-    color: #e8e6df;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    opacity: 0;
-    transition: opacity 1100ms cubic-bezier(.16,1,.3,1);
-  }
-  body.in { opacity: 1; }
-  main { text-align: center; padding: 2rem; }
-  h1 {
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.4rem;
-    color: rgba(232,230,223,.5);
-    letter-spacing: .01em;
-  }
-  a {
-    display: inline-block;
-    margin-top: 2.5rem;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: .62rem;
-    letter-spacing: .3em;
-    text-transform: lowercase;
-    color: rgba(232,230,223,.25);
-    text-decoration: none;
-    padding: 8px 14px;
-    transition: color 400ms ease;
-  }
-  a:hover, a:focus-visible { color: rgba(232,230,223,.8); }
-  #grain {
-    position: fixed; inset: 0; z-index: 60; pointer-events: none;
-    opacity: .035; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+:root{
+  --ink:#07080a;
+  --ink2:#0a0c10;
+  --line:rgba(255,255,255,.06);
+  --line2:rgba(255,255,255,.11);
+  --txt:#c9c6bf;
+  --dim:#8d8a82;
+  --faint:rgba(214,209,198,.38);
+  --gold:#dfa348;
+  --gold-hi:#f0c37e;
+  --gold-dim:rgba(223,163,72,.55);
+  --ember:#e8622c;
+  --steel:#9aa6b2;
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'Inter',-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-width:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0}
+html,body{background:var(--ink)}
+body{
+  font-family:var(--sans);font-weight:300;color:var(--txt);
+  font-size:15.5px;line-height:1.7;letter-spacing:.005em;
+  opacity:0;transition:opacity 1100ms cubic-bezier(.16,1,.3,1);
+  overflow-x:hidden;
+}
+body.in{opacity:1}
+body.lock{overflow:hidden}
+::selection{background:rgba(223,163,72,.25);color:#fff}
+a{color:var(--gold-dim);text-decoration:none;border-bottom:1px solid rgba(223,163,72,.18);transition:color 300ms ease,border-color 300ms ease}
+a:hover,a:focus-visible{color:var(--gold-hi);border-color:rgba(240,195,126,.5)}
+strong{font-weight:500;color:#e4e1da}
+em{font-family:var(--serif);font-style:italic;font-size:1.06em}
+code{font-family:var(--mono);font-size:.82em;color:var(--gold-dim);letter-spacing:.02em}
+button{font-family:inherit}
+
+/* ---------- fixed chrome ---------- */
+#veil{position:fixed;inset:0;background:var(--ink);z-index:90;pointer-events:none;opacity:0;transition:opacity 700ms ease}
+#veil.on{opacity:1;pointer-events:all}
+#return{
+  position:fixed;top:22px;right:26px;z-index:50;
+  font-family:var(--mono);font-weight:300;font-size:.6rem;letter-spacing:.32em;text-transform:lowercase;
+  color:rgba(214,209,198,0);border:none;padding:10px 6px;
+  animation:retfade 1400ms ease 2000ms forwards;
+}
+@keyframes retfade{to{color:rgba(214,209,198,.32)}}
+#return:hover,#return:focus-visible{color:rgba(240,195,126,.85);transition:color 400ms ease}
+#grain{position:fixed;inset:0;z-index:80;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+#vig{position:fixed;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 42%,transparent 55%,rgba(3,4,5,.55) 100%)}
+
+/* ---------- the stage ---------- */
+#stage{position:fixed;inset:0;overflow:hidden;z-index:1}
+#bg,#fg{position:absolute;inset:0;width:100%;height:100%}
+#bg{z-index:1}
+#fg{z-index:2}
+#world{position:absolute;inset:0;z-index:3;pointer-events:none;will-change:transform}
+#world .hall{position:absolute;top:0;height:100%;width:100vw;pointer-events:none}
+#world .hall>*{pointer-events:none}
+#world .hall .chips button,#world .hall .chips a,#world .hall input{pointer-events:auto}
+
+/* hall text composition */
+.htext{position:absolute;left:6.5vw;bottom:11.5vh;max-width:400px}
+.chips.extra{margin-bottom:.75rem}
+.yet{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.12;color:#e9e6df;margin-bottom:1.1rem;text-wrap:balance}
+.yet .soft{color:rgba(233,230,223,.42)}
+.yet.lit{color:var(--gold-hi)}
+.hk{font-family:var(--mono);font-weight:300;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-bottom:1rem}
+.hk b{font-weight:400;color:var(--gold-dim)}
+.hsub{font-size:.95rem;color:#aeaba3;line-height:1.68;margin-bottom:1.3rem}
+.hpromise{font-size:.93rem;color:var(--gold-dim);line-height:1.62;margin-bottom:1.6rem}
+.hpromise::before{
+  content:'when you leave';display:block;
+  font-family:var(--mono);font-size:.56rem;font-weight:400;letter-spacing:.34em;text-transform:uppercase;
+  color:rgba(223,163,72,.5);margin-bottom:.4rem;
+}
+.chips{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+.chip{
+  background:#14100a;border:1px solid rgba(223,163,72,.5);color:rgba(240,195,126,.9);
+  font-family:var(--mono);font-weight:400;font-size:.68rem;letter-spacing:.2em;text-transform:lowercase;
+  padding:13px 22px;cursor:pointer;transition:all 350ms ease;
+}
+.chip:hover,.chip:focus-visible{border-color:rgba(240,195,126,.9);color:#f6dcae;background:#221a0e}
+.chip.ghost{background:var(--ink2);border-color:rgba(255,255,255,.16);color:#a5a29a}
+.chip.ghost:hover,.chip.ghost:focus-visible{border-color:rgba(240,195,126,.6);color:var(--gold-hi);background:#10131a}
+.sealtag{font-family:var(--mono);font-size:.58rem;letter-spacing:.24em;color:var(--faint)}
+.sealtag.on{color:var(--gold)}
+
+/* threshold + terminus */
+.hall.threshold .htext{left:7vw;bottom:auto;top:50%;transform:translateY(-50%);max-width:480px}
+.hall.threshold h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(3rem,6.5vw,5.4rem);line-height:1.02;color:#ece9e2;margin-bottom:1.4rem}
+.hall.threshold h1 .amp{color:var(--gold)}
+.walkcue{
+  display:flex;align-items:center;gap:16px;margin-top:2.8rem;
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.3em;color:rgba(240,195,126,.8);
+}
+.walkcue::before{content:'';width:54px;height:1px;background:linear-gradient(90deg,transparent,rgba(240,195,126,.55))}
+.walkcue .arr{display:inline-block;font-size:1.05rem;letter-spacing:.1em;animation:cue 1.9s ease-in-out infinite}
+@keyframes cue{0%,100%{opacity:.9;transform:translateX(0)}50%{opacity:.35;transform:translateX(12px)}}
+#pbar{position:fixed;top:0;left:0;height:1px;width:0;background:linear-gradient(90deg,rgba(223,163,72,.1),var(--gold));z-index:46;pointer-events:none}
+.hall.terminus .htext{max-width:460px}
+
+/* language input (hall 07) */
+.speak{position:absolute;left:50%;bottom:10vh;transform:translateX(-50%);width:min(520px,86vw);text-align:center}
+.speak .sug{display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;margin-bottom:1rem}
+.sbtn{
+  background:#14100a;border:1px solid rgba(223,163,72,.4);color:rgba(240,195,126,.85);
+  font-family:var(--mono);font-weight:400;font-size:.62rem;letter-spacing:.12em;text-transform:lowercase;
+  padding:8px 14px;cursor:pointer;pointer-events:auto;transition:all 300ms ease;
+}
+.sbtn:hover,.sbtn:focus-visible{border-color:rgba(240,195,126,.85);background:#221a0e;color:#f6dcae}
+.speak input{
+  width:100%;background:none;border:none;border-bottom:1px solid rgba(223,163,72,.35);
+  font-family:var(--mono);font-weight:300;font-size:.88rem;letter-spacing:.06em;color:#eee9df;
+  padding:11px 2px;outline:none;transition:border-color 300ms ease;text-align:center;
+}
+.speak input:focus{border-color:rgba(240,195,126,.8)}
+.speak input::placeholder{color:rgba(214,209,198,.3)}
+.speak .reply{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;color:rgba(240,195,126,.6);margin-top:.8rem;min-height:1.3em}
+
+/* ---------- hud ---------- */
+#hud{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;align-items:center;gap:2rem;
+  padding:14px 26px;font-family:var(--mono);font-weight:300;pointer-events:none}
+#hud .loc{font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);min-width:15em}
+#hud .dots{display:flex;gap:14px;margin:0 auto;pointer-events:auto}
+#hud .dots button{
+  background:none;border:none;cursor:pointer;padding:8px 2px;position:relative;
+  font-size:.5rem;letter-spacing:.12em;color:rgba(214,209,198,.22);transition:color 300ms ease;
+}
+#hud .dots button:hover,#hud .dots button:focus-visible{color:rgba(240,195,126,.85)}
+#hud .dots button.on{color:var(--gold)}
+#hud .dots button.sealed::after{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:1px;width:3px;height:3px;background:var(--gold);border-radius:50%}
+#hud .meter{font-size:.55rem;letter-spacing:.22em;color:var(--faint);min-width:8em;text-align:right;pointer-events:auto;user-select:none;-webkit-user-select:none;touch-action:manipulation;padding:14px 0 14px 20px;margin:-14px 0}
+#awk{position:fixed;inset:0;z-index:75;pointer-events:none;opacity:0;transition:opacity 700ms ease;
+  background:radial-gradient(ellipse 90% 70% at 50% 62%, rgba(223,163,72,.30), rgba(223,163,72,.04) 55%, transparent 75%)}
+#awk.on{opacity:1;transition:opacity 250ms ease}
+#hud .meter b{font-weight:400;color:var(--gold-dim)}
+#hud .loc.prev{color:var(--gold)}
+#sound{
+  position:fixed;top:52px;right:26px;z-index:50;background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-weight:300;font-size:.6rem;letter-spacing:.3em;text-transform:lowercase;
+  color:rgba(214,209,198,.26);padding:8px 6px;transition:color 400ms ease;
+}
+#sound:hover,#sound:focus-visible{color:rgba(240,195,126,.7)}
+#sound.on{color:var(--gold)}
+
+/* ---------- dossier ---------- */
+#dback{position:fixed;inset:0;z-index:60;background:rgba(4,5,7,.6);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity 500ms ease}
+#dback.on{opacity:1;pointer-events:auto}
+#dossier{
+  position:fixed;z-index:61;left:50%;bottom:0;transform:translate(-50%,105%);
+  width:min(780px,94vw);height:88dvh;background:#0a0b0e;
+  border:1px solid var(--line2);border-bottom:none;
+  transition:transform 650ms cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column;
+}
+#dossier.on{transform:translate(-50%,0)}
+#dhead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:1.5rem 2.2rem 1.2rem;border-bottom:1px solid var(--line);flex-shrink:0}
+#dhead .dt{font-family:var(--mono);font-size:.66rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+#dhead .ds{font-family:var(--mono);font-size:.57rem;letter-spacing:.2em;color:var(--faint);margin-top:.35rem}
+#dclose{background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:.58rem;letter-spacing:.26em;
+  color:var(--dim);padding:8px 10px;transition:color 300ms ease}
+#dclose:hover,#dclose:focus-visible{color:var(--gold-hi)}
+#dbody{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:2rem 2.2rem 4rem;scrollbar-width:thin;scrollbar-color:rgba(223,163,72,.25) transparent}
+#dbody::-webkit-scrollbar{width:4px;display:block}
+#dbody::-webkit-scrollbar-thumb{background:rgba(223,163,72,.25)}
+
+/* dossier document styles */
+#dbody h3{font-family:var(--mono);font-weight:400;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);margin:2.4rem 0 .9rem}
+#dbody h3:first-child{margin-top:0}
+#dbody .lede{font-size:.95rem;color:#b3b0a8;max-width:58ch;line-height:1.65}
+.res{border-top:1px solid var(--line)}
+.res .row{display:flex;align-items:baseline;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line)}
+.res .row .t{flex:1;min-width:0}
+.res .row .t a{font-weight:400;color:#d6d3cb;border-bottom-color:rgba(255,255,255,.12)}
+.res .row .t a:hover{color:var(--gold-hi);border-bottom-color:rgba(240,195,126,.5)}
+.res .row .t .note{display:block;font-size:.85rem;color:var(--dim);margin-top:3px;line-height:1.6}
+.res .row .hrs{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+.ck{position:relative;flex-shrink:0}
+.ck input{position:absolute;opacity:0;inset:-10px;width:auto;height:auto;cursor:pointer;margin:0}
+.ck .bx{display:block;width:16px;height:16px;border:1px solid rgba(214,209,198,.35);transition:border-color 300ms ease,background 300ms ease;position:relative;top:2px}
+.ck input:hover+.bx,.ck input:focus-visible+.bx{border-color:rgba(240,195,126,.7)}
+.ck input:checked+.bx{background:rgba(223,163,72,.85);border-color:rgba(223,163,72,.9)}
+.ck input:checked+.bx::after{content:'';position:absolute;inset:4px;background:#0a0b0e}
+.ck input:focus-visible+.bx{outline:1px solid rgba(240,195,126,.6);outline-offset:2px}
+.concepts li{list-style:none;padding:.45rem 0 .45rem 1.4rem;position:relative;font-size:.9rem;color:#b7b4ac;border-bottom:1px solid rgba(255,255,255,.03);line-height:1.62}
+.concepts li::before{content:'—';position:absolute;left:0;color:rgba(223,163,72,.4);font-family:var(--mono);font-size:.7rem;top:.55rem}
+.gate{margin:2.4rem 0;border-left:1px solid rgba(232,98,44,.55);padding:1.3rem 0 1.3rem 1.6rem;position:relative}
+.gate::before{content:'';position:absolute;left:-1px;top:0;width:1px;height:100%;box-shadow:0 0 18px rgba(232,98,44,.35)}
+.gate .gk{font-family:var(--mono);font-size:.58rem;letter-spacing:.36em;color:var(--ember);margin-bottom:.9rem}
+.gate .gbody{font-size:.95rem;color:#c9c6bf;line-height:1.68}
+.gate .gbody p{margin-bottom:.8rem}
+.gate .gbody p:last-child{margin-bottom:0}
+.gate .sub{font-family:var(--mono);font-size:.56rem;letter-spacing:.24em;color:rgba(232,98,44,.75);display:block;margin:1rem 0 .3rem}
+.traps li{list-style:none;padding:.5rem 0 .5rem 1.4rem;position:relative;font-size:.88rem;color:var(--dim);line-height:1.62}
+.traps li::before{content:'×';position:absolute;left:0;color:rgba(232,98,44,.5);font-family:var(--mono)}
+.traps li b{font-weight:400;color:#bab7af}
+.contract{margin-top:2.4rem;border:1px solid var(--line2);padding:1.5rem 1.6rem 1.2rem}
+.contract .chd{font-family:var(--mono);font-size:.56rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);margin-bottom:1rem}
+.contract .ci{display:flex;gap:.9rem;align-items:baseline;padding:.55rem 0;border-top:1px solid rgba(255,255,255,.04)}
+.contract .ci .cl{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;color:var(--gold-dim);width:6.6em;flex-shrink:0}
+.contract .ci .cd{font-size:.87rem;color:#adaaa2;flex:1;line-height:1.58}
+.seal{margin-top:1.4rem;position:relative}
+.seal input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.seal .sb{display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(223,163,72,.3);
+  padding:13px 18px;font-family:var(--mono);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold-dim);transition:all 400ms ease}
+.seal .sb .st{opacity:.55;letter-spacing:.16em;text-transform:lowercase}
+.seal input:hover+.sb,.seal input:focus-visible+.sb{border-color:rgba(240,195,126,.6);color:var(--gold-hi)}
+.seal input:focus-visible+.sb{outline:1px solid rgba(240,195,126,.5);outline-offset:3px}
+.seal input:checked+.sb{background:rgba(223,163,72,.08);border-color:rgba(223,163,72,.65);color:var(--gold)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:1.4rem}
+.card{background:rgba(255,255,255,.012);border:1px solid var(--line);padding:1.3rem 1.4rem}
+.card .ch{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.5rem}
+.card .cn{font-weight:400;font-size:.93rem;color:#d9d6ce}
+.card .cn a{color:inherit;border-bottom-color:rgba(255,255,255,.1)}
+.card .tag{font-family:var(--mono);font-size:.52rem;letter-spacing:.18em;color:var(--faint);white-space:nowrap}
+.card .tag.hot{color:rgba(232,98,44,.8)}
+.card p{font-size:.85rem;color:var(--dim);line-height:1.6}
+.card .vd{margin-top:.7rem;font-size:.84rem;color:#b3b0a8;line-height:1.58}
+.card .vd::before{content:'verdict — ';font-family:var(--mono);font-size:.54rem;letter-spacing:.2em;color:rgba(223,163,72,.55)}
+.lrow{display:flex;align-items:baseline;gap:1.1rem;padding:.7rem 0;border-bottom:1px solid var(--line);font-size:.87rem}
+.lrow .li{flex:1;color:#c2bfb7;line-height:1.55}
+.lrow .li .s{color:var(--dim);font-size:.8rem}
+.lrow .lp{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--gold-dim);white-space:nowrap}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin:2.2rem 0 .5rem}
+.phead h3{margin:0 !important}
+.phead .tot{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;color:var(--gold)}
+.papers .row{display:flex;gap:1rem;align-items:baseline;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.papers .row .t{flex:1;font-size:.89rem;color:#c2bfb7;line-height:1.58}
+.papers .row .t a{color:#d6d3cb;font-weight:400;border-bottom-color:rgba(255,255,255,.1)}
+.papers .row .t .why{display:block;font-size:.82rem;color:var(--dim);margin-top:2px}
+.papers .row .yr{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;color:var(--faint);white-space:nowrap}
+.sig .band{padding:1.4rem 0;border-top:1px solid var(--line)}
+.sig .band .bh{display:flex;gap:1.3rem;align-items:baseline;margin-bottom:.9rem}
+.sig .band .bh h3{margin:0 !important}
+.sig .band .bh .dm{font-family:var(--mono);font-size:.52rem;letter-spacing:.2em;color:var(--faint)}
+.sig .it{display:inline-block;margin:0 1.5rem .55rem 0;font-size:.85rem}
+.sig .it a{color:#b9b6ae;border-bottom-color:rgba(255,255,255,.08)}
+.sig .it .w{color:var(--dim);font-size:.77rem}
+.sig .dim1{opacity:.85}.sig .dim2{opacity:.62}.sig .dim3{opacity:.42}
+.vs{margin:1.6rem 0;border-top:1px solid var(--line)}
+.vs .r{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;padding:.8rem 0;border-bottom:1px solid var(--line);font-size:.85rem;line-height:1.55}
+.vs .r.hd{font-family:var(--mono);font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;color:var(--faint);padding:.55rem 0}
+.vs .a{color:var(--dim)}
+.vs .b{color:#cfccc4}
+.pull{font-family:var(--serif);font-style:italic;font-size:1.5rem;line-height:1.35;color:#ddd9d1;
+  border-left:1px solid rgba(223,163,72,.4);padding-left:1.4rem;margin:1.8rem 0}
+.pull .hot{color:var(--gold)}
+.audit .cap{display:flex;gap:.9rem;align-items:baseline;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.audit .cap .cd{font-size:.9rem;color:#c2bfb7;flex:1;line-height:1.55}
+.ledbtns{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.4rem}
+.ledbtns button{background:none;border:1px solid var(--line2);color:var(--dim);font-family:var(--mono);font-weight:300;
+  font-size:.56rem;letter-spacing:.26em;text-transform:lowercase;padding:10px 18px;cursor:pointer;transition:all 300ms ease}
+.ledbtns button:hover,.ledbtns button:focus-visible{border-color:rgba(240,195,126,.5);color:var(--gold-hi)}
+#dbody .close-note{margin-top:3rem;font-family:var(--serif);font-style:italic;color:rgba(201,198,191,.45);font-size:1rem}
+
+/* ---------- responsive ---------- */
+@media (max-width:860px){
+  #return{top:16px;right:16px}
+  .htext{left:6vw;right:6vw;bottom:10.5vh;max-width:none}
+  .hall.threshold .htext{left:8vw;right:8vw}
+  .yet{font-size:1.7rem}
+  #hud{padding:10px 14px;gap:1rem}
+  #hud .loc{display:none}
+  #hud .meter{min-width:6em}
+  #dossier{width:100vw;height:94dvh}
+  #dhead,#dbody{padding-left:1.3rem;padding-right:1.3rem}
+  .vs .r{grid-template-columns:1fr;gap:.3rem}
+  .vs .r.hd{display:none}
+  .vs .r .a::before{content:'ml — ';font-family:var(--mono);font-size:.54rem;letter-spacing:.2em;color:var(--faint)}
+  .vs .r .b::before{content:'robot — ';font-family:var(--mono);font-size:.54rem;letter-spacing:.2em;color:rgba(223,163,72,.5)}
+  .speak{bottom:24vh}
+}
+@media (max-width:480px){
+  body{font-size:14.5px}
+  .res .row{flex-wrap:wrap}
+  .res .row .hrs{width:100%;padding-left:23px}
+  .lrow{flex-wrap:wrap;gap:.2rem .8rem}
+}
+@media (prefers-reduced-motion:reduce){
+  body,#veil{transition:none}
+  #return{animation:none;color:rgba(214,209,198,.32)}
+  .walkcue{animation:none;opacity:.5}
+  #dossier{transition:none}
+}
 </style>
 </head>
 <body>
-<main>
-  <h1>the body is still being assembled.</h1>
-  <a href="../atlas.html">&larr; atlas</a>
-</main>
+<div id="stage">
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <canvas id="fg" aria-hidden="true"></canvas>
+  <div id="world"></div>
+</div>
+<div id="vig" aria-hidden="true"></div>
+<div id="awk" aria-hidden="true"></div>
+<div id="pbar" aria-hidden="true"></div>
+<a id="return" href="../atlas.html">· atlas</a>
+<button id="sound" type="button" aria-label="toggle ambient sound">♪ sound</button>
+<nav id="hud" aria-label="halls">
+  <span class="loc" id="hudloc"></span>
+  <span class="dots" id="huddots"></span>
+  <span class="meter" id="hudmeter"></span>
+</nav>
+<div id="dback"></div>
+<aside id="dossier" role="dialog" aria-modal="true" aria-label="work order">
+  <div id="dhead">
+    <div><div class="dt" id="dtitle">—</div><div class="ds" id="dsub"></div></div>
+    <button id="dclose" type="button">put it down ×</button>
+  </div>
+  <div id="dbody"></div>
+</aside>
 <div id="grain" aria-hidden="true"></div>
+<div id="veil" aria-hidden="true"></div>
+<div id="track" style="position:relative;width:1px"></div>
 <script>
-  requestAnimationFrame(function(){ document.body.classList.add('in'); });
-  window.addEventListener('pageshow', function(e){ if (e.persisted) document.body.classList.add('in'); });
+/* ================= DATA ================= */
+const HALLS = [
+{
+  id:'s1', code:'substrate', name:'the substrate',
+  yet:'it cannot see the pattern.', lit:'it sees structure.',
+  dur:'12–16 weeks',
+  sub:'The mathematical bed the whole machine grows from. Medicine already gave you calculus, statistics, and a feel for signal and noise — here you gain the computational framing: matrices as transformations, probability as inference, optimization as the engine under every controller.',
+  promise:'PCA written from scratch, run on your own medical images, and explained publicly in your own words.',
+  hint:'stir the points',
+  acquire:'python env (conda/venv) · jupyter · numpy / scipy / matplotlib',
+  res:[
+    {n:'3Blue1Brown — Essence of Linear Algebra', u:'https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab', note:'All 15 episodes. Watch, then re-derive every claim. The five hours that make every robotics textbook readable.', h:'5–8 h'},
+    {n:'MIT OCW 18.01 / 18.02 — Calculus', u:'https://ocw.mit.edu/courses/18-02-multivariable-calculus-fall-2007/', note:'Chain rule, Jacobians, optimization. Reference chapters as needed — your training already carries the rest.', h:'ref'},
+    {n:'Harvard Stat 110 — Blitzstein', u:'https://stat110.net', note:'The full course. You already think Bayesian from the reading room; now formalize it into an instrument.', h:'40–60 h'},
+    {n:'Python Data Science Handbook — VanderPlas, ch. 2–4', u:'https://jakevdp.github.io/PythonDataScienceHandbook/', note:'NumPy, pandas, matplotlib. Do the examples actively — this is the daily language of everything ahead.', h:'20–30 h'},
+  ],
+  con:[
+    'Eigendecomposition, SVD, QR — and where they live in robotics: PCA for sensor compression, SVD for the pseudoinverse in IK, QR for least-squares',
+    'Gradient descent from first principles; implement backprop by hand, once',
+    'Conditional probability, Bayes, Gaussians, sum/product rule, maximum likelihood',
+    'NumPy broadcasting cold — vectorized computation without loops',
+  ],
+  gate:`<p>Implement <strong>PCA from scratch</strong> — pure numpy, no sklearn — and apply it to a medical imaging dataset you already have access to: a DICOM series, radiomics features. Write a <strong>1500-word technical post</strong> explaining the math from eigendecomposition to geometric interpretation, code and plots embedded. Post it publicly.</p><p>This is the exact loop frontier research runs on — math → code → communication — and after this hall it is yours.</p>`,
+  traps:[
+    '<b>Passive watching.</b> Every 3B1B video should leave you with ten lines of numpy — derive, don’t just admire.',
+    '<b>Treating Stat 110 as review.</b> The combinatorics and MGF material are genuinely new, and they resurface inside Kalman and particle filters.',
+    '<b>Skipping the C++ seed.</b> Plant learncpp.com ch. 1–6 as a parallel 2 hr/week track from week 4 — future-you will be grateful before Hall 03.',
+  ],
+},
+{
+  id:'s2', code:'skeleton', name:'the skeleton',
+  yet:'it cannot reach.', lit:'it reaches.',
+  dur:'10–14 weeks',
+  sub:'Rigid body geometry — the true shape of motion. Rotations that never lie, frames that compose, kinematic chains that reach. You learn screw theory, the elegant modern language that Drake, contemporary planners, and every serious manipulation course now speak.',
+  promise:'forward and inverse kinematics you wrote yourself, verified against a physics engine to within a millimetre.',
+  hint:'drag its hand',
+  acquire:'mujoco + dm_control installed · SO-ARM100 urdf downloaded',
+  res:[
+    {n:'Modern Robotics — Lynch & Park, ch. 1–6', u:'https://hades.mech.northwestern.edu/index.php/Modern_Robotics', note:'Free preprint PDF. Configuration space, SO(3), SE(3), screw theory, FK, velocity kinematics. Your primary mathematics reference — the proofs are where the understanding lives.', h:'6–8 wks'},
+    {n:'learncpp.com — through ch. 14', u:'https://www.learncpp.com/', note:'Parallel track: classes, templates, smart pointers. Functional C++, exactly the level the field actually uses.', h:'2 h/wk'},
+    {n:'MuJoCo docs + dm_control', u:'https://mujoco.readthedocs.io/en/stable/python.html', note:'Set the simulation up now — Hall 03 opens the moment this is running.', h:'setup'},
+  ],
+  con:[
+    'Rotation representations — matrices, axis-angle, quaternions, Euler — and where each one breaks (gimbal lock, discontinuities)',
+    'SO(3) and SE(3) as the real geometry of rigid motion; why screw theory supersedes DH',
+    'Forward kinematics via product of exponentials',
+    'Geometric and numerical IK; Jacobian pseudoinverse; singularity handling',
+    'URDF — write one by hand for a simple arm',
+  ],
+  gate:`<p>Implement <strong>FK and numerical IK from scratch</strong> in pure numpy for a 6-DOF arm modeled on the SO-ARM100’s published URDF. Verify against MuJoCo: <strong>2000 random joint configurations, FK matching site positions to &lt;1&nbsp;mm RMS</strong>. Run your IK on 500 random target poses; report solve rate and mean error.</p><p>Publish on GitHub with a reproducible <code>requirements.txt</code> and a results table — any engineer who clones it verifies your numbers in under five minutes. That is what engineering credibility looks like.</p>`,
+  traps:[
+    '<b>Learning DH instead of screw theory.</b> DH is legacy notation — read it in old literature, never derive in it.',
+    '<b>Skipping the Lynch & Park proofs.</b> The proofs are why your IK will behave near singularities when others’ diverge.',
+    '<b>Deferring MuJoCo setup.</b> Simulation running before Hall 03 keeps the momentum unbroken.',
+    '<b>Euler angles internally.</b> Visualization output only. Never store orientation as Euler angles.',
+  ],
+},
+{
+  id:'s3', code:'muscle', name:'the muscle',
+  yet:'it cannot stand.', lit:'it stands.',
+  dur:'14–18 weeks',
+  sub:'Dynamics, control, trajectory optimization — where the skeleton learns to hold itself against gravity and move on purpose. The steepest hall in the university, and the one that changes how you see every moving thing for the rest of your life.',
+  promise:'a controller you derived by hand, holding sixty seconds of balance against chaos.',
+  hint:'give it a shove',
+  acquire:'SO-ARM100 urdf working in mujoco',
+  res:[
+    {n:'Control Bootcamp — Steve Brunton', u:'https://www.youtube.com/playlist?list=PLMrJAkhIeNNR20Mz-VpzgfQs5zrYi085m', note:'All lectures, in order, derive everything. The best free control theory resource on the internet, and it is not close.', h:'~4 wks'},
+    {n:'MIT 6.832 — Underactuated Robotics, Tedrake', u:'https://underactuated.csail.mit.edu/', note:'Chapters 1–3, 5, 6, 9 are your path; 9–10 for trajectory optimization. A living textbook at the ceiling of the field — and you get to read it for free.', h:'grad'},
+    {n:'Modern Robotics — ch. 8–11', u:'https://hades.mech.northwestern.edu/index.php/Modern_Robotics', note:'Dynamics and trajectory generation, continuing from Hall 02.', h:'4–6 wks'},
+  ],
+  con:[
+    'Lagrangian and Newton–Euler dynamics; computing M(q), C(q,q̇), g(q)',
+    'Controllability and observability — the physical meaning, not just the definitions',
+    'LQR: cost design, the Riccati equation, infinite-horizon stability',
+    'PID from first principles; integral windup and its prevention',
+    'Trajectory optimization: direct collocation, shooting, the idea of iLQR',
+    'Underactuation — why a double pendulum cannot be linearized away',
+    'Frequency domain: Bode plots, gain and phase margin, bandwidth limits',
+  ],
+  gate:`<span class="sub">gate a</span><p><strong>LQR cart-pole from scratch</strong> in MuJoCo — Riccati solved in numpy, no control library. Balance <strong>60 consecutive seconds</strong> from random initial angles in ±15°. Video with the state plot overlaid.</p><span class="sub">gate b</span><p><strong>Joint-space PID with analytic gravity feedforward</strong> on the Hall-02 arm. A smooth figure-8 at 0.3&nbsp;m/s, <strong>&lt;8&nbsp;mm RMS tracking over ten laps</strong>. The gravity term derived, not tuned. Publish both, with video.</p><p>The exhibit beside you is running this exact controller. After this hall, you can build it.</p>`,
+  traps:[
+    '<b>A control library before you’ve derived LQR by hand once.</b> scipy is a fine servant — afterwards.',
+    '<b>Fighting all of 6.832 at once.</b> It is a graduate course; the walking and Lyapunov chapters will still be there when you return for them.',
+    '<b>Skipping frequency domain.</b> Real motors have resonance modes — knowing what bandwidth means is a superpower on hardware.',
+    '<b>Trusting the simulator.</b> Keep a running ledger of every idealization; you settle each one in Hall 05, on your terms.',
+  ],
+},
+{
+  id:'s4', code:'senses', name:'the senses',
+  yet:'it does not know where it is.', lit:'it knows where it is.',
+  dur:'10–14 weeks',
+  sub:'State estimation and SLAM — the machine learns to believe. Every sensor is a little uncertain; the craft is holding a probability distribution over the world and updating it with grace. You have practiced this reasoning for years — here it becomes an algorithm.',
+  promise:'a robot that closes the loop on a real benchmark, shipped in a container that runs anywhere.',
+  hint:'click to scatter its beliefs',
+  acquire:'docker desktop · victoria park dataset',
+  res:[
+    {n:'Probabilistic Robotics — Thrun, Burgard, Fox, ch. 2–7', u:'https://docs.ufpr.br/~danielsantos/ProbabilisticRobotics.pdf', note:'Gaussian filters, nonparametric filters, occupancy maps, EKF-SLAM. The canonical text — the filter chapters are permanently relevant.', h:'8–10 wks'},
+    {n:'Cyrill Stachniss — SLAM lectures (2020 series)', u:'https://www.youtube.com/channel/UCi1TC2fLRvgBQNe-T4dp8Eg', note:'The best free SLAM course anywhere, by a margin. Watch in order, before Thrun’s harder chapters.', h:'full course'},
+    {n:'MIT Missing Semester', u:'https://missing.csail.mit.edu/', note:'bash, vim, tmux, git, docker — two parallel weeks. From this hall onward, every project ships containerized.', h:'10–15 h'},
+  ],
+  con:[
+    'The Kalman filter derived from Bayes rule — a belief-propagation algorithm, not a formula',
+    'EKF: linearization error, when it diverges, how to detect it',
+    'Particle filters: sample impoverishment, resampling strategies, cost',
+    'Occupancy grids: log-odds updates, beam vs likelihood-field sensor models',
+    'EKF-SLAM: the joint state vector, data association, why it scales O(n²)',
+    'Graph-SLAM and factor graphs at the conceptual level — GTSAM / iSAM for implementation',
+  ],
+  gate:`<p><strong>EKF-SLAM from scratch</strong> in Python — 2D differential drive, range-bearing sensor — tested on the Victoria Park benchmark. Loop closure to <strong>&lt;2&nbsp;m RMS</strong> over the full sequence. Then wrap it as a <strong>ROS 2 node</strong>: subscribe <code>/odom</code> and <code>/landmark_detections</code>, publish <code>/map</code> and <code>/pose</code>, running in Gazebo.</p><p>Ship it in a Docker container — <code>docker run</code> and it works. The single most portfolio-legible artifact of the foundational halls, and it will be yours.</p>`,
+  traps:[
+    '<b>The motion-model Jacobian.</b> One subtle sign error hides here — knowing that in advance saves you the weeks it costs everyone else.',
+    '<b>Thrun ch. 9 cold.</b> GraphSLAM rewards preparation — Stachniss first, then Thrun, in that order.',
+    '<b>Treating data association as trivial.</b> Known correspondences first, maximum-likelihood second, JCBB never in a first pass.',
+    '<b>Postponing Docker.</b> A reproducible setup is a professional signature — start signing your work now.',
+  ],
+},
+{
+  id:'s5', code:'iron', name:'the iron',
+  yet:'it has never touched the world.', lit:'it moves through the real.',
+  dur:'10–14 weeks',
+  sub:'Real hardware and systems integration. The clean mental model meets a physical machine — encoders drift, ports vanish, wheels run 3 mm off spec. Every one of those surprises is the curriculum working: this is the hall where simulation-knowledge becomes engineering.',
+  promise:'a physical robot navigating your own corridor — built, wired, and debugged by you.',
+  hint:'click to take the controls · arrows to drive',
+  acquire:'raspberry pi 5 · rplidar a1 · motor driver · chassis + encoder motors (~₹20,000)',
+  res:[
+    {n:'Articulated Robotics — Josh Newans', u:'https://www.youtube.com/@ArticulatedRobotics', note:'The best ROS 2 curriculum in any medium. Builds a real diff-drive on camera, explains every decision, honest about the sim-to-real gap.', h:'20–30 h'},
+    {n:'Official ROS 2 tutorials — Jazzy', u:'https://docs.ros.org/en/jazzy/Tutorials.html', note:'Run alongside the videos for reference syntax. They cover different things; together they cover everything.', h:'15–25 h'},
+    {n:'ros2_control documentation', u:'https://control.ros.org/', note:'The controller vs hardware-interface split — the abstraction real robots are built on.', h:'ref'},
+    {n:'SO-ARM100 / SO-101 hardware guide', u:'https://github.com/TheRobotStudio/SO-ARM100', note:'For the arm you buy after the diff-drive gate — the skills stack in exactly that order.', h:'ref'},
+  ],
+  con:[
+    'ROS 2 architecture: nodes, topics, services, actions, lifecycle, parameters',
+    'ros2_control: where the controller ends and the hardware interface begins',
+    'Real-time constraints — why the control loop must not block on I2C, and when Python steps aside',
+    'URDF/XACRO, the TF2 tree, robot state publisher',
+    'Sensor integration: USB camera, encoders on GPIO, IMU parsing',
+    'Nav2: costmaps, recovery behaviors, behavior-tree navigation',
+    'Debugging physical systems: oscilloscope thinking, logging at 1 kHz, electrical vs software faults',
+  ],
+  gate:`<p>Build a <strong>physical diff-drive robot</strong> on a Raspberry Pi running ROS 2. It must: navigate a home corridor autonomously with <strong>Nav2 + 2D lidar</strong> on a pre-built map; <strong>localize from five different starting positions</strong>; execute a five-waypoint sequence unattended, recovering from at least one injected obstacle.</p><p>Three-minute video with the live RViz overlay — costmap, planned path, localization estimate. Code on GitHub. Integration is the rarest skill in the field — this gate is where you acquire it.</p>`,
+  traps:[
+    '<b>Buying the arm first.</b> The arm needs every skill the diff-drive teaches — take them in order and both go faster.',
+    '<b>chmod 777 on the serial port.</b> Learn udev rules instead — an afternoon that repays entire weekends.',
+    '<b>Pi networking.</b> Static IP and ROS_DOMAIN_ID in .bashrc before anything else — future sessions thank you.',
+    '<b>"It worked in sim."</b> Expected. Your encoder model is honest now, not perfect — work the differences systematically and each one makes you sharper.',
+    '<b>Dodging C++.</b> Some ros2_control interfaces speak only C++ — finish learncpp and nothing on the robot is closed to you.',
+  ],
+},
+{
+  id:'s6', code:'hands', name:'the hands',
+  yet:'it cannot hold.', lit:'it holds.',
+  dur:'14–20 weeks',
+  sub:'Learning for manipulation — where classical robotics converges with everything you know about ML, and where the clinician-AI hybrid becomes genuinely rare. Policies stop being formulas and become trained things — and you already know how to train things.',
+  promise:'a trained policy moving real objects with a real arm — filmed uncut.',
+  hint:'drag the dial — feel the demonstrations count',
+  acquire:'so-101 arm (₹27,999, thinkrobotics) · wrist camera · gpu or cloud credits',
+  res:[
+    {n:'MIT 6.4210 — Robotic Manipulation, Tedrake', u:'https://manipulation.csail.mit.edu/', note:'The single course that maps frontier manipulation. Perception, planning, control — Drake + notebooks, updated every semester.', h:'full course'},
+    {n:'CS285 — Deep RL, Levine (Berkeley)', u:'https://rail.eecs.berkeley.edu/deeprlcourse/', note:'Lectures 1–14. Lecture 2 alone explains why the whole field moved to diffusion policies.', h:'6–8 wks'},
+    {n:'Diffusion Policy — Chi et al. 2023', u:'https://arxiv.org/abs/2303.04137', note:'The paper. Read deeply, run the Colab notebooks, understand why it beats BC — everything after builds on it.', h:'paper+code'},
+    {n:'ACT + LeRobot — HuggingFace', u:'https://huggingface.co/docs/lerobot/act', note:'Action chunking, and the framework where theory becomes practice on hardware you own.', h:'paper+code'},
+  ],
+  con:[
+    'Imitation learning: behavioral cloning, DAgger, distribution shift — why the robot drives off a cliff on step 51',
+    'Policy representations: MLPs, diffusion (denoising as trajectory generation), transformer action chunking',
+    'What makes a good visual feature for contact-rich tasks',
+    'Sim-to-real: domain randomization, system identification, the MuJoCo-vs-contact gap',
+    'Reward design: sparse vs dense, reward hacking, curricula',
+    'Data collection ergonomics: teleop latency, demo quality, how many demos are actually needed',
+  ],
+  gate:`<p>Train a <strong>Diffusion Policy for pick-and-place on your real arm</strong>. Collect 80–120 teleoperated demos with a wrist camera; train with the official codebase or LeRobot; evaluate <strong>25 trials at novel object positions</strong>. Report success rate, completion time, and a failure-mode breakdown.</p><p>Reach <strong>&gt;70%</strong> and you understand the method — below 40% simply means the data pipeline needs your debugging eye first. Publish code, weights on HuggingFace, and a video of <strong>ten consecutive trials, uncut</strong>. Uncut footage is the quiet flex of someone with nothing to hide.</p>`,
+  traps:[
+    '<b>Treating it as ML, not systems.</b> A struggling policy usually means camera calibration, mount rigidity, or lighting drift — check the physical world first and you’ll fix in hours what others chase for weeks.',
+    '<b>Porting Drake into ROS.</b> Run them as separate stacks; bridge if needed.',
+    '<b>Demo-quality regimes.</b> 100 good demos beat 50 perfect ones in diffusion; the reverse holds for ACT — know which you are training.',
+    '<b>Bimanual ambition.</b> Single-arm mastery first — then two arms become an upgrade instead of a wall.',
+  ],
+},
+{
+  id:'s7', code:'world', name:'the world',
+  yet:'it cannot understand you.', lit:'it listens.',
+  dur:'20–30+ weeks · open-ended',
+  sub:'Frontier methods and research contribution — the assembly walks out of the workshop. Open-ended by design: this is research territory, and the gate is verified by the field itself. A radiologist arriving here is genuinely unusual — the field will lean in to meet you.',
+  promise:'your name in the field — a merged contribution, or a paper with your reasoning on arXiv.',
+  hint:'speak to it',
+  acquire:'a100-class gpu access (vast.ai / lambda) · aloha hardware only if the path demands it',
+  res:[
+    {n:'Isaac Lab — NVIDIA', u:'https://isaac-sim.github.io/IsaacLab/', note:'GPU-parallel RL: 4096+ environments on one card. The standard for training locomotion, and increasingly manipulation.', h:'docs'},
+    {n:'π0 — Physical Intelligence', u:'https://arxiv.org/abs/2410.24164', note:'The frontier VLA: flow matching, one set of weights across morphologies, 50 Hz control. Read it last — by then it will read like a colleague’s work.', h:'paper'},
+    {n:'OpenVLA — Kim et al.', u:'https://arxiv.org/abs/2406.09246', note:'The accessible 7B open VLA — master the fine-tuning pipeline here before π0-scale work.', h:'paper+code'},
+    {n:'LeRobot codebase — HuggingFace', u:'https://github.com/huggingface/lerobot', note:'The best-maintained open manipulation stack. If you bookmark one repo, bookmark this one.', h:'live'},
+  ],
+  con:[
+    'GPU-parallel simulation: vectorized environments, contact-rich RL at scale',
+    'VLAs: how RT-2 / OpenVLA fine-tune from VLM priors; the real data requirements',
+    'Flow matching vs diffusion for action generation — why flow is winning',
+    'Whole-body control: arm, base, torso as one hierarchical problem',
+    'Research method: find the gap, design the controlled experiment, measure the right thing',
+    'Open-source practice: reading unfamiliar codebases, reproducible experiments, PRs that merge',
+  ],
+  gate:`<span class="sub">path a — contribution</span><p>A <strong>substantive, merged PR</strong> to LeRobot, Isaac Lab, or their ecosystem. Not a typo fix — a policy implementation, an environment, a benchmark reproduction. Merged by maintainers: externally verifiable, permanently yours.</p><span class="sub">path b — preprint</span><p><strong>Reproduce a frontier result with one meaningful modification</strong> — architecture component, training distribution, new eval task, sim-to-real transfer. Eight pages, NeurIPS/ICRA format, arXiv, submitted to an ICRA or CoRL workshop. <strong>The submission itself is the gate</strong> — the moment you press submit, you are a contributing member of the field.</p>`,
+  traps:[
+    '<b>Isaac Lab API churn.</b> Pin your version, read the changelog before every pull — calm survives updates.',
+    '<b>Compute surprise.</b> π0/OpenVLA-scale experiments want A100-class hardware — budget $200–500 in cloud and it never blocks you.',
+    '<b>Reading like a tourist.</b> Track arXiv cs.RO weekly from Hall 06 — a reading list, not a bookmark folder.',
+    '<b>Working alone at the frontier.</b> Submit to workshops, post your builds, join the reading groups — your perspective is the rare one in the room.',
+  ],
+},
+];
+
+const CONTRACT = [
+  {l:'corpus', d:'Every resource in this hall worked end to end — derived, typed, run. Not watched, not skimmed.'},
+  {l:'concepts', d:'Each concept above survives a cold self-test: explain it aloud, derive it on paper, no notes.'},
+  {l:'artifact', d:'The gate artifact built to its stated numbers, verified, and public — repo, video, post.'},
+  {l:'postmortem', d:'The lab log written: what broke, what you first misread, what you would tell yourself at the start.'},
+];
+
+const TRACKS = [
+  {n:'c++', s:'halls 2–5', d:'learncpp.com ch. 1–12, OOP 14–17, smart pointers 22. Functional, not expert — exactly what the field runs on.'},
+  {n:'linux / docker', s:'halls 4–7', d:'Missing Semester, then every project containerized. You will SSH into your robot like a second home.'},
+  {n:'mujoco', s:'by end of hall 2', d:'pip install mujoco. The universal language of robotics research.'},
+  {n:'arxiv cs.ro', s:'hall 6 onward', d:'Weekly. The real skill being built is knowing where every new paper fits.'},
+  {n:'gpu cloud', s:'hall 7', d:'Vast.ai A100 under $1/hr for bursts; Lambda for multi-day runs.'},
+];
+
+const LADDER = {
+  phases:[
+    {t:'phase i — foundation', when:'months 1–6', tot:'~₹20,000', items:[
+      ['Raspberry Pi 5 (4 GB) — the brain','₹5,500','thinkrobotics'],
+      ['4WD chassis, encoder motors, L298N driver','₹2,500','robokits'],
+      ['ESP32 DevKit — co-processor / micro-ROS bridge','₹500','robu.in'],
+      ['HC-SR04 ×2 + MPU-6050 IMU','₹500','evelta'],
+      ['RPLIDAR A1M8 — the SLAM game-changer','₹8,500','robu.in'],
+      ['12V Li-ion pack, buck converter, microSD','₹2,500','—'],
+    ]},
+    {t:'phase ii — manipulation entry', when:'months 6–18', tot:'+₹60k–1.3L', items:[
+      ['SO-101 dual-arm pair — leader/follower teleop, the LeRobot workflow. The single highest-leverage purchase in India','₹55,998','thinkrobotics'],
+      ['1080p USB webcam — sufficient for first imitation learning','₹2,000','—'],
+      ['Used RTX 3090 (24 GB) or ₹15–20k Lambda credits','₹70,000','olx / cloud'],
+    ]},
+    {t:'phase iii — research rig', when:'months 18–36', tot:'+₹3–8L', items:[
+      ['Intel RealSense D435i — depth + IMU','₹51,299','mg super labs'],
+      ['Jetson Orin Nano Super — on-robot policy inference at 10–30 Hz','₹37,200','thinkrobotics'],
+      ['RTX 4090 workstation — pays for itself vs cloud in ~300 A100-hours','₹2.5–3L','elitehubs'],
+      ['Unitree Go2 Edu — only if legged locomotion becomes your track','₹3.5–5L landed','import'],
+    ]},
+  ],
+  note:'India-landed adds ~30–35% to import prices (BCD + IGST + surcharge). Check for Indian-stocked equivalents first — the SO-101 at ThinkRobotics beats importing the SO-ARM100 by ₹12,000 and a customs fight.',
+  three:[
+    ['Pi 5 + RPLIDAR + chassis — ₹20,000','Your entire foundation. Build it. Break it. Rebuild it.'],
+    ['SO-101 dual-arm pair — ₹56,000','No other arm at any nearby price is within an order of magnitude of this relevance to frontier work.'],
+    ['RTX 4090 or equivalent cloud','Policy training is where hardware meets research. Workstation if training 2+ years; cloud to defer capital.'],
+  ],
+  compute:[
+    ['Vast.ai A100','burst RL training; genuinely real','~$0.53–1.27/hr'],
+    ['Lambda Labs A100/H100','multi-day runs, guaranteed uptime','$1.79–3.29/hr'],
+    ['Used RTX 3090 24 GB','the VRAM floor for policy training','₹65–90k'],
+    ['Jetson Orin AGX 32 GB','when a diffusion policy must run at 10 Hz on the robot','₹82,999'],
+  ],
+};
+
+const SIMS = [
+  {n:'MuJoCo', u:'https://mujoco.org', t:'free · cpu ok', hot:false, d:'The universal standard. Soft contacts, implicit integration — gold standard for manipulation.', v:'If you learn one simulator, learn this one. pip install mujoco.'},
+  {n:'Isaac Lab', u:'https://isaac-sim.github.io/IsaacLab/', t:'free · rtx required', hot:false, d:'GPU-parallel RL on Isaac Sim — 4096+ envs, ~90k fps on a 4090.', v:'Where the field converged for training humanoids and quadrupeds.'},
+  {n:'Genesis', u:'https://github.com/Genesis-Embodied-AI/Genesis', t:'free · gpu rec.', hot:true, d:'Unified multi-physics — rigid, soft, fluid — 10–30× Isaac Lab on many tasks. Real: 29k stars, active releases.', v:'The rising challenger. Learn it as it becomes mainstream.'},
+  {n:'Isaac Sim', u:'https://developer.nvidia.com/isaac/sim', t:'free r&d · rtx', hot:false, d:'Photoreal RTX rendering for sensor-accurate synthetic data and digital twins.', v:'Required when sensor-level sim-to-real is the goal.'},
+  {n:'Gazebo', u:'https://gazebosim.org', t:'free', hot:false, d:'The ROS simulator — Nav2, sensor pipelines, hardware-in-the-loop.', v:'For building real ROS systems, not for RL training.'},
+  {n:'Drake', u:'https://drake.mit.edu', t:'free · advanced', hot:false, d:'MIT/TRI toolbox for principled manipulation: trajectory optimization, hydroelastic contact.', v:'The 6.4210 stack. Model-based rigor over RL-first workflows.'},
+  {n:'PyBullet', u:'https://pybullet.org', t:'free · legacy', hot:false, d:'The workhorse of 2017–21 RL research. Development has slowed.', v:'Fine for learning concepts; build new work elsewhere.'},
+  {n:'Brax / MJX', u:'https://github.com/google/brax', t:'free · jax', hot:false, d:'Differentiable physics at TPU scale; millions of steps per second.', v:'For differentiable-RL research or TPU access; else MuJoCo covers it.'},
+  {n:'Webots', u:'https://cyberbotics.com', t:'free', hot:false, d:'The most beginner-friendly simulator; wonderful coursework tool.', v:'Education first; graduate to MuJoCo for research.'},
+  {n:'CoppeliaSim', u:'https://www.coppeliarobotics.com', t:'free edu', hot:false, d:'GUI-centric industrial simulation, strong EU academic following.', v:'Relevant if a curriculum you follow is built on it.'},
+];
+
+const PAPERS1 = [
+  ['RT-2 — web knowledge → robotic control', 'https://arxiv.org/abs/2307.15818', '2023', 'Established the VLA paradigm: actions as text tokens on a 55B VLM.'],
+  ['Open X-Embodiment / RT-X', 'https://arxiv.org/abs/2310.08864', '2023', '1M+ trajectories, 22 robot types. Cross-embodiment beats specialists by ~50%.'],
+  ['ALOHA / ACT — bimanual on low-cost hardware', 'https://arxiv.org/abs/2304.13705', '2023', 'Action chunking: the default imitation recipe of 2023–24.'],
+  ['Diffusion Policy — Chi et al.', 'https://arxiv.org/abs/2303.04137', '2023', 'Policy as denoising over action trajectories. The paper of the era.'],
+  ['Octo — open generalist policy', 'https://arxiv.org/abs/2405.12213', '2024', '93M params matching 55B closed models. The paper to clone and run first.'],
+  ['OpenVLA', 'https://arxiv.org/abs/2406.09246', '2024', '7B open VLA beating RT-2-X by 16.5% absolute. The research baseline.'],
+  ['π0 — Physical Intelligence', 'https://arxiv.org/abs/2410.24164', '2024', 'Flow matching, 50 Hz control, one model across morphologies. The frontier.'],
+  ['Mobile ALOHA', 'https://arxiv.org/abs/2401.02117', '2024', 'Whole-body teleop: sautéing shrimp from 50 new demos.'],
+  ['ANYmal Parkour — ETH', 'https://arxiv.org/abs/2306.14874', '2023', 'Zero-shot sim-to-real legged locomotion at 2 m/s. The gold standard.'],
+  ['ASAP — sim/real physics alignment', 'https://arxiv.org/abs/2502.01143', '2025', 'Sim pre-training + real-world residual model. Best 2025 humanoid sim-to-real.'],
+];
+const PAPERS2 = [
+  ['GR00T N1 — NVIDIA', 'https://arxiv.org/abs/2503.14734', '2025', 'Dual-system VLA for humanoids; open weights.'],
+  ['HumanPlus — shadowing from RGB', 'https://arxiv.org/abs/2406.10454', '2024', 'The bridge between human video and robot learning.'],
+  ['ALOHA 2', 'https://arxiv.org/abs/2405.02292', '2024', 'The open bimanual hardware π0 demos run on.'],
+  ['ExBody — whole-body control', 'https://arxiv.org/abs/2402.16796', '2024', 'The starting point for WBC on real hardware.'],
+  ['UniSim — learned world simulator', 'https://arxiv.org/abs/2310.06114', '2023', 'Policies trained inside a neural video model, transferring zero-shot.'],
+  ['RoboAgent — semantic augmentation', 'https://arxiv.org/abs/2309.01918', '2023', 'Data efficiency, not just scale.'],
+];
+
+const FIELD = {
+  co:[
+    ['Physical Intelligence','software-first generalist brain · Levine, Finn, Hausman · $5.6B'],
+    ['Figure AI','hardware-first · Figure 02 loaded 90k parts at BMW Spartanburg'],
+    ['1X Technologies','the only major player targeting the home · NEO, 30 kg, soft-bodied'],
+    ['Agility Robotics','Digit — first humanoid in real industrial testing at scale (Amazon)'],
+    ['Boston Dynamics','electric Atlas, 56 DOF · best-in-class mechanics, Gemini integration'],
+    ['Unitree','the Raspberry Pi of humanoids — G1 at ~$16k, open SDK, every sim-to-real paper'],
+  ],
+  labs:[
+    ['Stanford IRIS — Finn','ALOHA, ACT, Mobile ALOHA, HumanPlus, OpenVLA'],
+    ['Berkeley RAIL — Levine','offline RL, flow-matching policies, Octo'],
+    ['ETH RSL — Hutter','ANYmal · the sim-to-real locomotion gold standard'],
+    ['MIT CSAIL — Tedrake','Drake, manipulation, trajectory optimization'],
+    ['CMU RI — Gupta / Pathak','RoboAgent, world models, curiosity'],
+    ['NVIDIA LPR','Isaac Lab + GR00T — the infrastructure and the model layer both'],
+  ],
+  coming:[
+    'VLAs commoditize; the contest shifts to data quality — an opening for careful newcomers',
+    'The ImageNet-of-manipulation race — internet video as robot pre-training',
+    'Humanoids deploy in constrained industrial settings; reliability engineering becomes the craft',
+    'World models go mainstream as training environments',
+    'Sim-to-real managed, not solved — residual calibration becomes a standard pipeline',
+    'For a radiologist: surgical robotics is where this work eventually points — ALOHA is already in surgical research',
+  ],
+};
+
+const SIGNAL = [
+  {h:'watch', dm:'video', dim:1, items:[
+    ['Articulated Robotics','https://www.youtube.com/@ArticulatedRobotics','the spine of hall 05'],
+    ['Steve Brunton','https://www.youtube.com/@Eigensteve','the math layer, beautifully'],
+    ['Cyrill Stachniss','https://www.youtube.com/channel/UCi1TC2fLRvgBQNe-T4dp8Eg','graduate SLAM, free'],
+    ['Yannic Kilcher','https://www.youtube.com/c/YannicKilcher','equation-by-equation paper reads'],
+    ['Two Minute Papers','https://www.youtube.com/channel/UCbfYPyITQ-7l4upoX8nvctg','paper radar, not depth'],
+    ['Boston Dynamics','https://www.youtube.com/@BostonDynamics','inspiration only — zero pedagogy'],
+  ]},
+  {h:'read', dm:'weekly', dim:1, items:[
+    ['Import AI — Jack Clark','https://importai.substack.com','highest signal in the field; read only one, read this'],
+    ['The Robot Report','https://therobotreport.com','what ships, what gets funded'],
+    ['BAIR Blog','https://bair.berkeley.edu/blog/','frontier methods, explained by the lab'],
+    ['Weekly Robotics','https://weeklyrobotics.com','low-noise link roundup'],
+  ]},
+  {h:'follow', dm:'x / twitter', dim:2, items:[
+    ['@pabbeel','https://x.com/pabbeel','Abbeel'],['@chelseabfinn','https://x.com/chelseabfinn','Finn'],
+    ['@svlevine','https://x.com/svlevine','Levine'],['@RussTedrake','https://x.com/RussTedrake','Tedrake — unusually interactive'],
+    ['@eigensteve','https://x.com/eigensteve','Brunton'],['@LeRobotHF','https://x.com/LeRobotHF','datasets, checkpoints, hackathons'],
+    ['@LerrelPinto','https://x.com/LerrelPinto','dexterity'],['@corl_conf','https://x.com/corl_conf','the conference that matters'],
+  ]},
+  {h:'ask', dm:'community', dim:2, items:[
+    ['LeRobot Discord','https://discord.com/invite/s3Kuuzs','where questions get answered by people actively building'],
+    ['ROS Discourse','https://discourse.ros.org','maintainers answer; a reference, not a feed'],
+    ['r/robotics','https://reddit.com/r/robotics','early exploration; mixed signal'],
+    ['ARTPARK, IISc Bangalore','https://artpark.in','the most active hub in India · ROSCon India, Pune'],
+  ]},
+  {h:'listen', dm:'podcasts', dim:3, items:[
+    ['The Robot Brains — Abbeel','https://open.spotify.com/show/2qbLq3HrhTnnmmsHc37QOD','the best robotics podcast for an ambitious beginner'],
+    ['Audrow Nash Podcast','https://audrownashpodcast.com','the industry layer'],
+    ['Lex #114 Tedrake · #162 Levine','https://lexfridman.com/podcast/','these episodes only'],
+  ]},
+  {h:'attend', dm:'proceedings', dim:3, items:[
+    ['CoRL','https://corl.org','fully open access · the venue most aligned with this path'],
+    ['RSS','https://roboticsproceedings.org','single-track, free — every paper among the year’s best'],
+    ['ICRA','https://ieee-icra.org','read via arXiv in May, follow the discussion'],
+  ]},
+];
+
+const CTRAPS = [
+  ['The math prerequisite trap','Months of linear algebra before any robot code delays the joy indefinitely. Learn math when the algorithm demands it — it sticks better that way anyway.'],
+  ['The ROS 1 trap','ROS 1 retired in May 2025. Any resource without an explicit "2" builds intuitions in a system that no longer exists.'],
+  ['The YouTube productivity illusion','Watching robot videos produces motivation, not competence. Enjoy them — one session a week — and spend the rest building.'],
+  ['The hardware-first trap','A kit bought early adds mechanical mystery to every software bug. Six to twelve months in simulation first makes the hardware feel easy when it arrives.'],
+  ['The specialization trap','Domain choices get dramatically better after six months of general work — let the fundamentals choose your specialty with you.'],
+  ['The kit trap','Cheap robot cars teach RC control, not robotics. Simulation from day one, or a mid-range arm with a real API.'],
+];
+
+const TERMINAL = [
+  'Read and reproduce an ICRA/CoRL/RSS-level manipulation or locomotion paper in under two weeks',
+  'Stand up a sim-to-real training pipeline in Isaac Lab for a novel task, without tutorial hand-holding',
+  'Identify why a learned policy fails on real hardware, and fix it — the rarest skill in the field',
+  'Contribute to open codebases with merged PRs — LeRobot, Isaac Lab, ACT',
+  'Design a novel experiment, instrument it correctly, write it up at workshop-paper level',
+  'A working manipulation demo on real hardware that you built and debugged yourself',
+];
+
+const DOCTRINE_VS = [
+  ['Dataset is fixed, i.i.d.','Data is generated by your own policy in real time; the distribution shifts as you learn.'],
+  ['Retrain and re-evaluate in hours.','Real hardware cycles take days — so you learn to design experiments that count.'],
+  ['Output is a probability vector.','Output closes a control loop at 50–1000 Hz. Latency shapes everything.'],
+  ['Failure mode: accuracy drops.','Failure mode: the robot meets the floor. You develop an engineer’s respect for gravity.'],
+  ['Uncertainty is optional.','Uncertainty is load-bearing — your Bayesian training becomes a structural advantage.'],
+  ['GPU training dominates compute.','Embedded CPU, GPU and real-time constraints coexist on one moving machine.'],
+];
+/* ================= ENGINE ================= */
+const TAU = Math.PI*2;
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const lerp = (a,b,t) => a+(b-a)*t;
+const ease = t => t<0?0:t>1?1:t*t*(3-2*t);
+const motionOK = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const GOLD = a => `rgba(223,163,72,${a})`;
+const HI   = a => `rgba(240,195,126,${a})`;
+const STEEL= a => `rgba(154,166,178,${a})`;
+const EMBER= a => `rgba(232,98,44,${a})`;
+const BLUE = a => `rgba(100,190,251,${a})`;
+const PALE = a => `rgba(214,209,198,${a})`;
+const MONO = s => `300 ${s}px "JetBrains Mono", ui-monospace, monospace`;
+
+/* ---- progress state ---- */
+const LSKEY = 'body-progress-v1';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(LSKEY)) || {}; } catch(e){ state = {}; }
+function save(){ try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch(e){} }
+let preview = false;   /* the hidden master switch — nothing is written to the ledger */
+const isSealed = i => preview || !!state['seal-'+HALLS[i].id];   /* i = 0..6 */
+const sealedCount = () => preview ? 7 : HALLS.reduce((n,h)=> n + (state['seal-'+h.id]?1:0), 0);
+
+const PIDS = [];
+HALLS.forEach(h => {
+  h.res.forEach((r,j)=>PIDS.push(`${h.id}-r${j}`));
+  [1,2,3,4].forEach(j=>PIDS.push(`${h.id}-c${j}`));
+  PIDS.push(`seal-${h.id}`);
+});
+LADDER.phases.forEach((p,pi)=>p.items.forEach((it,j)=>PIDS.push(`hw-${pi}-${j}`)));
+PAPERS1.forEach((p,j)=>PIDS.push(`fp1-${j}`));
+PAPERS2.forEach((p,j)=>PIDS.push(`fp2-${j}`));
+TERMINAL.forEach((t,j)=>PIDS.push(`term-${j}`));
+
+/* ---- geometry ---- */
+const SCENES = 9;                  /* 0 threshold · 1-7 halls · 8 terminus */
+let VW=0, VH=0, GAP=0, CMAX=0, TRACKH=0, FLOOR=0;
+let camX=0, camS=0;
+const sceneC = i => i*GAP;
+const stage = document.getElementById('stage');
+const bg = document.getElementById('bg'), bx = bg.getContext('2d');
+const fg = document.getElementById('fg'), gx = fg.getContext('2d');
+const world = document.getElementById('world');
+let DPR = 1;
+
+function layout(){
+  VW = innerWidth; VH = innerHeight;
+  DPR = Math.min(devicePixelRatio||1, VW<900?1.5:2);
+  GAP = VW * (VW<860 ? 1.25 : 1.42);
+  CMAX = sceneC(SCENES-1);
+  FLOOR = VH*0.80;
+  [bg,fg].forEach(c => { c.width = VW*DPR; c.height = VH*DPR; c.getContext('2d').setTransform(DPR,0,0,DPR,0,0); });
+  TRACKH = Math.round(VH + (SCENES-1)*VH*1.05);
+  document.getElementById('track').style.height = TRACKH+'px';
+  document.querySelectorAll('#world .hall').forEach((el,i)=>{ el.style.left = (sceneC(i)-VW/2)+'px'; el.style.width = VW+'px'; });
+}
+
+/* exhibit anchor in world coords (x) + screen y */
+const exAnchor = i => VW<860
+  ? { wx: sceneC(i), y: VH*0.34, s: Math.min(VW,VH)*0.9 }
+  : { wx: sceneC(i)+VW*0.17, y: VH*0.44, s: Math.min(VW,VH)*1.0 };
+
+/* ---- DOM: halls ---- */
+function chipBtn(label, type, ghost){
+  return `<button class="chip${ghost?' ghost':''}" data-d="${type}" type="button">${label}</button>`;
+}
+function buildWorld(){
+  let html = `
+  <div class="hall threshold">
+    <div class="htext">
+      <div class="hk">the second form · a university you build yourself</div>
+      <h1>the<br>assembly<span class="amp">.</span></h1>
+      <p class="hsub">Seven halls, each ending in a machine that can do something it couldn't. Zero to frontier robotics in 22–30 months, 10–15 hours a week — every course free, every link verified. The exhibits beside you are real algorithms, running live. Walk the line: what you seal, stays lit.</p>
+      <div class="chips">${chipBtn('the doctrine','doctrine')}<span class="sealtag" id="thseal"></span></div>
+      <div class="walkcue">scroll · swipe · press → to walk<span class="arr">⟶</span></div>
+    </div>
+  </div>`;
+  HALLS.forEach((h,i)=>{
+    html += `
+  <div class="hall" data-h="${i}">
+    <div class="htext">
+      <div class="yet" id="yet-${i}">${h.yet} <span class="soft">yet.</span></div>
+      <div class="hk">hall <b>0${i+1}</b> / 07 · ${h.code} · ${h.dur}</div>
+      <p class="hsub">${h.sub}</p>
+      <p class="hpromise">${h.promise}</p>
+      ${i===1?`<div class="chips extra">${chipBtn('parallel tracks','tracks',true)}</div>`:''}
+      ${i===2?`<div class="chips extra">${chipBtn('proving grounds','sims',true)}</div>`:''}
+      ${i===4?`<div class="chips extra">${chipBtn('the ladder','ladder',true)}</div>`:''}
+      ${i===6?`<div class="chips extra">${chipBtn('the canon','canon',true)}${chipBtn('the signal','signal',true)}</div>`:''}
+      <div class="chips">
+        ${chipBtn('open the work order','work'+i)}
+        <span class="sealtag" id="stag-${i}"></span>
+      </div>
+    </div>
+    ${i===6?`<div class="speak">
+      <div class="sug">
+        <button class="sbtn" type="button" data-cmd="move the red block left">move the red block left</button>
+        <button class="sbtn" type="button" data-cmd="stack blue on red">stack blue on red</button>
+        <button class="sbtn" type="button" data-cmd="lift the blue block">lift the blue block</button>
+        <button class="sbtn" type="button" data-cmd="wave">wave</button>
+      </div>
+      <input id="speakin" type="text" autocomplete="off" spellcheck="false" placeholder="…or type your own words" aria-label="speak to the machine">
+      <div class="reply" id="speakout"></div>
+    </div>`:''}
+  </div>`;
+  });
+  html += `
+  <div class="hall terminus">
+    <div class="htext">
+      <div class="yet" id="yet-t">the machine, walking.</div>
+      <div class="hk">terminus · what you become</div>
+      <p class="hsub" id="termsub">You didn't enroll anywhere. You built the university yourself — hall by hall, seal by seal — and taught a body to move through the world. By the end, frontier papers read like case reports: you reproduce them in a fortnight, your pipelines stand up without hand-holding, and your contributions land in the codebases the field runs on.</p>
+      <div class="chips extra">
+        ${chipBtn('known traps','traps',true)}
+        ${chipBtn('the ledger','ledger',true)}
+      </div>
+      <div class="chips">
+        ${chipBtn('the last audit','audit')}
+      </div>
+    </div>
+  </div>`;
+  world.innerHTML = html;
+}
+
+/* ---- HUD ---- */
+const hudloc = document.getElementById('hudloc');
+const huddots = document.getElementById('huddots');
+const hudmeter = document.getElementById('hudmeter');
+const SCENE_NAMES = ['threshold', ...HALLS.map(h=>h.code), 'terminus'];
+function buildHud(){
+  huddots.innerHTML = SCENE_NAMES.map((n,i)=>`<button type="button" data-s="${i}" aria-label="${n}">0${i}</button>`).join('');
+}
+let curScene = 0;
+function hudUpdate(){
+  const sc = clamp(Math.round(camS/GAP),0,SCENES-1);
+  if (sc !== curScene){
+    curScene = sc;
+    stage.style.cursor = '';
+    history.replaceState(null,'','#'+(curScene===0?'threshold':curScene===8?'terminus':'h'+curScene));
+  }
+  hudloc.textContent = preview ? 'preview — everything operational' :
+    curScene===0 ? 'the assembly · su7sh' :
+    curScene===8 ? 'terminus' : `hall 0${curScene} · ${SCENE_NAMES[curScene]}`;
+  hudloc.classList.toggle('prev', preview);
+  hudmeter.innerHTML = `<b>${(camS/GAP*12).toFixed(1)}</b> m`;
+  const pb = document.getElementById('pbar');
+  if (pb) pb.style.width = (clamp(camS/CMAX,0,1)*100) + '%';
+  huddots.querySelectorAll('button').forEach((b,i)=>{
+    b.classList.toggle('on', i===curScene);
+    b.classList.toggle('sealed', i>=1 && i<=7 && isSealed(i-1));
+  });
+}
+
+/* ---- scroll mapping ---- */
+const SMAX = () => TRACKH - VH;
+const yToCam = y => clamp(y / Math.max(1,SMAX()), 0, 1) * CMAX;
+const camToY = c => c / CMAX * SMAX();
+let lastUser = 0, settling = null;
+addEventListener('scroll', ()=>{ camX = yToCam(scrollY); }, {passive:true});
+function userNudge(){ lastUser = perfNow; if (settling) settling = null; }
+addEventListener('wheel', e => {
+  if (dossierOpen) return;
+  userNudge();
+  if (Math.abs(e.deltaX) > Math.abs(e.deltaY)){ scrollBy(0, e.deltaX); e.preventDefault(); }
+}, {passive:false});
+addEventListener('touchmove', userNudge, {passive:true});
+function goScene(i, instant){
+  const y = camToY(sceneC(clamp(i,0,SCENES-1)));
+  if (instant || !motionOK) scrollTo(0, y);
+  else settling = { from: scrollY, to: y, t0: perfNow, dur: 900 };
+}
+
+/* magnetic settle */
+function settleTick(){
+  if (settling){
+    const k = ease((perfNow - settling.t0) / settling.dur);
+    scrollTo(0, lerp(settling.from, settling.to, k));
+    if (k >= 1) settling = null;
+    return;
+  }
+  if (!motionOK || dossierOpen) return;
+  if (perfNow - lastUser < 850) return;
+  const i = Math.round(camX/GAP), c = sceneC(clamp(i,0,SCENES-1));
+  const d = c - camX;
+  /* never rest in the dark between bays — always glide to the nearest one */
+  if (Math.abs(d) > 2){
+    settling = { from: scrollY, to: camToY(c), t0: perfNow, dur: 800 + Math.abs(d)/GAP*900 };
+  }
+}
+
+/* ---- dossier ---- */
+const dback = document.getElementById('dback');
+const dossier = document.getElementById('dossier');
+const dbody = document.getElementById('dbody');
+const dtitle = document.getElementById('dtitle');
+const dsub = document.getElementById('dsub');
+let dossierOpen = false, dReturnFocus = null;
+
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function ck(pid, aria){
+  return `<span class="ck"><input type="checkbox" data-pid="${pid}" aria-label="${esc(aria||pid)}"${state[pid]?' checked':''}><span class="bx"></span></span>`;
+}
+
+function dossierHTML(type){
+  if (type.startsWith('work')){
+    const i = +type.slice(4), h = HALLS[i];
+    return { t:`work order — hall 0${i+1} · ${h.code}`, s:`${h.dur} · before starting: ${h.acquire}`, html:`
+      <h3>the corpus</h3>
+      <div class="res">${h.res.map((r,j)=>`
+        <div class="row">${ck(`${h.id}-r${j}`, r.n)}
+          <div class="t"><a href="${r.u}" target="_blank" rel="noopener">${r.n}</a><span class="note">${r.note}</span></div>
+          <span class="hrs">${r.h}</span></div>`).join('')}
+      </div>
+      <h3>concepts to hold cold</h3>
+      <ul class="concepts">${h.con.map(c=>`<li>${c}</li>`).join('')}</ul>
+      <div class="gate"><div class="gk">THE GATE — what you'll be able to do</div><div class="gbody">${h.gate}</div></div>
+      <h3>known traps — named so you can walk around them</h3>
+      <ul class="traps">${h.traps.map(t=>`<li>${t}</li>`).join('')}</ul>
+      <div class="contract">
+        <div class="chd">completion contract — all four, then the seal</div>
+        ${CONTRACT.map((c,j)=>`
+        <div class="ci">${ck(`${h.id}-c${j+1}`, `${h.code} contract: ${c.l}`)}
+          <span class="cl">${c.l}</span><span class="cd">${c.d}</span></div>`).join('')}
+        <div class="seal">
+          <input type="checkbox" class="sealbox" data-pid="seal-${h.id}" data-stage="${i}" aria-label="seal hall ${i+1} ${h.code}"${state['seal-'+h.id]?' checked':''}>
+          <div class="sb"><span>seal hall 0${i+1} — ${h.code}</span><span class="st">${state['seal-'+h.id]?('sealed '+String(state['seal-'+h.id]).slice(0,10)):'unsealed'}</span></div>
+        </div>
+      </div>
+      <div class="close-note">Seal it, and the exhibit outside learns. Permanently.</div>`};
+  }
+  switch(type){
+  case 'doctrine': return { t:'the doctrine', s:'before anything else', html:`
+      <div class="pull">Robotics is a <span class="hot">debugging discipline</span> — and debugging is diagnosis, which is what you already do.</div>
+      <p class="lede">Seventy percent of this craft is isolating <em>which layer</em> of a five-layer stack changed the outcome — perception, estimation, planning, control, or hardware. The math is learnable on schedule. The instinct to test every assumption against the physical world is built in Hall 02 and compounds forever. It is the same discipline as a differential diagnosis, applied to machines — you are closer than you think.</p>
+      <p class="lede" style="margin-top:1rem"><strong>Log everything.</strong> Every session, timestamped. Treat every hardware surprise as a case presentation: differential, isolation, resolution. This habit, more than any algorithm, is what separates people who ship robots from people with impressive simulation videos.</p>
+      <h3>your ml reflexes — retuned, not discarded</h3>
+      <div class="vs"><div class="r hd"><span>the ml mindset</span><span>the robotics reality</span></div>
+      ${DOCTRINE_VS.map(r=>`<div class="r"><span class="a">${r[0]}</span><span class="b">${r[1]}</span></div>`).join('')}</div>
+      <div class="close-note">Now walk. The first hall already knows you're coming.</div>`};
+  case 'tracks': return { t:'parallel tracks', s:'running quietly beneath the halls', html:`
+      <div class="res">${TRACKS.map(t=>`
+        <div class="row"><div class="t"><strong>${t.n}</strong><span class="note">${t.d}</span></div><span class="hrs">${t.s}</span></div>`).join('')}</div>`};
+  case 'sims': return { t:'proving grounds', s:'choose one simulator · stay in it', html:`
+      <p class="lede">A simulator sets the ceiling on what you can build. Commit to one and let it become home. Start tonight: <code>pip install mujoco gymnasium[mujoco]</code></p>
+      <div class="cards">${SIMS.map(s=>`
+        <div class="card"><div class="ch"><span class="cn"><a href="${s.u}" target="_blank" rel="noopener">${s.n}</a></span><span class="tag${s.hot?' hot':''}">${s.t}</span></div>
+        <p>${s.d}</p><div class="vd">${s.v}</div></div>`).join('')}</div>`};
+  case 'ladder': return { t:'the ladder', s:'hardware, india-calibrated · buy nothing early', html:`
+      <p class="lede">Each rung exists to serve a gate — the checkbox marks metal actually on the desk.</p>
+      ${LADDER.phases.map((ph,pi)=>`
+        <div class="phead"><h3>${ph.t} · ${ph.when}</h3><span class="tot">${ph.tot}</span></div>
+        ${ph.items.map((it,j)=>`
+        <div class="lrow">${ck('hw-'+pi+'-'+j, it[0])}
+          <span class="li">${it[0]} <span class="s">· ${it[2]}</span></span><span class="lp">${it[1]}</span></div>`).join('')}`).join('')}
+      <p class="lede" style="margin-top:1.8rem">${LADDER.note}</p>
+      <h3>if only three purchases</h3>
+      ${LADDER.three.map(t=>`<div class="lrow"><span class="li"><strong>${t[0]}</strong> <span class="s">— ${t[1]}</span></span></div>`).join('')}
+      <h3>compute, when it is needed</h3>
+      ${LADDER.compute.map(c=>`<div class="lrow"><span class="li">${c[0]} <span class="s">— ${c[1]}</span></span><span class="lp">${c[2]}</span></div>`).join('')}`};
+  case 'canon': return { t:'the canon', s:'the papers that moved the field', html:`
+      <h3>tier one — read in this order</h3>
+      <div class="papers">${PAPERS1.map((p,j)=>`
+        <div class="row">${ck('fp1-'+j, p[0])}<span class="t"><a href="${p[1]}" target="_blank" rel="noopener">${p[0]}</a><span class="why">${p[3]}</span></span><span class="yr">${p[2]}</span></div>`).join('')}</div>
+      <h3>tier two — once the foundation holds</h3>
+      <div class="papers">${PAPERS2.map((p,j)=>`
+        <div class="row">${ck('fp2-'+j, p[0])}<span class="t"><a href="${p[1]}" target="_blank" rel="noopener">${p[0]}</a><span class="why">${p[3]}</span></span><span class="yr">${p[2]}</span></div>`).join('')}</div>
+      <h3>who is building the bodies</h3>
+      <div class="papers">${FIELD.co.map(c=>`<div class="row"><span class="t"><strong>${c[0]}</strong><span class="why">${c[1]}</span></span></div>`).join('')}</div>
+      <h3>whose papers to trust</h3>
+      <div class="papers">${FIELD.labs.map(c=>`<div class="row"><span class="t"><strong>${c[0]}</strong><span class="why">${c[1]}</span></span></div>`).join('')}</div>
+      <h3>the next 12–18 months</h3>
+      <ul class="concepts">${FIELD.coming.map(c=>`<li>${c}</li>`).join('')}</ul>`};
+  case 'signal': return { t:'the signal', s:'ambient — deliberately untracked', html:`
+      <p class="lede">Watched, not worked. Nothing here carries a checkbox on purpose: this is atmosphere, and atmosphere must never masquerade as progress.</p>
+      <div class="sig">${SIGNAL.map(b=>`
+        <div class="band dim${b.dim}"><div class="bh"><h3>${b.h}</h3><span class="dm">${b.dm}</span></div>
+        <div>${b.items.map(it=>`<span class="it"><a href="${it[1]}" target="_blank" rel="noopener">${it[0]}</a> <span class="w">— ${it[2]}</span></span>`).join('')}</div></div>`).join('')}</div>`};
+  case 'traps': return { t:'known traps', s:'the path is safer when they are named', html:`
+      <div class="papers">${CTRAPS.map(t=>`
+        <div class="row"><span class="t"><strong style="color:rgba(232,98,44,.85)">${t[0]}</strong><span class="why">${t[1]}</span></span></div>`).join('')}</div>
+      <p class="lede" style="margin-top:2rem"><strong>Resources that feel authoritative but are retired:</strong> O'Kane's <em>Gentle Introduction to ROS</em> (ROS 1, 2018) · any course without "ROS 2" in the title · GitHub RL roadmaps frozen in 2018 · gamified platforms as a primary path — this university runs on building, and you already have the blueprints.</p>`};
+  case 'audit': return { t:'the last audit', s:'take it when you are ready — each line true and demonstrable', html:`
+      <div class="audit">${TERMINAL.map((t,j)=>`
+        <div class="cap">${ck('term-'+j, t)}<span class="cd">${t}</span></div>`).join('')}</div>
+      <div class="close-note">Six lines. A few years. A machine that moves because you understand why. Welcome to the frontier.</div>`};
+  case 'ledger': return { t:'the ledger', s:'progress lives in this browser · export to carry it', html:`
+      <p class="lede" id="ledstats">—</p>
+      <div class="ledbtns">
+        <button id="exp" type="button">export progress</button>
+        <button id="imp" type="button">import</button>
+        <button id="rst" type="button">reset</button>
+      </div>
+      <input type="file" id="impfile" accept=".json" style="display:none">
+      <div class="close-note">The body is assembled by hand, one seal at a time. There is no faster way — and no better one. — s.</div>`};
+  }
+  return { t:type, s:'', html:'' };
+}
+
+function openDossier(type, opener){
+  const d = dossierHTML(type);
+  dtitle.textContent = d.t; dsub.textContent = d.s;
+  dbody.innerHTML = d.html;
+  dbody.scrollTop = 0;
+  dReturnFocus = opener || null;
+  dossierOpen = true;
+  document.body.classList.add('lock');
+  dback.classList.add('on'); dossier.classList.add('on');
+  if (type === 'ledger') wireLedger();
+  document.getElementById('dclose').focus({preventScroll:true});
+}
+function closeDossier(){
+  dossierOpen = false;
+  document.body.classList.remove('lock');
+  dback.classList.remove('on'); dossier.classList.remove('on');
+  if (dReturnFocus){ dReturnFocus.focus({preventScroll:true}); dReturnFocus = null; }
+}
+document.getElementById('dclose').addEventListener('click', closeDossier);
+dback.addEventListener('click', closeDossier);
+world.addEventListener('click', e => {
+  const b = e.target.closest('button.chip'); if (!b) return;
+  openDossier(b.dataset.d, b);
+});
+
+/* ---- progress wiring ---- */
+function contractDone(h){ return [1,2,3,4].every(j => state[`${h.id}-c${j}`]); }
+dbody.addEventListener('change', e => {
+  const input = e.target;
+  if (!input.matches('input[data-pid]')) return;
+  const pid = input.dataset.pid;
+  if (input.classList.contains('sealbox') && input.checked){
+    const i = +input.dataset.stage;
+    if (!contractDone(HALLS[i])){
+      input.checked = false;
+      alert('The seal asks for all four first —\n\ncorpus · concepts · artifact · postmortem.\n\nFinish the contract, and the machine learns for good.');
+      return;
+    }
+  }
+  if (input.checked) state[pid] = new Date().toISOString();
+  else delete state[pid];
+  save(); refresh();
+  if (input.classList.contains('sealbox')){
+    const st = input.parentElement.querySelector('.st');
+    if (st) st.textContent = state[pid] ? 'sealed '+String(state[pid]).slice(0,10) : 'unsealed';
+  }
+});
+
+function refresh(){
+  HALLS.forEach((h,i)=>{
+    const y = document.getElementById('yet-'+i);
+    if (y){
+      if (isSealed(i)){ y.innerHTML = h.lit; y.classList.add('lit'); }
+      else { y.innerHTML = `${h.yet} <span class="soft">yet.</span>`; y.classList.remove('lit'); }
+    }
+    const tag = document.getElementById('stag-'+i);
+    if (tag){ tag.textContent = isSealed(i) ? '● sealed' : '○ unsealed'; tag.classList.toggle('on', isSealed(i)); }
+  });
+  const th = document.getElementById('thseal');
+  if (th) th.textContent = sealedCount() ? `${sealedCount()}/7 halls lit` : '';
+  const led = document.getElementById('ledstats');
+  if (led){
+    const n = PIDS.filter(p=>state[p]).length;
+    led.innerHTML = `<strong>${n}</strong> of ${PIDS.length} marks · <strong>${sealedCount()}</strong> of 7 halls sealed · the machine is <strong>${Math.round(sealedCount()/7*100)}%</strong> awake`;
+  }
+  hudUpdate();
+}
+
+function wireLedger(){
+  refresh();
+  document.getElementById('exp').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'body-progress-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+  const impfile = document.getElementById('impfile');
+  document.getElementById('imp').addEventListener('click', ()=>impfile.click());
+  impfile.addEventListener('change', ()=>{
+    const f = impfile.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try {
+        const data = JSON.parse(r.result);
+        if (typeof data !== 'object' || data === null || Array.isArray(data)) throw 0;
+        state = data; save(); refresh();
+      } catch(e){ alert('Not a valid progress file.'); }
+      impfile.value = '';
+    };
+    r.readAsText(f);
+  });
+  document.getElementById('rst').addEventListener('click', ()=>{
+    if (!confirm('Dissolve the assembly? All marks and seals will be erased.')) return;
+    state = {}; save(); refresh();
+    dbody.querySelectorAll('input[data-pid]').forEach(b=>b.checked=false);
+  });
+}
+
+/* ---- keyboard ---- */
+addEventListener('keydown', e => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+  if (e.key === 'Escape'){
+    if (dossierOpen){ closeDossier(); return; }
+    if (EX[4] && EX[4].engaged){ EX[4].engaged = false; return; }
+  }
+  if (dossierOpen) return;
+  if (EX[4] && EX[4].engaged && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)){
+    EX[4].key(e.key, true); e.preventDefault(); return;
+  }
+  userNudge();
+  if (e.key === 'ArrowRight' || e.key === 'PageDown'){ goScene(Math.round(camX/GAP)+1); e.preventDefault(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp'){ goScene(Math.round(camX/GAP)-1); e.preventDefault(); }
+  if (e.key === 'Home'){ goScene(0); e.preventDefault(); }
+  if (e.key === 'End'){ goScene(SCENES-1); e.preventDefault(); }
+});
+addEventListener('keyup', e => {
+  if (EX[4] && EX[4].engaged) EX[4].key(e.key, false);
+});
+
+/* ---- pointer routing ---- */
+let pdEx = null, dragScroll = null;
+function exLocal(i, x, y){
+  const a = exAnchor(i+1);      /* halls are scenes 1..7, exhibits EX[0..6] */
+  return { x: x - (a.wx - camS + VW/2), y: y - a.y, s: a.s };
+}
+function activeEx(){
+  const i = Math.round(camS/GAP) - 1;
+  return (i>=0 && i<7) ? i : -1;
+}
+stage.addEventListener('pointerdown', e => {
+  if (dossierOpen) return;
+  const i = activeEx();
+  if (i >= 0 && EX[i]){
+    const L = exLocal(i, e.clientX, e.clientY);
+    if (EX[i].hit && EX[i].hit(L.x, L.y, L.s)){
+      pdEx = i; EX[i].pointer('down', L.x, L.y, L.s);
+      stage.setPointerCapture(e.pointerId);
+      return;
+    }
+  }
+  if (e.pointerType === 'touch'){
+    dragScroll = { x: e.clientX, y: e.clientY, sy: scrollY };
+  }
+});
+stage.addEventListener('pointermove', e => {
+  if (pdEx !== null){ const L = exLocal(pdEx, e.clientX, e.clientY); EX[pdEx].pointer('move', L.x, L.y, L.s); return; }
+  if (dragScroll){
+    const dx = e.clientX - dragScroll.x, dy = e.clientY - dragScroll.y;
+    if (Math.abs(dx) > Math.abs(dy)*1.2){ userNudge(); scrollTo(0, dragScroll.sy - dx*1.35); }
+  } else {
+    const i = activeEx();
+    if (i >= 0 && EX[i] && EX[i].hover){ const L = exLocal(i, e.clientX, e.clientY); EX[i].hover(L.x, L.y, L.s); }
+  }
+});
+function pointerEnd(e){
+  if (pdEx !== null){ const L = exLocal(pdEx, e.clientX, e.clientY); EX[pdEx].pointer('up', L.x, L.y, L.s); pdEx = null; }
+  dragScroll = null;
+}
+stage.addEventListener('pointerup', pointerEnd);
+stage.addEventListener('pointercancel', pointerEnd);
+
+/* ---- background environment ---- */
+function drawBG(t){
+  bx.clearRect(0,0,VW,VH);
+  const horizon = FLOOR - VH*0.015;
+
+  /* far glow band */
+  const gg = bx.createLinearGradient(0, horizon-VH*0.09, 0, horizon+VH*0.02);
+  gg.addColorStop(0,'rgba(0,0,0,0)');
+  gg.addColorStop(1,'rgba(120,110,95,0.05)');
+  bx.fillStyle = gg; bx.fillRect(0, horizon-VH*0.09, VW, VH*0.11);
+
+  /* distant hall lights on the horizon (parallax .22) */
+  for (let i=1;i<SCENES;i++){
+    const x = VW*0.5 + (sceneC(i) - camS)*0.22;
+    if (x < -20 || x > VW+20) continue;
+    const sealed = (i<=7) ? isSealed(i-1) : sealedCount()===7;
+    bx.fillStyle = sealed ? GOLD(.75) : PALE(.16);
+    bx.fillRect(x-1.2, horizon-3, 2.4, 2.4);
+    if (sealed){ bx.fillStyle = GOLD(.1); bx.beginPath(); bx.arc(x, horizon-2, 7, 0, TAU); bx.fill(); }
+  }
+
+  /* mid structure: columns + trusses (parallax .55) */
+  bx.strokeStyle = PALE(.05); bx.lineWidth = 1;
+  const colGap = GAP*0.5;
+  const off55 = camS*0.55;
+  const first = Math.floor(off55/colGap)-1;
+  for (let k=first; k<first+Math.ceil(VW/colGap)+3; k++){
+    const x = k*colGap - off55;
+    if (x < -60 || x > VW+60) continue;
+    bx.beginPath(); bx.moveTo(x, VH*0.06); bx.lineTo(x, FLOOR); bx.stroke();
+    bx.beginPath(); bx.moveTo(x-26, VH*0.06); bx.lineTo(x+26, VH*0.06); bx.stroke();
+  }
+  /* cables (parallax .8) */
+  bx.strokeStyle = PALE(.045);
+  const cabGap = GAP*0.33, off8 = camS*0.8;
+  const cfirst = Math.floor(off8/cabGap)-1;
+  for (let k=cfirst; k<cfirst+Math.ceil(VW/cabGap)+3; k++){
+    const x = k*cabGap - off8;
+    bx.beginPath(); bx.moveTo(x, 0); bx.quadraticCurveTo(x+cabGap*0.5, VH*0.10+((k%3)+1)*VH*0.012, x+cabGap, 0); bx.stroke();
+  }
+
+  /* floor line + slats (parallax 1) */
+  bx.strokeStyle = PALE(.12); bx.beginPath(); bx.moveTo(0,FLOOR); bx.lineTo(VW,FLOOR); bx.stroke();
+  const slat = GAP*0.118;
+  const sfirst = Math.floor(camS/slat)-1;
+  for (let k=sfirst; k<sfirst+Math.ceil(VW/slat)+3; k++){
+    const x = k*slat - camS;
+    bx.strokeStyle = PALE(.05);
+    bx.beginPath(); bx.moveTo(x, FLOOR); bx.lineTo(x - VW*0.012, VH); bx.stroke();
+  }
+  bx.strokeStyle = PALE(.04); bx.beginPath(); bx.moveTo(0,FLOOR+VH*0.075); bx.lineTo(VW,FLOOR+VH*0.075); bx.stroke();
+
+  /* per-hall: bay stencil + light cone + dust */
+  bx.textAlign = 'center';
+  for (let i=1;i<SCENES;i++){
+    const cx = sceneC(i) - camS + VW/2 + (i<=7 ? (VW<860?0:VW*0.17) : (VW<860?0:VW*0.12));
+    const bayx = sceneC(i) - camS + VW/2;
+    if (bayx > -VW && bayx < VW*2){
+      bx.save();
+      bx.translate(bayx - (VW<860?0:VW*0.24), FLOOR + VH*0.055);
+      bx.scale(1, .5);
+      bx.font = MONO(Math.max(11, VH*0.02));
+      bx.fillStyle = PALE(.13);
+      bx.fillText(i===8?'∎∎':('0'+i), 0, 0);
+      bx.restore();
+    }
+    if (cx > -VW*0.6 && cx < VW*1.6){
+      const sealed = (i<=7) ? isSealed(i-1) : sealedCount()===7;
+      const topW = VW*0.018, botW = VW*(VW<860?0.42:0.24);
+      const cg = bx.createLinearGradient(0,0,0,FLOOR);
+      const tone = sealed ? '223,163,72' : '170,180,190';
+      cg.addColorStop(0, `rgba(${tone},${sealed?.13:.075})`);
+      cg.addColorStop(1, `rgba(${tone},0.008)`);
+      bx.fillStyle = cg;
+      bx.beginPath();
+      bx.moveTo(cx-topW, 0); bx.lineTo(cx+topW, 0);
+      bx.lineTo(cx+botW, FLOOR); bx.lineTo(cx-botW, FLOOR);
+      bx.closePath(); bx.fill();
+      bx.fillStyle = sealed ? GOLD(.9) : PALE(.35);
+      bx.fillRect(cx-VW*0.008, 4, VW*0.016, 2);
+      bx.fillStyle = `rgba(${tone},${sealed?.05:.028})`;
+      bx.beginPath(); bx.ellipse(cx, FLOOR, botW*0.85, VH*0.012, 0, 0, TAU); bx.fill();
+      if (motionOK){
+        bx.fillStyle = sealed ? GOLD(.28) : PALE(.14);
+        for (let d=0; d<14; d++){
+          const seed = i*31+d*7;
+          const dy = ((t*0.014*(0.5+((seed*13)%10)/14) + (seed*97)%1000/1000) % 1);
+          const dx2 = Math.sin(t*0.28+seed)* (topW + (botW-topW)*dy) * 0.7;
+          bx.fillRect(cx+dx2, dy*FLOOR, 1.1, 1.1);
+        }
+      }
+    }
+  }
+  bx.textAlign = 'start';
+}
+
+/* ---- veil / nav ---- */
+const veil = document.getElementById('veil');
+document.getElementById('return').addEventListener('click', function(e){
+  e.preventDefault();
+  veil.classList.add('on');
+  const href = this.href;
+  setTimeout(()=>{ location.href = href; }, 650);
+});
+addEventListener('pageshow', e => {
+  if (e.persisted){ veil.classList.remove('on'); document.body.classList.add('in'); }
+});
+
+/* ---- boot (part 1) ---- */
+let perfNow = 0;
+buildWorld(); buildHud(); layout(); refresh();
+huddots.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  goScene(+b.dataset.s);
+});
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+(function initialJump(){
+  const m = location.hash.match(/^#(?:h([1-7])|terminus)$/);
+  if (!m) return;
+  const i = m[1] ? +m[1] : 8;
+  const jump = ()=>{ scrollTo(0, camToY(sceneC(i))); camX = yToCam(scrollY); camS = camX; };
+  jump();
+  addEventListener('load', jump, {once:true});
+})();
+addEventListener('resize', ()=>{
+  const fr = SMAX() > 0 ? clamp(scrollY/SMAX(),0,1) : 0;   /* keep your place on the line */
+  layout();
+  scrollTo(0, fr*SMAX());
+  camX = yToCam(scrollY);
+});
+if (document.fonts && document.fonts.load){
+  document.fonts.load(MONO(11)); document.fonts.load('italic 400 30px "Instrument Serif"');
+}
+/* ================= EXHIBITS — real algorithms, running live ================= */
+/* deterministic rng */
+function RNG(seed){ let s = seed>>>0 || 1; return ()=> (s = (s*1664525+1013904223)>>>0) / 4294967296; }
+function randn(r){ let u=0,v=0; while(!u) u=r(); while(!v) v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*v); }
+
+/* ---- 4x4 linear algebra for the Riccati solve ---- */
+const m4mul = (A,B)=>{ const C=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=A[i][k]*B[k][j];C[i][j]=s;} return C; };
+const m4T = A => A[0].map((_,j)=>A.map(r=>r[j]));
+const m4v = (A,v)=>A.map(r=>r[0]*v[0]+r[1]*v[1]+r[2]*v[2]+r[3]*v[3]);
+
+/* cart-pole constants + LQR gain (solved at boot by iterating the DARE) */
+const CP = { M:1.0, m:0.12, l:0.55, g:9.81, dt:1/120, fmax:14 };
+function solveLQR(){
+  const {M,m,l,g,dt} = CP;
+  const A=[[0,1,0,0],[0,0,-m*g/M,0],[0,0,0,1],[0,0,(M+m)*g/(l*M),0]];
+  const B=[0,1/M,0,-1/(l*M)];
+  const Ad=[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]].map((r,i)=>r.map((v,j)=>v+A[i][j]*dt));
+  const Bd=B.map(v=>v*dt);
+  const Q=[[1.5,0,0,0],[0,1,0,0],[0,0,22,0],[0,0,0,2.5]], R=0.08;
+  let P=Q.map(r=>r.slice());
+  for(let it=0; it<600; it++){
+    const PA = m4mul(P,Ad), PB = m4v(P,Bd);
+    const s = R + Bd[0]*PB[0]+Bd[1]*PB[1]+Bd[2]*PB[2]+Bd[3]*PB[3];
+    const w = [0,1,2,3].map(j=>Bd[0]*PA[0][j]+Bd[1]*PA[1][j]+Bd[2]*PA[2][j]+Bd[3]*PA[3][j]);
+    const u = [0,1,2,3].map(i=>Ad[0][i]*PB[0]+Ad[1][i]*PB[1]+Ad[2][i]*PB[2]+Ad[3][i]*PB[3]);
+    const At = m4T(Ad), P1 = m4mul(m4mul(At,P),Ad);
+    const Pn=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++) Pn[i][j] = Q[i][j] + P1[i][j] - u[i]*w[j]/s;
+    P = Pn;
+  }
+  const PA = m4mul(P,Ad), PB = m4v(P,Bd);
+  const s = R + Bd[0]*PB[0]+Bd[1]*PB[1]+Bd[2]*PB[2]+Bd[3]*PB[3];
+  return [0,1,2,3].map(j=>(Bd[0]*PA[0][j]+Bd[1]*PA[1][j]+Bd[2]*PA[2][j]+Bd[3]*PA[3][j])/s);
+}
+const LQR_K = solveLQR();
+
+/* analytic 2-link IK (elbow sign ±1) */
+function ik2(tx, ty, L1, L2, elbow){
+  let d = Math.hypot(tx,ty);
+  d = clamp(d, Math.abs(L1-L2)+1e-4, L1+L2-1e-4);
+  const a = Math.atan2(ty,tx);
+  const c2 = clamp((d*d - L1*L1 - L2*L2)/(2*L1*L2), -1, 1);
+  const q2 = elbow*Math.acos(c2);
+  const q1 = a - Math.atan2(L2*Math.sin(q2), L1+L2*Math.cos(q2));
+  return [q1, q2];
+}
+const angLerp = (a,b,t)=>{ let d=(b-a)%TAU; if(d>Math.PI)d-=TAU; if(d<-Math.PI)d+=TAU; return a+d*t; };
+
+function hintText(g, s, txt, y){
+  g.font = MONO(Math.max(10, s*0.0165));
+  g.fillStyle = HI(.55);
+  g.textAlign = 'center';
+  g.fillText('⌖ ' + txt, 0, y);
+  g.textAlign = 'start';
+}
+
+/* =========== 1 · SUBSTRATE — live PCA =========== */
+function exSubstrate(){
+  const r = RNG(11), N = 90, th0 = 0.52;
+  const pts = [];
+  for (let i=0;i<N;i++){
+    const a = randn(r)*0.145, b = randn(r)*0.05;
+    pts.push({ hx: Math.cos(th0)*a - Math.sin(th0)*b, hy: -(Math.sin(th0)*a + Math.cos(th0)*b)*0.9,
+               x:0, y:0, vx:0, vy:0, ph: r()*TAU });
+  }
+  pts.forEach(p=>{ p.x=p.hx; p.y=p.hy; });
+  let px=0, py=0, pactive=false;
+  return {
+    hit:(x,y,s)=> Math.abs(x)<s*0.26 && Math.abs(y)<s*0.24,
+    pointer(type,x,y,s){ px=x/s; py=y/s; pactive = type!=='up'; },
+    step(dt,t){
+      for (const p of pts){
+        let ax = (p.hx-p.x)*2.2 + Math.sin(t*0.6+p.ph)*0.012;
+        let ay = (p.hy-p.y)*2.2 + Math.cos(t*0.5+p.ph)*0.012;
+        if (pactive){
+          const dx = p.x-px, dy = p.y-py, d2 = dx*dx+dy*dy;
+          if (d2 < 0.02){ const f = 0.9/(d2*60+1); ax += dx*f*60; ay += dy*f*60; }
+        }
+        p.vx = (p.vx+ax*dt)*0.92; p.vy = (p.vy+ay*dt)*0.92;
+        p.x += p.vx*dt*6; p.y += p.vy*dt*6;
+      }
+    },
+    draw(g,s,sealed){
+      for (const p of pts){
+        g.fillStyle = sealed ? GOLD(.55) : STEEL(.4);
+        g.fillRect(p.x*s-0.9, p.y*s-0.9, 1.8, 1.8);
+      }
+      if (sealed){
+        let mx=0,my=0; pts.forEach(p=>{mx+=p.x;my+=p.y;}); mx/=N; my/=N;
+        let sxx=0,syy=0,sxy=0;
+        pts.forEach(p=>{ const dx=p.x-mx, dy=p.y-my; sxx+=dx*dx; syy+=dy*dy; sxy+=dx*dy; });
+        sxx/=N; syy/=N; sxy/=N;
+        const tr=sxx+syy, det=sxx*syy-sxy*sxy;
+        const l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)), l2=tr/2-Math.sqrt(Math.max(0,tr*tr/4-det));
+        const a1 = Math.atan2(l1-sxx, sxy||1e-9);
+        const d1=Math.sqrt(Math.max(l1,0))*2.1, d2=Math.sqrt(Math.max(l2,0))*2.1;
+        g.strokeStyle = GOLD(.85); g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo((mx-Math.cos(a1)*d1)*s,(my-Math.sin(a1)*d1)*s); g.lineTo((mx+Math.cos(a1)*d1)*s,(my+Math.sin(a1)*d1)*s); g.stroke();
+        g.strokeStyle = GOLD(.3); g.lineWidth = 1;
+        g.beginPath(); g.moveTo((mx+Math.sin(a1)*d2)*s,(my-Math.cos(a1)*d2)*s); g.lineTo((mx-Math.sin(a1)*d2)*s,(my+Math.cos(a1)*d2)*s); g.stroke();
+        g.font = MONO(Math.max(8,s*0.011)); g.fillStyle = GOLD(.5);
+        g.fillText('σ₁', (mx+Math.cos(a1)*d1)*s+6, (my+Math.sin(a1)*d1)*s);
+      }
+    },
+  };
+}
+
+/* =========== 2 · SKELETON — inverse kinematics =========== */
+function exSkeleton(){
+  const L1=0.165, L2=0.135;
+  let q1=-1.9, q2=1.2, tx=0.12, ty=-0.14, drag=false;
+  let w1=0, w2=0, twitch=0, cool=0;
+  return {
+    hit:(x,y,s)=> Math.abs(x)<s*0.3 && Math.abs(y)<s*0.26,
+    probe(){ return { q1, q2, tx, ty, L1, L2 }; },
+    pointer(type,x,y,s){
+      drag = type!=='up';
+      if (drag){ tx = clamp(x/s,-0.29,0.29); ty = clamp(y/s,-0.25,0.18); }
+    },
+    step(dt,t,sealed){
+      if (!drag){
+        tx = Math.sin(t*0.5)*0.2; ty = -0.1 + Math.sin(t*0.83+1.2)*0.1;
+      }
+      const bx0=0, by0=0.14;                 /* base */
+      const rx = tx-bx0, ry = ty-by0;
+      if (sealed){
+        const [g1,g2] = ik2(rx, ry, L1, L2, -1);
+        q1 = angLerp(q1, g1, 1-Math.exp(-dt*10));
+        q2 = angLerp(q2, g2, 1-Math.exp(-dt*10));
+        w1=w2=0; twitch=0;
+      } else {
+        /* no kinematics, no strength — the arm hangs. dragging makes it spasm
+           toward your hand; it gets partway, trembles, and gravity wins. */
+        cool -= dt;
+        if (cool <= 0 && (drag || Math.random() < dt*0.35)){ twitch = 0.45; cool = drag ? 1.1 : 2.8; }
+        if (twitch > 0){
+          twitch -= dt;
+          const hx2 = bx0+Math.cos(q1)*L1+Math.cos(q1+q2)*L2;
+          const hy2 = by0+Math.sin(q1)*L1+Math.sin(q1+q2)*L2;
+          /* broken proprioception: it reaches for where it BELIEVES the target is —
+             systematically short, and drifting. no effort can correct a wrong map. */
+          const gx2 = bx0 + (tx-bx0)*0.62 + Math.sin(t*0.9)*0.05;
+          const gy2 = by0 + (ty-by0)*0.62 + Math.cos(t*0.7)*0.05;
+          const errA = Math.atan2(gy2-hy2, gx2-hx2);
+          const k = twitch/0.45;
+          w1 += Math.sin(errA - q1)*dt*135*k;
+          w2 += Math.sin(errA - (q1+q2))*dt*150*k + Math.sin(t*17)*dt*30*k;
+        }
+        /* gravity, always */
+        w1 += Math.sin(Math.PI/2 - q1)*dt*26;
+        w2 += Math.sin(Math.PI/2 - q1 - q2)*dt*22;
+        const dmp = Math.exp(-dt*2.6);
+        w1 = clamp(w1*dmp, -6, 6); w2 = clamp(w2*dmp, -6, 6);
+        q1 += w1*dt; q2 += w2*dt;
+      }
+    },
+    draw(g,s,sealed){
+      const bx0=0, by0=0.14*s;
+      const ex = bx0+Math.cos(q1)*L1*s, ey = by0+Math.sin(q1)*L1*s;
+      const hx = ex+Math.cos(q1+q2)*L2*s, hy = ey+Math.sin(q1+q2)*L2*s;
+      /* reach envelope + plinth */
+      g.strokeStyle = PALE(.06);
+      g.beginPath(); g.arc(bx0,by0,(L1+L2)*s,0,TAU); g.stroke();
+      g.strokeStyle = PALE(.2);
+      g.beginPath(); g.moveTo(bx0-s*0.05,by0+s*0.012); g.lineTo(bx0+s*0.05,by0+s*0.012); g.stroke();
+      /* singularity glow */
+      const str = Math.hypot(tx*s-bx0, ty*s-by0)/((L1+L2)*s);
+      const hot = sealed && str > 0.94;
+      const col = sealed ? (hot?EMBER(.9):GOLD(.8)) : STEEL(.6);
+      g.strokeStyle = col; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(bx0,by0); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
+      g.lineWidth = 1;
+      [[bx0,by0],[ex,ey]].forEach(p=>{ g.fillStyle = col; g.beginPath(); g.arc(p[0],p[1],2.6,0,TAU); g.fill(); });
+      /* hand chevron */
+      g.strokeStyle = col;
+      const ha = Math.atan2(ty*s-hy, tx*s-hx);
+      g.beginPath(); g.moveTo(hx+Math.cos(ha+2.6)*5, hy+Math.sin(ha+2.6)*5);
+      g.lineTo(hx,hy); g.lineTo(hx+Math.cos(ha-2.6)*5, hy+Math.sin(ha-2.6)*5); g.stroke();
+      /* target */
+      g.strokeStyle = sealed ? GOLD(.7) : PALE(.35);
+      g.beginPath(); g.arc(tx*s,ty*s,4,0,TAU); g.stroke();
+      g.beginPath(); g.moveTo(tx*s-7,ty*s); g.lineTo(tx*s+7,ty*s); g.moveTo(tx*s,ty*s-7); g.lineTo(tx*s,ty*s+7);
+      g.strokeStyle = sealed ? GOLD(.25) : PALE(.15); g.stroke();
+      if (hot){ g.font = MONO(Math.max(8,s*0.011)); g.fillStyle = EMBER(.7); g.fillText('singularity', tx*s+10, ty*s-8); }
+      /* status line */
+      g.font = MONO(Math.max(10,s*0.0135));
+      g.textAlign = 'center';
+      g.fillStyle = sealed ? GOLD(.65) : EMBER(.6);
+      g.fillText(sealed ? 'inverse kinematics — it follows your hand'
+                        : 'no kinematics — it spasms, and gravity wins', 0, s*0.24);
+      g.textAlign = 'start';
+    },
+  };
+}
+
+/* =========== 3 · MUSCLE — cart-pole with a real LQR =========== */
+function exMuscle(){
+  let st = [0, 0, 0.14, 0];      /* x ẋ θ θ̇ — θ from upright */
+  let F = 0, holdF = 0, falls = 0, saves = 0, downT = 0, wasOff = false;
+  const XL = 1.15;               /* track half width, metres */
+  const px = 0.16;               /* metres → fraction of s: 1m = 0.16s */
+  function physics(dt, sealed){
+    const {M,m,l,g,fmax} = CP;
+    const steps = Math.max(1, Math.round(dt/CP.dt));
+    for (let k=0;k<steps;k++){
+      let u = holdF;
+      if (sealed){
+        u += -(LQR_K[0]*st[0] + LQR_K[1]*st[1] + LQR_K[2]*st[2] + LQR_K[3]*st[3]);
+      }
+      u = clamp(u, -fmax, fmax);
+      F = u;
+      const [x,dx,th,dth] = st;
+      const sin = Math.sin(th), cos = Math.cos(th);
+      const den = M + m*sin*sin;
+      const ddx = (u + m*l*dth*dth*sin - m*g*sin*cos)/den;
+      const ddth = (-u*cos - m*l*dth*dth*sin*cos + (M+m)*g*sin)/(l*den);
+      st[1] += ddx*CP.dt; st[0] += st[1]*CP.dt;
+      st[3] += ddth*CP.dt; st[2] += st[3]*CP.dt;
+      if (st[0] > XL){ st[0]=XL; st[1]=Math.min(0,st[1]); }
+      if (st[0] < -XL){ st[0]=-XL; st[1]=Math.max(0,st[1]); }
+    }
+  }
+  return {
+    hit:(x,y,s)=> Math.abs(x)<s*0.28 && Math.abs(y)<s*0.24,
+    pointer(type,x,y,s){
+      if (type==='down'){
+        const dir = x > st[0]*px*s ? 1 : -1;
+        st[3] += dir*1.35;        /* the shove */
+      }
+      if (type==='up') holdF = 0;
+    },
+    step(dt,t,sealed){
+      if (downT > 0){
+        downT -= dt;
+        if (downT <= 0){ st = [0,0,(RNG((falls*97+13)>>>0)()-0.5)*0.24, 0]; }
+        return;
+      }
+      if (!sealed && Math.abs(st[2])<0.02 && Math.abs(st[3])<0.02){
+        st[3] += (Math.sin(t*0.9)>0?1:-1)*0.05; /* the world is never still */
+      }
+      physics(dt, sealed);
+      const off = Math.abs(st[2]) > 0.3;
+      if (sealed && wasOff && !off) saves++;
+      wasOff = off;
+      if (Math.abs(st[2]) > 1.25){ falls++; downT = 1.4; }
+    },
+    draw(g,s,sealed){
+      const y0 = s*0.12;
+      const {l} = CP;
+      /* track */
+      g.strokeStyle = PALE(.2);
+      g.beginPath(); g.moveTo(-XL*px*s-14, y0); g.lineTo(XL*px*s+14, y0); g.stroke();
+      g.strokeStyle = PALE(.35);
+      [[-XL,1],[XL,1]].forEach(e=>{ g.beginPath(); g.moveTo(e[0]*px*s, y0-4); g.lineTo(e[0]*px*s, y0+4); g.stroke(); });
+      const cx = st[0]*px*s;
+      const col = sealed ? GOLD(.85) : STEEL(.6);
+      /* cart */
+      g.strokeStyle = col; g.lineWidth = 1.4;
+      g.strokeRect(cx-s*0.028, y0-s*0.022, s*0.056, s*0.02);
+      /* pole */
+      const tipx = cx + Math.sin(st[2])*l*px*s*1.9;
+      const tipy = y0-s*0.022 - Math.cos(st[2])*l*px*s*1.9;
+      g.beginPath(); g.moveTo(cx, y0-s*0.022); g.lineTo(tipx, tipy); g.stroke();
+      g.fillStyle = col; g.beginPath(); g.arc(tipx, tipy, 3.4, 0, TAU); g.fill();
+      g.lineWidth = 1;
+      /* force arrow */
+      if (Math.abs(F) > 0.4 && sealed){
+        g.strokeStyle = GOLD(.4);
+        const fx = clamp(F,-8,8)*s*0.004;
+        g.beginPath(); g.moveTo(cx, y0+s*0.02); g.lineTo(cx+fx, y0+s*0.02); g.stroke();
+      }
+      if (downT > 0){
+        g.font = MONO(Math.max(9,s*0.013)); g.fillStyle = PALE(.4); g.textAlign='center';
+        g.fillText('it falls. again.', 0, -s*0.08); g.textAlign='start';
+      }
+      g.font = MONO(Math.max(8,s*0.011));
+      g.fillStyle = sealed ? GOLD(.45) : PALE(.3);
+      g.textAlign = 'center';
+      g.fillText(sealed ? `recoveries ${String(saves).padStart(3,'0')} · lqr engaged` : `attempts ${String(falls).padStart(4,'0')}`, 0, y0+s*0.055);
+      g.textAlign = 'start';
+    },
+  };
+}
+
+/* =========== 4 · SENSES — particle filter =========== */
+function exSenses(){
+  const W=0.27, H=0.17, Np=240;
+  const LM = [[-W*0.8,-H*0.75],[W*0.85,-H*0.5],[W*0.6,H*0.8],[-W*0.7,H*0.65]];
+  const r = RNG(23);
+  let parts = [];
+  const scatter = ()=>{ parts = []; for(let i=0;i<Np;i++) parts.push({x:(r()*2-1)*W, y:(r()*2-1)*H, w:1}); };
+  scatter();
+  let rob = {x:0,y:0,a:0}, lostT = 0;
+  return {
+    _flash: 0,
+    hit:(x,y,s)=> Math.abs(x)<s*(W+0.04) && Math.abs(y)<s*(H+0.05),
+    pointer(type){ if (type==='down'){ scatter(); this._flash = 1.4; } },
+    step(dt,t,sealed){
+      if (this._flash > 0) this._flash -= dt;
+      /* true robot on a smooth circuit */
+      const sp = 1;
+      const nx = Math.sin(t*0.42)*W*0.72, ny = Math.sin(t*0.84+1.1)*H*0.66;
+      rob.a = Math.atan2(ny-rob.y, nx-rob.x);
+      const vx = (nx-rob.x)*sp, vy = (ny-rob.y)*sp;
+      rob.x = nx; rob.y = ny;
+      /* predict: odometry + noise */
+      for (const p of parts){
+        p.x += vx + randn(r)*0.0035; p.y += vy + randn(r)*0.0035;
+      }
+      if (sealed){
+        /* weight by ranges to landmarks, then systematic resample */
+        const sig = 0.028;
+        let sum = 0;
+        const zr = LM.map(l=>Math.hypot(rob.x-l[0], rob.y-l[1]));
+        for (const p of parts){
+          let w = 1;
+          for (let li=0; li<LM.length; li++){
+            const d = Math.hypot(p.x-LM[li][0], p.y-LM[li][1]) - zr[li];
+            w *= Math.exp(-d*d/(2*sig*sig));
+          }
+          p.w = w + 1e-12; sum += p.w;
+        }
+        const step = sum/Np; let u = r()*step, c = parts[0].w, i = 0;
+        const nw = [];
+        for (let m=0; m<Np; m++){
+          while (u > c && i < Np-1){ i++; c += parts[i].w; }
+          nw.push({x:parts[i].x, y:parts[i].y, w:1});
+          u += step;
+        }
+        parts = nw;
+      } else {
+        lostT += dt;
+        if (lostT > 9){ lostT = 0; scatter(); }
+      }
+    },
+    draw(g,s,sealed,t){
+      g.strokeStyle = PALE(.14);
+      g.strokeRect(-W*s-8, -H*s-8, 2*W*s+16, 2*H*s+16);
+      for (const l of LM){
+        g.strokeStyle = sealed ? GOLD(.6) : PALE(.35);
+        g.beginPath();
+        g.moveTo(l[0]*s, l[1]*s-4); g.lineTo(l[0]*s+4, l[1]*s); g.lineTo(l[0]*s, l[1]*s+4); g.lineTo(l[0]*s-4, l[1]*s);
+        g.closePath(); g.stroke();
+      }
+      /* its guesses — ember when lost, gold when the filter runs */
+      g.fillStyle = sealed ? GOLD(.7) : EMBER(.5);
+      for (const p of parts) g.fillRect(p.x*s-1.1, p.y*s-1.1, 2.2, 2.2);
+      /* mean estimate + uncertainty ring */
+      let mx=0,my=0; parts.forEach(p=>{mx+=p.x;my+=p.y;}); mx/=Np; my/=Np;
+      const spread = Math.sqrt(parts.reduce((a,p)=>a+(p.x-mx)*(p.x-mx)+(p.y-my)*(p.y-my),0)/Np);
+      g.strokeStyle = sealed ? GOLD(.45) : EMBER(.4);
+      g.setLineDash([3,4]);
+      g.beginPath(); g.ellipse(mx*s, my*s, Math.max(6,spread*s*2), Math.max(5,spread*s*1.7), 0, 0, TAU); g.stroke();
+      g.setLineDash([]);
+      g.strokeStyle = sealed ? HI(.9) : EMBER(.7);
+      g.beginPath(); g.moveTo(mx*s-5,my*s); g.lineTo(mx*s+5,my*s); g.moveTo(mx*s,my*s-5); g.lineTo(mx*s,my*s+5); g.stroke();
+      /* the truth */
+      g.save(); g.translate(rob.x*s, rob.y*s); g.rotate(rob.a);
+      g.strokeStyle = PALE(.95); g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(7,0); g.lineTo(-5,-5); g.lineTo(-5,5); g.closePath(); g.stroke();
+      g.lineWidth = 1;
+      g.restore();
+      /* plain-language legend */
+      g.font = MONO(Math.max(10,s*0.0145));
+      g.textAlign='center';
+      const cm = Math.round(spread*320);
+      if (this._flash > 0){
+        g.fillStyle = HI(.9);
+        g.fillText('beliefs scattered — watch what happens', 0, H*s+s*0.045);
+      } else {
+        g.fillStyle = sealed ? GOLD(.65) : EMBER(.6);
+        g.fillText(sealed ? (spread<0.05 ? `filter on — belief locked · off by ~${cm} cm` : 'filter on — belief snapping back…')
+                          : `no filter — its guesses drift apart · off by ~${cm} cm`, 0, H*s+s*0.045);
+      }
+      g.font = MONO(Math.max(9,s*0.0125));
+      g.fillStyle = PALE(.45);
+      g.fillText('▷ the machine, truly   ·   ▪ where it believes it is', 0, H*s+s*0.078);
+      g.textAlign='start';
+    },
+  };
+}
+
+/* =========== 5 · IRON — drive it yourself =========== */
+function exIron(){
+  const W=0.3, H=0.19;
+  const WALLS = [
+    [-W,-H,W,-H],[W,-H,W,H],[W,H,-W,H],[-W,H,-W,-H],
+    [-W*0.35,-H,-W*0.35,-H*0.15],[W*0.3,H,W*0.3,H*0.25],
+  ];
+  let rob = {x:-W*0.6, y:H*0.5, a:0}, odo = {x:-W*0.6, y:H*0.5, a:0};
+  let v=0, w=0, keys = {};
+  let trailT = [], trailO = [], mapP = [];
+  const r = RNG(31);
+  function ray(x,y,a){
+    let best = 0.5;
+    const dx = Math.cos(a), dy = Math.sin(a);
+    for (const s of WALLS){
+      const x1=s[0],y1=s[1],x2=s[2],y2=s[3];
+      const den = dx*(y2-y1)-dy*(x2-x1);
+      if (Math.abs(den)<1e-9) continue;
+      const t2 = (dx*(y-y1)-dy*(x-x1))/den;
+      const t1 = Math.abs(dx)>Math.abs(dy) ? (x1+(x2-x1)*t2-x)/dx : (y1+(y2-y1)*t2-y)/dy;
+      if (t2>=0 && t2<=1 && t1>0 && t1<best) best=t1;
+    }
+    return best;
+  }
+  return {
+    engaged:false,
+    hit:(x,y,s)=> Math.abs(x)<s*(W+0.05) && Math.abs(y)<s*(H+0.06),
+    pointer(type,x,y,s){
+      if (type==='down'){ this.engaged = true; this._tp = {x,y}; }
+      if (type==='move' && this._tp){ this._steer = {x:(x-this._tp.x)/s, y:(y-this._tp.y)/s}; }
+      if (type==='up'){ this._tp=null; this._steer=null; }
+    },
+    key(k,down){ keys[k.toLowerCase()] = down; },
+    step(dt,t,sealed){
+      let cv=0, cw=0;
+      if (keys['arrowup']||keys['w']) cv += 0.12;
+      if (keys['arrowdown']||keys['s']) cv -= 0.08;
+      if (keys['arrowleft']||keys['a']) cw -= 2.6;
+      if (keys['arrowright']||keys['d']) cw += 2.6;
+      if (this._steer){ cv = clamp(-this._steer.y*0.6,-0.1,0.14); cw = clamp(this._steer.x*14,-3,3); }
+      v = lerp(v, cv, 1-Math.exp(-dt*7));
+      w = lerp(w, cw, 1-Math.exp(-dt*9));
+      const nx = rob.x + Math.cos(rob.a)*v*dt, ny = rob.y + Math.sin(rob.a)*v*dt;
+      /* wall margin */
+      if (Math.abs(nx) < W-0.012 && Math.abs(ny) < H-0.012 &&
+          !(nx>-W*0.35-0.015 && nx<-W*0.35+0.015 && ny<-H*0.15) &&
+          !(nx>W*0.3-0.015 && nx<W*0.3+0.015 && ny>H*0.25)){
+        rob.x = nx; rob.y = ny;
+      }
+      rob.a += w*dt;
+      /* odometry drifts */
+      odo.x += Math.cos(odo.a)*v*dt*1.05 + randn(r)*0.0006;
+      odo.y += Math.sin(odo.a)*v*dt*1.05 + randn(r)*0.0006;
+      odo.a += w*dt*1.04 + randn(r)*0.004 + 0.015*dt;
+      if (Math.abs(v) > 0.005){
+        trailT.push([rob.x,rob.y]); if (trailT.length>420) trailT.shift();
+        trailO.push([odo.x,odo.y]); if (trailO.length>420) trailO.shift();
+        /* scan */
+        for (let i=-4;i<=4;i++){
+          const a = rob.a + i*0.17;
+          const d = ray(rob.x, rob.y, a);
+          if (d < 0.45){
+            if (sealed) mapP.push([rob.x+Math.cos(a)*d, rob.y+Math.sin(a)*d]);
+            else mapP.push([odo.x+Math.cos(odo.a + i*0.17)*d, odo.y+Math.sin(odo.a + i*0.17)*d]);
+            if (mapP.length > 1100) mapP.shift();
+          }
+        }
+      }
+    },
+    draw(g,s,sealed){
+      g.strokeStyle = PALE(sealed?.06:.14);
+      for (const sg of WALLS){ g.beginPath(); g.moveTo(sg[0]*s,sg[1]*s); g.lineTo(sg[2]*s,sg[3]*s); g.stroke(); }
+      /* the map it believes */
+      g.fillStyle = sealed ? GOLD(.5) : EMBER(.28);
+      for (const p of mapP) g.fillRect(p[0]*s-0.8, p[1]*s-0.8, 1.6, 1.6);
+      /* trails */
+      g.strokeStyle = PALE(.3);
+      g.beginPath(); trailT.forEach((p,i)=> i?g.lineTo(p[0]*s,p[1]*s):g.moveTo(p[0]*s,p[1]*s)); g.stroke();
+      if (!sealed){
+        g.strokeStyle = EMBER(.35); g.setLineDash([2,3]);
+        g.beginPath(); trailO.forEach((p,i)=> i?g.lineTo(p[0]*s,p[1]*s):g.moveTo(p[0]*s,p[1]*s)); g.stroke();
+        g.setLineDash([]);
+      }
+      /* robot */
+      g.save(); g.translate(rob.x*s, rob.y*s); g.rotate(rob.a);
+      g.strokeStyle = this.engaged ? HI(.95) : PALE(.75);
+      g.strokeRect(-5,-4,10,8);
+      g.beginPath(); g.moveTo(5,0); g.lineTo(9,0); g.stroke();
+      g.restore();
+      if (this.engaged){
+        g.strokeStyle = GOLD(.25);
+        g.strokeRect(-W*s-12, -H*s-12, 2*W*s+24, 2*H*s+24);
+      }
+      g.font = MONO(Math.max(8,s*0.011));
+      g.fillStyle = sealed ? GOLD(.45) : PALE(.3);
+      g.textAlign='center';
+      g.fillText(this.engaged ? (sealed?'slam corrected — the map is true':'odometry only — watch the map lie') + '  ·  esc to release'
+                              : 'idle — take the controls', 0, H*s+s*0.05);
+      g.textAlign='start';
+    },
+  };
+}
+
+/* =========== 6 · HANDS — pick & place, demos dial =========== */
+function exHands(){
+  const L1=0.14, L2=0.12, ax0=0, ay0=-0.19;      /* shoulder anchor */
+  const tableY = 0.1;
+  let demos = 90, dialDrag = false;
+  let phase = 0, ph = 0, grasped = false, ok = true;
+  let blockX = -0.1, attempts = [], q1 = 1.9, q2 = -1.2;
+  const binX = 0.14;
+  const r = RNG(47);
+  const path = [ [-0.1, tableY-0.10], [-0.1, tableY-0.018], [-0.1, tableY-0.018], [-0.1, tableY-0.12], [binX, tableY-0.12], [binX, tableY-0.04], [binX, tableY-0.12] ];
+  const dialY = tableY + 0.085;
+  return {
+    hit:(x,y,s)=> Math.abs(x)<s*0.3 && y>-s*0.26 && y<s*0.26,
+    hover(x,y,s){
+      const inDial = y/s > dialY-0.03 && y/s < dialY+0.035 && Math.abs(x/s) < 0.2;
+      stage.style.cursor = inDial ? 'ew-resize' : '';
+    },
+    pointer(type,x,y,s){
+      if (type==='down' && y/s > dialY-0.035) dialDrag = true;
+      if (dialDrag && type!=='up') demos = Math.round(clamp((x/s+0.17)/0.34, 0, 1)*110+10);
+      if (type==='up') dialDrag = false;
+    },
+    step(dt,t,sealed){
+      const speed = 1;
+      const k = (demos-10)/110;
+      const noise = lerp(0.045, 0.004, k);          /* the dial shapes the wobble, always */
+      ph += dt*0.55*speed;
+      if (ph >= 1){
+        ph = 0; phase++;
+        if (phase === 2){ /* grasp attempt */
+          const p = sealed ? lerp(0.45, 0.96, k) : lerp(0.05, 0.32, k);
+          ok = r() < p;
+          grasped = ok;
+          attempts.push(ok?1:0); if (attempts.length>24) attempts.shift();
+          if (!ok) blockX = -0.1 + (r()-0.5)*0.03;
+        }
+        if (phase === 5){ if (grasped){ blockX = binX; } grasped = false; }
+        if (phase >= path.length){ phase = 0; blockX = -0.1; }
+      }
+      const P0 = path[phase], P1 = path[(phase+1)%path.length];
+      const kk = ease(ph);
+      let txp = lerp(P0[0], P1[0], kk), typ = lerp(P0[1], P1[1], kk);
+      txp += Math.sin(t*7+phase)*noise*0.6; typ += Math.cos(t*9)*noise*0.5;
+      const [g1,g2] = ik2(txp-ax0, typ-ay0, L1, L2, 1);
+      q1 = angLerp(q1,g1,1-Math.exp(-dt*14)); q2 = angLerp(q2,g2,1-Math.exp(-dt*14));
+      if (grasped){
+        blockX = ax0+Math.cos(q1)*L1 + Math.cos(q1+q2)*L2;
+      }
+    },
+    draw(g,s,sealed){
+      /* gantry + table */
+      g.strokeStyle = PALE(.18);
+      g.beginPath(); g.moveTo(-s*0.22, ay0*s); g.lineTo(s*0.22, ay0*s); g.stroke();
+      g.strokeStyle = PALE(.2);
+      g.beginPath(); g.moveTo(-s*0.24, tableY*s); g.lineTo(s*0.24, tableY*s); g.stroke();
+      /* bin */
+      g.strokeStyle = sealed ? GOLD(.4) : PALE(.25);
+      g.strokeRect(binX*s - s*0.024, tableY*s - s*0.004, s*0.048, s*0.004);
+      /* arm */
+      const ex = ax0*s+Math.cos(q1)*L1*s, ey = ay0*s+Math.sin(q1)*L1*s;
+      const hx = ex+Math.cos(q1+q2)*L2*s, hy = ey+Math.sin(q1+q2)*L2*s;
+      const col = sealed ? GOLD(.8) : STEEL(.55);
+      g.strokeStyle = col; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(ax0*s,ay0*s); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
+      g.lineWidth = 1;
+      g.fillStyle = col;
+      g.beginPath(); g.arc(ax0*s,ay0*s,2.6,0,TAU); g.fill();
+      g.beginPath(); g.arc(ex,ey,2.4,0,TAU); g.fill();
+      /* gripper */
+      const open = (phase===2||phase===5) ? 3 : (grasped ? 4 : 7);
+      g.strokeStyle = col;
+      g.beginPath(); g.moveTo(hx-open, hy); g.lineTo(hx-open, hy+8); g.moveTo(hx+open, hy); g.lineTo(hx+open, hy+8); g.stroke();
+      /* block */
+      g.strokeStyle = grasped ? GOLD(.9) : PALE(.6);
+      const by = grasped ? hy+9 : tableY*s - s*0.018;
+      g.strokeRect(blockX*s - s*0.012, by, s*0.024, s*0.018);
+      /* the dial — always yours to drag */
+      const dy2 = dialY*s;
+      g.font = MONO(Math.max(10,s*0.0135));
+      g.textAlign='center';
+      g.fillStyle = HI(.6);
+      g.fillText('‹  training demonstrations — drag  ›', 0, dy2 - s*0.028);
+      g.strokeStyle = PALE(.3); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(-0.17*s, dy2); g.lineTo(0.17*s, dy2); g.stroke();
+      /* tick marks */
+      g.strokeStyle = PALE(.15);
+      for (let m=0;m<=10;m++){ const tx2=(-0.17+0.34*m/10)*s; g.beginPath(); g.moveTo(tx2,dy2-3); g.lineTo(tx2,dy2+3); g.stroke(); }
+      const kx = (-0.17 + 0.34*(demos-10)/110)*s;
+      g.fillStyle = dialDrag ? HI(1) : GOLD(.95);
+      g.beginPath(); g.arc(kx, dy2, dialDrag?7:5.5, 0, TAU); g.fill();
+      g.strokeStyle = GOLD(.35);
+      g.beginPath(); g.arc(kx, dy2, dialDrag?11:9, 0, TAU); g.stroke();
+      const rate = attempts.length ? Math.round(attempts.reduce((a,b)=>a+b,0)/attempts.length*100) : 0;
+      g.fillStyle = sealed ? GOLD(.7) : EMBER(.6);
+      g.fillText(sealed ? `${demos} demos → success ${rate}% — data becomes skill`
+                        : `${demos} demos → success ${rate}% — untrained. data alone isn't enough. yet.`, 0, dy2 + s*0.042);
+      g.textAlign='start';
+    },
+  };
+}
+
+/* =========== 7 · WORLD — it listens =========== */
+function exWorld(){
+  const railY = -0.17, groundY = 0.1, BH = 0.021;
+  const blocks = { red:{x:-0.1,on:null}, blue:{x:0.05,on:null} };
+  let carX = 0, carTX = 0, grabY = railY+0.03, grabTY = railY+0.03, held = null;
+  let plan = [], stepT = 0, lookX = null, tilt = 0, flickerT = 0;
+  let pulseC = null, pulseT = 0, sparks = [];
+  const topY = c => groundY - BH - (blocks[c].on ? BH : 0);
+  function spark(x,y){
+    for (let i=0;i<9;i++) sparks.push({x,y,a:i/9*TAU + 0.2, life:0.55});
+  }
+  function planMove(color, dxs){
+    const other = color==='red'?'blue':'red';
+    let dst = clamp(blocks[color].x + dxs, -0.2, 0.2);
+    if (Math.abs(dst - blocks[other].x) < 0.035 && !blocks[other].on) dst = clamp(dst + Math.sign(dxs)*0.045, -0.2, 0.2);
+    plan = [
+      {t:'look', x:blocks[color].x, dur:0.7},
+      {t:'goto', x:()=>blocks[color].x},
+      {t:'grabTo', y:()=>topY(color)-0.004},
+      {t:'do', fn:()=>{ held = color; if (blocks[other].on===color) blocks[other].on=null; blocks[color].on=null; }},
+      {t:'grabTo', y:railY+0.03},
+      {t:'goto', x:dst},
+      {t:'grabTo', y:groundY-BH-0.004},
+      {t:'do', fn:()=>{ blocks[color].x = dst; held = null; pulseC = color; pulseT = 1; spark(dst, groundY-BH); }},
+      {t:'grabTo', y:railY+0.03},
+    ];
+  }
+  function planStack(a, b){
+    plan = [
+      {t:'look', x:blocks[a].x, dur:0.6},
+      {t:'goto', x:()=>blocks[a].x},
+      {t:'grabTo', y:()=>topY(a)-0.004},
+      {t:'do', fn:()=>{ held = a; blocks[a].on = null; }},
+      {t:'grabTo', y:railY+0.03},
+      {t:'look', x:blocks[b].x, dur:0.5},
+      {t:'goto', x:()=>blocks[b].x},
+      {t:'grabTo', y:()=>groundY-2*BH-0.004},
+      {t:'do', fn:()=>{ blocks[a].x = blocks[b].x; blocks[a].on = b; held = null; pulseC = a; pulseT = 1; spark(blocks[b].x, groundY-2*BH); }},
+      {t:'grabTo', y:railY+0.03},
+    ];
+  }
+  function planLift(color){
+    plan = [
+      {t:'look', x:blocks[color].x, dur:0.6},
+      {t:'goto', x:()=>blocks[color].x},
+      {t:'grabTo', y:()=>topY(color)-0.004},
+      {t:'do', fn:()=>{ held = color; }},
+      {t:'grabTo', y:railY+0.06},
+      {t:'wait', dur:1.1},
+      {t:'grabTo', y:()=>topY(color)-0.004},
+      {t:'do', fn:()=>{ held = null; pulseC = color; pulseT = 1; }},
+      {t:'grabTo', y:railY+0.03},
+    ];
+  }
+  function planWave(){
+    plan = [
+      {t:'goto', x:0},
+      {t:'do', fn:()=>{ tilt = -0.16; }},
+      {t:'goto', x:0.06},{t:'goto', x:-0.06},{t:'goto', x:0.05},{t:'goto', x:-0.04},{t:'goto', x:0},
+      {t:'do', fn:()=>{ spark(0, railY+0.05); }},
+    ];
+  }
+  const ex = {
+    hit:()=>false,
+    pointer(){},
+    step(dt,t,sealed){
+      tilt = lerp(tilt, 0, dt*2.6);
+      if (flickerT > 0) flickerT -= dt;
+      if (pulseT > 0) pulseT -= dt*1.6;
+      sparks.forEach(sp=>sp.life-=dt);
+      sparks = sparks.filter(sp=>sp.life>0);
+      if (plan.length){
+        const st0 = plan[0];
+        if (st0.t==='look'){ lookX = st0.x; stepT += dt; pulseC = null; if (stepT>st0.dur){ plan.shift(); stepT=0; lookX=null; } }
+        else if (st0.t==='wait'){ stepT += dt; if (stepT>st0.dur){ plan.shift(); stepT=0; } }
+        else if (st0.t==='do'){ st0.fn(); plan.shift(); }
+        else if (st0.t==='goto'){ carTX = typeof st0.x==='function'?st0.x():st0.x; if (Math.abs(carX-carTX)<0.005) plan.shift(); }
+        else if (st0.t==='grabTo'){ grabTY = typeof st0.y==='function'?st0.y():st0.y; if (Math.abs(grabY-grabTY)<0.005) plan.shift(); }
+      }
+      carX = lerp(carX, carTX, 1-Math.exp(-dt*4.5));
+      grabY = lerp(grabY, grabTY, 1-Math.exp(-dt*5));
+      if (held){ blocks[held].x = carX; }
+    },
+    draw(g,s,sealed,t){
+      g.strokeStyle = PALE(.2);
+      g.beginPath(); g.moveTo(-0.24*s, railY*s); g.lineTo(0.24*s, railY*s); g.stroke();
+      g.beginPath(); g.moveTo(-0.26*s, groundY*s); g.lineTo(0.26*s, groundY*s); g.stroke();
+      const col = sealed ? GOLD(.85) : STEEL(.55);
+      /* searchlight — it looks before it acts */
+      if (lookX !== null){
+        const lg = g.createLinearGradient(carX*s, railY*s, lookX*s, groundY*s);
+        lg.addColorStop(0, GOLD(.28)); lg.addColorStop(1, GOLD(.02));
+        g.fillStyle = lg;
+        g.beginPath();
+        g.moveTo(carX*s-3, railY*s+4); g.lineTo(carX*s+3, railY*s+4);
+        g.lineTo(lookX*s+s*0.035, groundY*s); g.lineTo(lookX*s-s*0.035, groundY*s);
+        g.closePath(); g.fill();
+      }
+      /* carriage + column */
+      g.save();
+      g.translate(carX*s, railY*s);
+      g.rotate(tilt);
+      g.strokeStyle = col;
+      g.strokeRect(-s*0.02, -s*0.008, s*0.04, s*0.014);
+      g.beginPath(); g.moveTo(0, s*0.006); g.lineTo(0, (grabY-railY)*s); g.stroke();
+      const gy = (grabY-railY)*s;
+      const open = held ? 4 : 7;
+      g.beginPath(); g.moveTo(-open, gy); g.lineTo(-open, gy+7); g.moveTo(open, gy); g.lineTo(open, gy+7); g.stroke();
+      /* the eye */
+      const flick = flickerT > 0 && Math.sin(t*40) > 0;
+      g.fillStyle = flick ? EMBER(.9) : (sealed ? GOLD(1) : PALE(.45));
+      g.fillRect(-s*0.009, -s*0.004, s*0.018, 2.2);
+      if (sealed || flick){
+        g.fillStyle = flick ? EMBER(.12) : GOLD(.1);
+        g.beginPath(); g.arc(0, -s*0.002, s*0.02, 0, TAU); g.fill();
+      }
+      g.restore();
+      /* blocks (stacking-aware) */
+      Object.entries(blocks).forEach(([c,b])=>{
+        const isHeld = held===c;
+        const by = isHeld ? railY*s + (grabY-railY)*s + 8 : (groundY - BH - (b.on?BH:0))*s;
+        const bxp = isHeld ? carX*s : b.x*s;
+        g.strokeStyle = c==='red' ? EMBER(.95) : BLUE(.95);
+        g.lineWidth = (isHeld || (pulseC===c && pulseT>0)) ? 1.8 : 1.1;
+        g.strokeRect(bxp - s*0.014, by, s*0.028, BH*s);
+        if (pulseC===c && pulseT>0){
+          g.strokeStyle = HI(pulseT*.8);
+          g.strokeRect(bxp - s*0.014 - 3 - (1-pulseT)*6, by - 3 - (1-pulseT)*6, s*0.028 + 6 + (1-pulseT)*12, BH*s + 6 + (1-pulseT)*12);
+        }
+        g.lineWidth = 1;
+        /* name tags */
+        g.font = MONO(Math.max(9,s*0.011));
+        g.textAlign = 'center';
+        g.fillStyle = c==='red' ? EMBER(.6) : BLUE(.6);
+        if (!isHeld && !b.on) g.fillText(c, bxp, groundY*s + s*0.028);
+        g.textAlign = 'start';
+      });
+      /* sparks */
+      for (const sp of sparks){
+        const k = sp.life/0.55, d = (1-k)*s*0.03 + 3;
+        g.strokeStyle = HI(k*.9);
+        g.beginPath();
+        g.moveTo(sp.x*s + Math.cos(sp.a)*3, sp.y*s + Math.sin(sp.a)*3);
+        g.lineTo(sp.x*s + Math.cos(sp.a)*d, sp.y*s + Math.sin(sp.a)*d);
+        g.stroke();
+      }
+    },
+    command(txt, sealed){
+      const out = document.getElementById('speakout');
+      const say = m => { if (out) out.textContent = m; };
+      if (!sealed){
+        tilt = 0.15; flickerT = 1.3;
+        const lines = ['…static. the light flickers — sound, not meaning. yet.','it tilts its head toward you. the words don\'t land. yet.','it heard you. hall 07 is where it learns what words mean.'];
+        say(lines[txt.length % lines.length]);
+        return;
+      }
+      const s2 = txt.toLowerCase();
+      const color = s2.includes('red') ? 'red' : s2.includes('blue') ? 'blue' : null;
+      const dir = s2.includes('left') ? -0.1 : s2.includes('right') ? 0.1 : 0;
+      if (/wave|dance|bow/.test(s2)){ planWave(); say('✓ it waves back.'); return; }
+      if (/hello|^hi\b|hey/.test(s2)){ tilt = -0.13; pulseT = 1; say('the eye brightens. it knows you.'); return; }
+      if (/stack|on top|put.*on\b/.test(s2) && color){
+        const other = color==='red'?'blue':'red';
+        const first = s2.indexOf('red') >= 0 && s2.indexOf('blue') >= 0
+          ? (s2.indexOf('red') < s2.indexOf('blue') ? 'red' : 'blue') : color;
+        const second = first==='red'?'blue':'red';
+        planStack(first, second); say(`✓ stacking ${first} on ${second}.`); return;
+      }
+      if (color && /move|push|take|shift|slide|bring/.test(s2) && dir){ planMove(color, dir); say(`✓ moving the ${color} block ${dir<0?'left':'right'}.`); return; }
+      if (color && /lift|pick|raise|grab|hold/.test(s2)){ planLift(color); say(`✓ lifting the ${color} block.`); return; }
+      if (/home|center|reset/.test(s2)){ plan=[{t:'goto',x:0},{t:'grabTo',y:railY+0.03}]; say('✓ returning home.'); return; }
+      say('not in its vocabulary yet — try the buttons above, or: stack red on blue');
+    },
+  };
+  return ex;
+}
+
+/* =========== TERMINUS — the walker: its body is your progress =========== */
+const WALK_CAP = [
+  'it cannot stand. the first seal changes that',
+  'the attempts have rhythm now — it is learning to try',
+  'it stands. walking comes with the muscle',
+  'first steps. rough, real, yours',
+  'it knows where it is — the shaking stops',
+  'solid strides on real ground',
+  'the hands have found their swing',
+  'assembly complete — it walks because you understand why',
+];
+function walker(){
+  let phse = 0, speed = 1, dust = [], lastLift = [1,1];
+  let riseU = 0, tW = 0, stumbleCool = 3.5, lurch = 0;
+  /* one limb: shoulder/hip → target, returns nothing, strokes it */
+  function limb(g, x0, y0, x1, y1, L1, L2, elbow){
+    const [a1,a2] = ik2(x1-x0, y1-y0, L1, L2, elbow);
+    const mx = x0 + Math.cos(a1)*L1, my = y0 + Math.sin(a1)*L1;
+    g.beginPath(); g.moveTo(x0,y0); g.lineTo(mx,my); g.lineTo(x1,y1); g.stroke();
+    return [mx,my];
+  }
+  return {
+    arrived: false, salute: 0,
+    step(dt, camVel){
+      tW += dt;
+      const n = sealedCount();
+      if (this.salute > 0) this.salute -= dt;
+      dust.forEach(d=>{ d.life-=dt; d.x+=d.vx*dt; d.y+=d.vy*dt; d.vy-=dt*8; });
+      dust = dust.filter(d=>d.life>0);
+      this._dust = dust;
+      if (n <= 1){ riseU = (riseU + dt/(n===0 ? 4.8 : 4.0)) % 1; return; }
+      if (n === 2){ phse += dt*0.9; return; }
+      /* walking */
+      const cap = [0,0,0,0.45,0.6,0.85,1.0,1.15][n];
+      const tgt = clamp(0.7 + camVel*0.0022, 0.7, 2.4) * cap;
+      speed = lerp(speed, tgt, 1-Math.exp(-dt*2));
+      /* stumbles, only while the balance is raw */
+      if (n === 3){
+        stumbleCool -= dt;
+        if (stumbleCool <= 0){ lurch = 1; stumbleCool = 3.5 + (phse % 3); }
+      }
+      lurch = Math.max(0, lurch - dt*1.6);
+      phse += dt*speed*3.4*(1 + lurch*1.3);
+      /* footfall dust once the feet land with intent */
+      if (n >= 5){
+        for (let leg=0; leg<2; leg++){
+          const lift = Math.max(0, Math.sin(phse + leg*Math.PI + Math.PI*0.5));
+          if (lastLift[leg] > 0.08 && lift <= 0.08){
+            const fx = Math.sin(phse + leg*Math.PI);
+            for (let k=0;k<4;k++) dust.push({x:fx, y:0, vx:(Math.sin(phse*9+k)*.5)*3, vy:-(1.5+k*0.5), life:0.5});
+          }
+          lastLift[leg] = lift;
+        }
+      }
+    },
+    draw(g, s, ay){
+      const ground = FLOOR - ay;
+      const n = sealedCount();
+      const all = n === 7;
+      const base = all ? GOLD(.9) : STEEL(.5+n*0.05);
+      const dim  = all ? GOLD(.55) : STEEL(.32);
+      const TH = s*0.13, SH = s*0.125, AR1 = s*0.075, AR2 = s*0.07;
+      g.lineWidth = 1.6;
+
+      if (n <= 1){
+        /* —— down. only a hand reaches for the light, trembles, and falls back —— */
+        let reach = 0, trem = 0;
+        if (riseU < 0.45) reach = ease(riseU/0.45);
+        else if (riseU < 0.64){ reach = 1; trem = 1; }
+        else if (riseU < 0.76) reach = 1 - ease((riseU-0.64)/0.12);
+        const maxR = n===0 ? 0.55 : 1.0;
+        const r = reach*maxR;
+        const hipX = 0, hipY = ground - s*0.045;
+        /* legs folded together, resting to one side */
+        g.strokeStyle = dim;
+        limb(g, hipX, hipY, hipX - s*0.17, ground, TH, SH, 1);
+        g.strokeStyle = base;
+        limb(g, hipX, hipY, hipX - s*0.15, ground - s*0.008, TH, SH, 1);
+        /* slumped torso, drooped head — the body barely stirs */
+        const torsoA = 1.0 - 0.12*r;
+        const shX = hipX + Math.sin(torsoA)*s*0.13;
+        const shY = hipY - Math.cos(torsoA)*s*0.13;
+        g.strokeStyle = base;
+        g.beginPath(); g.moveTo(hipX,hipY); g.lineTo(shX,shY); g.stroke();
+        g.beginPath(); g.arc(shX + s*0.03, shY - s*0.008 + s*0.01*(1-r*0.4), s*0.024, 0, TAU); g.stroke();
+        /* one arm rests on the ground */
+        g.strokeStyle = dim;
+        limb(g, shX, shY, shX + s*0.10, ground, AR1, AR2, 1);
+        /* the other reaches up */
+        const tr = trem * Math.sin(tW*(n===0 ? 16 : 7)) * s*0.007;
+        const hx3 = shX - s*0.02 + tr;
+        const hy3 = lerp(ground - s*0.02, shY - s*(n===0 ? 0.10 : 0.16), r) + tr*0.6;
+        g.strokeStyle = base;
+        limb(g, shX, shY, hx3, hy3, AR1, AR2, -1);
+        /* an open hand, asking */
+        g.beginPath(); g.moveTo(hx3, hy3); g.lineTo(hx3 - 3, hy3 - 5);
+        g.moveTo(hx3, hy3); g.lineTo(hx3 + 2, hy3 - 5); g.stroke();
+      }
+      else if (n === 2){
+        /* —— standing. knees not yet trusted —— */
+        const sway = Math.sin(phse*0.9)*s*0.014;
+        const dip0 = Math.max(0, Math.sin(phse*1.7+1.3));
+        const dip = dip0 > 0.9 ? (dip0-0.9)/0.1 : 0;
+        const hipX = sway;
+        const hipY = ground - s*0.225 + dip*s*0.032 + Math.sin(tW*7)*s*0.002;
+        g.strokeStyle = dim;
+        limb(g, hipX, hipY, -s*0.055, ground, TH, SH, -1);
+        g.strokeStyle = base;
+        limb(g, hipX, hipY, s*0.055, ground, TH, SH, 1);
+        const shX = hipX*0.4, shY = hipY - s*0.135;
+        g.strokeStyle = base;
+        g.beginPath(); g.moveTo(hipX,hipY); g.lineTo(shX,shY); g.stroke();
+        g.beginPath(); g.arc(shX + sway*0.4, shY - s*0.035, s*0.024, 0, TAU); g.stroke();
+        /* arms hang, lagging the sway */
+        g.strokeStyle = dim;
+        limb(g, shX, shY, shX - s*0.045 - sway*0.7, shY + s*0.135, AR1, AR2, -1);
+        g.strokeStyle = base;
+        limb(g, shX, shY, shX + s*0.045 - sway*0.7, shY + s*0.135, AR1, AR2, 1);
+      }
+      else {
+        /* —— walking. each seal steadies it —— */
+        const asym  = n===3 ? 1 : n===4 ? 0.8 : n===5 ? 0.15 : 0;
+        const wob   = n===3 ? 1 : n===4 ? 0.2 : n===5 ? 0.12 : n===6 ? 0.06 : 0;
+        const stride= (n>=5 ? 1 : 0.55) * s*0.085;
+        const crouch= asym*s*0.014;
+        const bob = Math.sin(phse*2)*s*0.008*(1+1.8*wob) + wob*Math.sin(phse*3.3+1)*s*0.006;
+        /* the bad leg takes weight badly: hip drops on its stance */
+        const pBad = phse + 0.4*asym*Math.sin(phse);
+        const badLoad = Math.max(0, -Math.sin(pBad + Math.PI*0.5));
+        const hy = ground - s*0.245 + crouch + bob + asym*badLoad*s*0.02;
+        const leanX = lurch*s*0.055 + asym*Math.sin(phse)*s*0.006;
+        /* legs */
+        for (let leg=0; leg<2; leg++){
+          const bad = leg===0;
+          let p = phse + leg*Math.PI;
+          if (bad) p += 0.4*asym*Math.sin(p);
+          const fx = Math.sin(p)*stride*(bad ? (1-0.5*asym) : 1);
+          const lift = Math.max(0, Math.sin(p + Math.PI*0.5))*s*0.05*(bad ? (1-0.65*asym) : 1);
+          const fy = ground - lift;
+          g.strokeStyle = leg ? base : dim;
+          const [kx,ky] = limb(g, 0, hy, fx, fy, TH, SH, 1);
+          g.beginPath(); g.moveTo(fx,fy); g.lineTo(fx+s*0.028*(bad?(1-0.4*asym):1), fy); g.stroke();
+          if (isSealed(4)){
+            g.strokeStyle = leg ? GOLD(.25) : GOLD(.14);
+            g.strokeRect(kx-3, hy+(ky-hy)*0.35, 6, (ky-hy)*0.42);
+          }
+        }
+        /* torso, head */
+        const shY = hy - s*0.135;
+        g.strokeStyle = base;
+        g.beginPath(); g.moveTo(0,hy); g.lineTo(leanX,shY); g.stroke();
+        const hdX = leanX + wob*Math.sin(tW*2.3)*s*0.012 + lurch*s*0.02;
+        g.beginPath(); g.arc(hdX, shY - s*0.035 + wob*Math.sin(tW*3.1)*s*0.005, s*0.024, 0, TAU); g.stroke();
+        /* arms — limp until the hands hall, then a real swing */
+        for (let arm=0; arm<2; arm++){
+          let hx2, hy2;
+          if (n >= 6){
+            const p = phse + arm*Math.PI + Math.PI;
+            hx2 = Math.sin(p)*s*0.055; hy2 = s*0.115;
+          } else {
+            hx2 = leanX + (arm? 1:-1)*s*0.035 - Math.sin(phse)*s*0.01;
+            hy2 = s*0.13;
+          }
+          if (arm===1 && this.salute > 0 && n >= 3){
+            const k = clamp(this.salute/0.4, 0, 1) * clamp((1.6-this.salute)/0.3, 0, 1);
+            hx2 = lerp(hx2, s*0.085, k); hy2 = lerp(hy2, -s*0.055, k);
+          }
+          g.strokeStyle = arm ? base : dim;
+          const [ex2,ey2] = limb(g, leanX, shY, leanX+hx2, shY+hy2, AR1, AR2, arm? -1:1);
+          if (isSealed(5)){
+            const wx2 = leanX+hx2, wy2 = shY+hy2;
+            g.beginPath(); g.moveTo(wx2,wy2); g.lineTo(wx2+3,wy2+5); g.moveTo(wx2,wy2); g.lineTo(wx2-2,wy2+5); g.stroke();
+          }
+        }
+        /* senses: the soft sweep */
+        if (isSealed(3)){
+          g.strokeStyle = GOLD(.12);
+          const a0 = Math.sin(phse*0.4)*0.5;
+          g.beginPath(); g.moveTo(leanX, shY-s*0.035);
+          g.lineTo(leanX+Math.cos(a0-0.2)*s*0.2, shY-s*0.035+Math.sin(a0-0.2)*s*0.12);
+          g.moveTo(leanX, shY-s*0.035);
+          g.lineTo(leanX+Math.cos(a0+0.2)*s*0.2, shY-s*0.035+Math.sin(a0+0.2)*s*0.12);
+          g.stroke();
+        }
+        /* world: visor */
+        if (isSealed(6)){
+          g.strokeStyle = HI(.9); g.lineWidth = 1.6;
+          g.beginPath(); g.moveTo(hdX-s*0.013, shY-s*0.038); g.lineTo(hdX+s*0.013, shY-s*0.038); g.stroke();
+        }
+        /* completion aura */
+        if (all){
+          const pul = Math.sin(phse*0.8)*.5+.5;
+          g.strokeStyle = GOLD(.08 + pul*.06);
+          g.beginPath(); g.arc(0, hy - s*0.06, s*0.32, 0, TAU); g.stroke();
+        }
+      }
+      g.lineWidth = 1;
+      /* kicked dust */
+      g.fillStyle = PALE(.3);
+      for (const d of (this._dust||[])){
+        g.fillRect(d.x*s*0.085 + d.vx*s*0.004, ground + d.y*s*0.01 - (0.5-d.life)*s*0.02, 1.4, 1.4);
+      }
+      g.font = MONO(Math.max(10, s*0.015));
+      g.textAlign = 'center';
+      g.fillStyle = all ? GOLD(.65) : HI(.5);
+      g.fillText(`${n}/7 — ${WALK_CAP[n]}`, 0, ground + s*0.05);
+      if (n >= 3){
+        g.font = MONO(Math.max(9, s*0.012));
+        g.fillStyle = PALE(.35);
+        g.fillText('scroll — its pace follows yours', 0, ground + s*0.078);
+      }
+      g.textAlign = 'start';
+    },
+  };
+}
+
+/* ---- build + main loop ---- */
+const EX = [exSubstrate(), exSkeleton(), exMuscle(), exSenses(), exIron(), exHands(), exWorld()];
+const WALK = walker();
+
+const speakEl = document.getElementById('speakin');
+if (speakEl){
+  speakEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && speakEl.value.trim()){
+      EX[6].command(speakEl.value.trim(), isSealed(6));
+      speakEl.value = '';
+    }
+  });
+}
+world.addEventListener('click', e => {
+  const b = e.target.closest('button.sbtn'); if (!b) return;
+  if (speakEl) speakEl.value = b.dataset.cmd;
+  EX[6].command(b.dataset.cmd, isSealed(6));
+  setTimeout(()=>{ if (speakEl && speakEl.value===b.dataset.cmd) speakEl.value=''; }, 900);
+});
+
+let prevTS = 0, prevCam = 0;
+function frame(ts){
+  requestAnimationFrame(frame);
+  if (document.hidden) return;
+  perfNow = ts;
+  const dt = clamp((ts - prevTS)/1000, 0.001, 0.05);
+  prevTS = ts;
+  const t = ts/1000;
+
+  camX = yToCam(scrollY);        /* read position directly — never trust events alone */
+  settleTick();
+  camS = motionOK ? lerp(camS, camX, 1-Math.exp(-dt*6.5)) : camX;
+  const camVel = Math.abs(camS - prevCam)/dt; prevCam = camS;
+  world.style.transform = `translate3d(${VW/2 - camS}px,0,0)`;
+
+  drawBG(t);
+  gx.clearRect(0,0,VW,VH);
+
+  for (let i=0;i<7;i++){
+    const a = exAnchor(i+1);
+    const sx = a.wx - camS + VW/2;
+    if (sx < -VW*0.8 || sx > VW*1.8) continue;
+    const sealed = isSealed(i);
+    EX[i].step(dt, t, sealed);
+    gx.save();
+    gx.translate(sx, a.y);
+    EX[i].draw(gx, a.s, sealed, t);
+    hintText(gx, a.s, HALLS[i].hint, a.s*(i===2?0.24:0.3));
+    gx.restore();
+  }
+  /* terminus walker */
+  {
+    const a = exAnchor(8);
+    const sx = (VW<860 ? sceneC(8) : sceneC(8)+VW*0.12) - camS + VW/2;
+    if (sx > -VW*0.8 && sx < VW*1.8){
+      if (curScene === 8 && !WALK.arrived){ WALK.arrived = true; WALK.salute = 1.6; }
+      WALK.step(dt, camVel);
+      gx.save(); gx.translate(sx, a.y);
+      WALK.draw(gx, a.s, a.y);
+      gx.restore();
+    }
+  }
+  hudUpdate();
+}
+
+/* ---- the hidden master switch: triple-tap the metre readout (or press `) ---- */
+const awk = document.getElementById('awk');
+let awkT = null;
+function togglePreview(){
+  preview = !preview;
+  refresh();
+  /* unmistakable acknowledgment — the whole room flares gold */
+  awk.classList.add('on');
+  clearTimeout(awkT);
+  awkT = setTimeout(()=>awk.classList.remove('on'), preview ? 900 : 350);
+}
+addEventListener('keydown', e => {
+  if (e.key === '`' && !(e.target && (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA'))) togglePreview();
+});
+
+/* ---- ambient — slow jazz, synthesized live. brushed ride, walking bass, soft keys ---- */
+const BPM = 72, BEAT = 60/BPM;
+const mf = m => 440*Math.pow(2,(m-69)/12);
+/* Am7 → D9 → Gmaj7 → Em7, one bar each — a gentle turnaround */
+const PROG = [
+  { b:45, third:3, n:[57,60,64,67] },   /* Am7  : A C E G  */
+  { b:38, third:4, n:[57,60,62,66] },   /* D9   : A C D F# */
+  { b:43, third:4, n:[59,62,66,69] },   /* Gmaj7: B D F# A */
+  { b:40, third:3, n:[59,62,64,67] },   /* Em7  : B D E G  */
+];
+let AC = null, masterG = null, soundOn = false, noiseBuf = null;
+let nextT = 0, beatIx = 0;
+function noiseHit(t, dur, type, freq, q, vol){
+  const src = AC.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  src.playbackRate.value = 0.9 + Math.random()*0.2;
+  const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+  const g = AC.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(f); f.connect(g); g.connect(masterG);
+  src.start(t); src.stop(t + dur + 0.05);
+}
+function bassNote(t, midi){
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.16, t + 0.018);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + BEAT*0.92);
+  g.connect(masterG);
+  const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = mf(midi);
+  const o2 = AC.createOscillator(); o2.type = 'triangle'; o2.frequency.value = mf(midi);
+  const g2 = AC.createGain(); g2.gain.value = 0.18;
+  o.connect(g); o2.connect(g2); g2.connect(g);
+  o.start(t); o.stop(t + BEAT); o2.start(t); o2.stop(t + BEAT);
+}
+function epChord(t, notes, vel){
+  notes.forEach(m=>{
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vel, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+    g.connect(masterG);
+    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = mf(m);
+    const oh = AC.createOscillator(); oh.type = 'sine'; oh.frequency.value = mf(m)*2;
+    const gh = AC.createGain(); gh.gain.value = 0.22;
+    o.connect(g); oh.connect(gh); gh.connect(g);
+    o.start(t); o.stop(t + 1.6); oh.start(t); oh.stop(t + 1.6);
+  });
+}
+function scheduleBeat(t, ix){
+  const bar = Math.floor(ix/4), beat = ix % 4;
+  const ch = PROG[bar % PROG.length], nx = PROG[(bar+1) % PROG.length];
+  /* brushed ride — swing: hit each beat, skip-note on 2 and 4 */
+  noiseHit(t, 0.34, 'highpass', 6200, 0.7, beat===0 ? 0.042 : 0.03);
+  if (beat===1 || beat===3) noiseHit(t + BEAT*0.66, 0.2, 'highpass', 7000, 0.7, 0.022);
+  /* soft brush on 2 and 4 */
+  if (beat===1 || beat===3) noiseHit(t, 0.1, 'bandpass', 850, 1.1, 0.05);
+  /* walking bass — root, colour, fifth, chromatic approach to the next root */
+  let m;
+  if (beat===0) m = ch.b;
+  else if (beat===1) m = ch.b + (Math.random()<0.6 ? ch.third : 7);
+  else if (beat===2) m = ch.b + (Math.random()<0.7 ? 7 : 10);
+  else m = nx.b + (Math.random()<0.5 ? 1 : -1);
+  bassNote(t, m);
+  /* keys comp — mostly on the and-of-two, sometimes on four */
+  if (beat===1 && Math.random()<0.7) epChord(t + BEAT*0.66, ch.n, 0.022 + Math.random()*0.012);
+  if (beat===3 && Math.random()<0.35) epChord(t, ch.n, 0.016 + Math.random()*0.008);
+}
+function buildAudio(){
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterG = AC.createGain(); masterG.gain.value = 0;
+  masterG.connect(AC.destination);
+  const len = AC.sampleRate;
+  noiseBuf = AC.createBuffer(1, len, AC.sampleRate);
+  const chd = noiseBuf.getChannelData(0);
+  for (let i=0;i<len;i++) chd[i] = Math.random()*2 - 1;
+  nextT = AC.currentTime + 0.15; beatIx = 0;
+  setInterval(()=>{
+    if (!soundOn){ nextT = Math.max(nextT, AC.currentTime + 0.15); return; }
+    while (nextT < AC.currentTime + 0.5){ scheduleBeat(nextT, beatIx); nextT += BEAT; beatIx++; }
+  }, 120);
+}
+const soundBtn = document.getElementById('sound');
+function setSound(on){
+  soundOn = on;
+  try {
+    if (on && !AC) buildAudio();
+    if (AC){
+      if (on) AC.resume();
+      masterG.gain.setTargetAtTime(on ? 0.85 : 0, AC.currentTime, on ? 1.8 : 0.6);
+    }
+  } catch(e){ soundOn = false; }
+  soundBtn.classList.toggle('on', soundOn);
+  soundBtn.textContent = soundOn ? '♪ sound on' : '♪ sound';
+  try { localStorage.setItem('body-sound', soundOn ? '1' : '0'); } catch(e){}
+}
+soundBtn.addEventListener('click', ()=> setSound(!soundOn));
+/* if sound was on last visit, wake it on the first touch of anything */
+try {
+  if (localStorage.getItem('body-sound') === '1'){
+    const wake = ()=>{ if (!soundOn) setSound(true); };
+    addEventListener('pointerdown', wake, {once:true});
+    addEventListener('keydown', wake, {once:true});
+  }
+} catch(e){}
+
+/* self-test + debug hook */
+window.__ASSEMBLY = {
+  state: ()=>state, EX, LQR_K, goScene, cam: ()=>camS, pids: PIDS,
+  testSkeleton(){
+    const run = sealed => {
+      const e = exSkeleton();
+      e.pointer('down', 0.15*1000, -0.12*1000, 1000);   /* pin a target, keep dragging */
+      const dists = [];
+      for (let k=0;k<600;k++){
+        e.step(1/60, k/60, sealed);
+        const p = e.probe();
+        const hx2 = Math.cos(p.q1)*p.L1 + Math.cos(p.q1+p.q2)*p.L2;
+        const hy2 = 0.14 + Math.sin(p.q1)*p.L1 + Math.sin(p.q1+p.q2)*p.L2;
+        if (k>=480) dists.push(Math.hypot(p.tx-hx2, p.ty-hy2));
+      }
+      return { mean: dists.reduce((a,b)=>a+b,0)/dists.length,
+               min: Math.min(...dists) };
+    };
+    return { sealed: run(true), unsealed: run(false) };
+  },
+  testCartpole(){
+    let s2 = [0,0,0.2,0];
+    const {M,m,l,g,fmax} = CP;
+    for (let k=0;k<Math.round(8/CP.dt);k++){
+      let u = clamp(-(LQR_K[0]*s2[0]+LQR_K[1]*s2[1]+LQR_K[2]*s2[2]+LQR_K[3]*s2[3]), -fmax, fmax);
+      const sin=Math.sin(s2[2]), cos=Math.cos(s2[2]), den=M+m*sin*sin;
+      const ddx=(u+m*l*s2[3]*s2[3]*sin-m*g*sin*cos)/den;
+      const ddth=(-u*cos-m*l*s2[3]*s2[3]*sin*cos+(M+m)*g*sin)/(l*den);
+      s2[1]+=ddx*CP.dt; s2[0]+=s2[1]*CP.dt; s2[3]+=ddth*CP.dt; s2[2]+=s2[3]*CP.dt;
+    }
+    return { th: s2[2], x: s2[0] };
+  },
+};
+
+requestAnimationFrame(frame);
+requestAnimationFrame(()=>document.body.classList.add('in'));
 </script>
 </body>
 </html>
