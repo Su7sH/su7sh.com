@@ -2,468 +2,647 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#07080a">
+<meta name="theme-color" content="#05070a">
 <title>·</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  /* A work of art — vivid, jaw-dropping antechamber.
-     Inspired by high-craft experimental sites (geometric artistry like Species in Pieces, pure CSS/SVG mastery like Lynn Fisher).
-     No adherence to the site's usual restraint. Rich, artistic, immersive. */
+  /* THE TWO FORMS — a raymarched liquid threshold.
+     Two living metals: mercury (brain) and molten gold (body).
+     They breathe, reach for each other, and swallow whoever chooses. */
   :root {
     color-scheme: dark;
-    --bg: #05070f;
+    --bg: #05070a;
     --text: #e8e6df;
-    --text-muted: #8a8578;
-    --accent-brain: #7aa8c9;   /* cool luminous for intelligence */
-    --accent-body: #c9a26b;    /* warm precise for embodiment */
+    --muted: #8a8578;
     --serif: 'Instrument Serif', Georgia, serif;
     --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease: cubic-bezier(.16,1,.3,1);
   }
-  * { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     font-weight: 300;
-    line-height: 1.65;
-    font-size: 15px;
-    -webkit-font-smoothing: antialiased;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; text-decoration: none; }
-  :focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: 4px; }
+  :focus-visible { outline: 1px solid rgba(232,230,223,.45); outline-offset: 6px; }
 
-  /* artistic background canvas layer */
-  #bg-canvas {
+  #gl {
     position: fixed;
     inset: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    opacity: 0.65;
+    display: block;
   }
 
-  /* subtle artistic grain + depth */
-  body::after {
-    content: '';
+  /* ---- overlay text ---- */
+  #epigraph {
     position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(circle at 30% 20%, rgba(120,140,170,.06) 0%, transparent 50%),
-      radial-gradient(circle at 70% 80%, rgba(170,130,90,.05) 0%, transparent 55%);
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  /* veil */
-  #veil {
-    position: fixed;
-    inset: 0;
-    background: #05070f;
-    z-index: 4000;
-    pointer-events: none;
-    opacity: 1;
-    transition: opacity 1200ms cubic-bezier(.16,1,.3,1);
-  }
-
-  /* return — artistic, quiet */
-  #return {
-    position: fixed;
-    top: 32px;
-    right: 36px;
-    z-index: 3000;
-    font-family: var(--mono);
-    font-size: .65rem;
-    letter-spacing: .3em;
-    text-transform: lowercase;
-    color: rgba(232,230,223,.25);
-    padding: 8px 16px;
-    transition: color 600ms ease, letter-spacing 600ms ease;
-  }
-  #return:hover {
-    color: var(--text);
-    letter-spacing: .4em;
-  }
-
-  main {
-    position: relative;
+    top: 7.5%;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 10;
-    height: 100%;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    letter-spacing: .01em;
+    color: rgba(232,230,223,0);
+    text-align: center;
+    line-height: 1.5;
+    pointer-events: none;
+    transition: color 1600ms ease;
+    white-space: nowrap;
+  }
+  body.loaded #epigraph { color: rgba(232,230,223,.34); }
+
+  #choices { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+  #choices a {
+    position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: .55rem;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 1400ms ease 900ms;
+    padding: 12px 20px;
+  }
+  body.loaded #choices a { opacity: 1; }
+
+  #pickBrain { left: 33%; bottom: 11%; transform: translateX(-50%); }
+  #pickBody  { left: 67%; bottom: 11%; transform: translateX(-50%); }
+
+  #choices .word {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 2rem;
+    line-height: 1;
+    color: rgba(232,230,223,.42);
+    letter-spacing: .015em;
+    transition: color 700ms ease, text-shadow 700ms ease, letter-spacing 700ms ease;
+  }
+  #choices .sub {
+    font-family: var(--mono);
+    font-size: .58rem;
+    letter-spacing: .3em;
+    text-transform: lowercase;
+    color: rgba(138,133,120,.55);
+    transition: color 700ms ease;
+  }
+  body.hoverA #pickBrain .word, #pickBrain:hover .word, #pickBrain:focus-visible .word {
+    color: #cfe6f7;
+    text-shadow: 0 0 28px rgba(110,170,220,.4);
+    letter-spacing: .04em;
+  }
+  body.hoverA #pickBrain .sub, #pickBrain:hover .sub { color: rgba(160,190,215,.75); }
+  body.hoverB #pickBody .word, #pickBody:hover .word, #pickBody:focus-visible .word {
+    color: #f2ddb8;
+    text-shadow: 0 0 28px rgba(220,160,90,.4);
+    letter-spacing: .04em;
+  }
+  body.hoverB #pickBody .sub, #pickBody:hover .sub { color: rgba(210,180,135,.75); }
+
+  @media (orientation: portrait) {
+    #epigraph { display: none; }
+    #pickBrain { left: 50%; top: 5.5%; bottom: auto; }
+    #pickBody  { left: 50%; bottom: 5.5%; }
+    #choices .word { font-size: 1.65rem; }
+  }
+
+  /* ---- return ---- */
+  #return {
+    position: fixed;
+    top: 28px;
+    right: 34px;
+    z-index: 30;
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .3em;
+    text-transform: lowercase;
+    color: rgba(232,230,223,0);
+    padding: 8px 14px;
+    transition: color 800ms ease;
+  }
+  body.loaded #return { color: rgba(232,230,223,.22); transition: color 900ms ease 1800ms; }
+  body.loaded #return:hover, body.loaded #return:focus-visible { color: rgba(232,230,223,.8); transition: color 400ms ease; }
+
+  /* ---- grain (site-wide ritual) ---- */
+  #grain {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: .035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- veil ---- */
+  #veil {
+    position: fixed;
+    inset: 0;
+    background: #05070a;
+    z-index: 100;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  /* ---- fallback (no WebGL2) ---- */
+  #fallback {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 2rem;
+    gap: 3rem;
     text-align: center;
   }
-
-  .intro {
-    margin-bottom: 3.5rem;
-    max-width: 620px;
-  }
-  .intro .epigraph {
-    font-family: var(--serif);
-    font-size: 1.45rem;
-    font-style: italic;
-    color: var(--text-muted);
-    line-height: 1.35;
-    letter-spacing: -.01em;
-  }
-
-  .emblems {
-    display: flex;
-    gap: 6rem;
-    align-items: center;
-    width: 100%;
-    max-width: 1100px;
-    justify-content: center;
-  }
-  @media (max-width: 720px) {
-    .emblems { flex-direction: column; gap: 3.5rem; }
-  }
-
-  .emblem {
-    position: relative;
-    width: 320px;
-    cursor: pointer;
-    transition: transform 900ms cubic-bezier(.16,1,.3,1);
-  }
-  .emblem:hover {
-    transform: translateY(-4px);
-  }
-  .emblem .art {
-    width: 100%;
-    height: 320px;
-    display: block;
-    position: relative;
-  }
-  .emblem .art svg {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 10px 30px rgba(0,0,0,.6));
-    transition: filter 600ms ease;
-  }
-  .emblem:hover .art svg {
-    filter: drop-shadow(0 20px 50px rgba(0,0,0,.5));
-  }
-
-  /* mouse-driven subtle artistic lighting across the composition */
-  .emblems {
-    --mx: 0.5;
-    --my: 0.5;
-  }
-  .emblem .art svg {
-    transition: filter 600ms ease;
-  }
-  .emblem:hover .art svg {
-    filter: drop-shadow(0 25px 60px rgba(0,0,0,.35)) 
-            drop-shadow(calc((var(--mx) - 0.5) * 18px) calc((var(--my) - 0.5) * 12px) 28px rgba(255,255,255,.08));
-  }
-
-  .emblem .label {
-    margin-top: 1.1rem;
-    font-size: .95rem;
-    letter-spacing: .08em;
-    color: var(--text-muted);
+  #fallback.on { display: flex; }
+  #fallback .fword {
     font-family: var(--serif);
     font-style: italic;
+    font-size: 2rem;
+    color: rgba(232,230,223,.6);
+    transition: color 500ms ease;
+  }
+  #fallback a:hover .fword { color: var(--text); }
+  #fallback .fsub {
+    font-family: var(--mono);
+    font-size: .58rem;
+    letter-spacing: .3em;
+    color: rgba(138,133,120,.55);
+    margin-top: .6rem;
   }
 
-  /* vivid activation styles for the art pieces */
-  .emblem.brain .art svg path,
-  .emblem.brain .art svg circle {
-    transition: stroke 400ms ease, fill 400ms ease, opacity 400ms ease;
+  noscript .ns {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    background: var(--bg); font-family: var(--serif); font-style: italic; font-size: 1.5rem;
   }
-  .emblem:hover.brain .art svg .active {
-    stroke: var(--accent-brain);
-    filter: brightness(1.3) saturate(1.4);
-  }
-
-  .emblem.body .art svg path,
-  .emblem.body .art svg circle {
-    transition: stroke 400ms ease, fill 400ms ease, opacity 400ms ease;
-  }
-  .emblem:hover.body .art svg .active {
-    stroke: var(--accent-body);
-    filter: brightness(1.25) saturate(1.3);
-  }
-
-  /* drawing animation classes */
-  .emblem .art svg .draw {
-    stroke-dasharray: 800;
-    stroke-dashoffset: 800;
-    transition: stroke-dashoffset 1600ms cubic-bezier(.2,1,.2,1);
-  }
-  .emblem:hover .art svg .draw {
-    stroke-dashoffset: 0;
-  }
+  noscript .ns a { color: rgba(232,230,223,.7); }
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
+<canvas id="gl" aria-hidden="true"></canvas>
 
-<div id="veil" aria-hidden="true"></div>
+<p id="epigraph">behind the room — two maps.<br>choose the one that will claim you.</p>
+
+<nav id="choices" aria-label="Choose a frontier">
+  <a id="pickBrain" href="brain.html">
+    <span class="word">brain</span>
+    <span class="sub">the atlas of intelligence</span>
+  </a>
+  <a id="pickBody" href="body/index.html">
+    <span class="word">body</span>
+    <span class="sub">frontier robotics</span>
+  </a>
+</nav>
+
+<div id="fallback">
+  <a href="brain.html"><span class="fword">brain</span><div class="fsub">the atlas of intelligence</div></a>
+  <a href="body/index.html"><span class="fword">body</span><div class="fsub">frontier robotics</div></a>
+</div>
 
 <a id="return" href="index.html">&larr; return</a>
 
-<main>
-  <div class="intro">
-    <p class="epigraph">behind the room — two maps.<br>choose the frontier that will claim you.</p>
-  </div>
+<div id="grain" aria-hidden="true"></div>
+<div id="veil" aria-hidden="true"></div>
 
-  <div class="emblems">
-    <!-- BRAIN: cosmic neural constellation. jaw-dropping abstract intelligence.
-         Vivid on engagement — lines draw, nodes bloom with cool light, forms breathe. -->
-    <a href="brain.html" class="emblem brain" aria-label="The Atlas of Intelligence">
-      <div class="art">
-        <svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <linearGradient id="brainGrad" x1="20%" y1="20%" x2="80%" y2="80%">
-              <stop offset="0%" stop-color="#7aa8c9"/>
-              <stop offset="100%" stop-color="#a8c4d8"/>
-            </linearGradient>
-          </defs>
-          <!-- outer cosmic shell -->
-          <circle cx="160" cy="160" r="138" stroke="#3a3f4a" stroke-width="1.5" opacity="0.4"/>
-          <!-- intricate neural web - many layers for complexity and beauty -->
-          <g stroke="#e8e6df" stroke-width="1.2" stroke-linecap="round">
-            <!-- main radiating arms -->
-            <path class="draw" d="M160 22 Q160 80 160 140" stroke="url(#brainGrad)" stroke-width="2.5"/>
-            <path class="draw" d="M160 298 Q160 240 160 180" stroke="url(#brainGrad)" stroke-width="2.5"/>
-            <path class="draw" d="M22 160 Q80 160 140 160" stroke="url(#brainGrad)" stroke-width="2.5"/>
-            <path class="draw" d="M298 160 Q240 160 180 160" stroke="url(#brainGrad)" stroke-width="2.5"/>
-            <!-- elegant curves and connections -->
-            <path class="draw" d="M70 70 Q110 110 160 140"/>
-            <path class="draw" d="M250 70 Q210 110 160 140"/>
-            <path class="draw" d="M70 250 Q110 210 160 180"/>
-            <path class="draw" d="M250 250 Q210 210 160 180"/>
-            <!-- fine mesh - complexity -->
-            <path class="draw" d="M95 55 Q130 95 160 120"/>
-            <path class="draw" d="M225 55 Q190 95 160 120"/>
-            <path class="draw" d="M95 265 Q130 225 160 200"/>
-            <path class="draw" d="M225 265 Q190 225 160 200"/>
-          </g>
-          <!-- glowing nodes -->
-          <g fill="#7aa8c9" filter="url(#glow)">
-            <circle cx="160" cy="60" r="4.5" class="active"/>
-            <circle cx="160" cy="260" r="4.5" class="active"/>
-            <circle cx="60" cy="160" r="4.5" class="active"/>
-            <circle cx="260" cy="160" r="4.5" class="active"/>
-            <circle cx="105" cy="105" r="3.5" class="active"/>
-            <circle cx="215" cy="105" r="3.5" class="active"/>
-            <circle cx="105" cy="215" r="3.5" class="active"/>
-            <circle cx="215" cy="215" r="3.5" class="active"/>
-            <circle cx="160" cy="160" r="7" class="active"/>
-          </g>
-          <!-- inner delicate structure for depth -->
-          <g stroke="#a8c4d8" stroke-width="0.8" opacity="0.6">
-            <path class="draw" d="M120 90 Q160 130 200 90"/>
-            <path class="draw" d="M120 230 Q160 190 200 230"/>
-            <circle cx="140" cy="140" r="2"/>
-            <circle cx="180" cy="140" r="2"/>
-            <circle cx="140" cy="180" r="2"/>
-            <circle cx="180" cy="180" r="2"/>
-          </g>
-        </svg>
-      </div>
-      <div class="label">The Atlas of Intelligence</div>
-    </a>
-
-    <!-- BODY: vivid abstract embodiment. elegant mechanical poetry.
-         Precise lines, articulated beauty. On hover, structure articulates and warms. -->
-    <a href="body/index.html" class="emblem body" aria-label="Frontier Robotics">
-      <div class="art">
-        <svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="glowBody" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <linearGradient id="bodyGrad" x1="30%" y1="10%" x2="70%" y2="90%">
-              <stop offset="0%" stop-color="#c9a26b"/>
-              <stop offset="100%" stop-color="#e8d4a8"/>
-            </linearGradient>
-          </defs>
-          <!-- elegant outer presence -->
-          <ellipse cx="160" cy="160" rx="92" ry="128" stroke="#3a3f4a" stroke-width="1.5" opacity="0.35"/>
-          <!-- head -->
-          <circle cx="160" cy="68" r="22" stroke="#e8e6df" stroke-width="2.5"/>
-          <!-- neck -->
-          <line x1="160" y1="90" x2="160" y2="108" stroke="#e8e6df" stroke-width="3"/>
-          <!-- shoulders & clavicle - architectural -->
-          <path d="M115 108 Q160 122 205 108" stroke="#e8e6df" stroke-width="2.2"/>
-          <!-- torso - strong vertical presence -->
-          <line x1="132" y1="122" x2="132" y2="198" stroke="#e8e6df" stroke-width="2.8"/>
-          <line x1="188" y1="122" x2="188" y2="198" stroke="#e8e6df" stroke-width="2.8"/>
-          <!-- pelvis articulation -->
-          <path d="M132 198 Q160 210 188 198" stroke="#e8e6df" stroke-width="2"/>
-          <!-- left arm - beautiful mechanics -->
-          <path class="draw" d="M115 115 Q88 155 78 205" stroke="url(#bodyGrad)" stroke-width="2.5"/>
-          <path class="draw" d="M78 205 Q70 235 85 262" stroke="url(#bodyGrad)" stroke-width="2.2"/>
-          <!-- right arm -->
-          <path class="draw" d="M205 115 Q232 155 242 205" stroke="url(#bodyGrad)" stroke-width="2.5"/>
-          <path class="draw" d="M242 205 Q250 235 235 262" stroke="url(#bodyGrad)" stroke-width="2.2"/>
-          <!-- left leg -->
-          <path class="draw" d="M140 210 Q118 265 105 295" stroke="url(#bodyGrad)" stroke-width="2.5"/>
-          <!-- right leg -->
-          <path class="draw" d="M180 210 Q202 265 215 295" stroke="url(#bodyGrad)" stroke-width="2.5"/>
-          <!-- precise joints - vivid on hover -->
-          <g fill="#c9a26b" filter="url(#glowBody)">
-            <circle cx="115" cy="115" r="5" class="active"/>
-            <circle cx="78" cy="205" r="4.5" class="active"/>
-            <circle cx="205" cy="115" r="5" class="active"/>
-            <circle cx="242" cy="205" r="4.5" class="active"/>
-            <circle cx="140" cy="210" r="5" class="active"/>
-            <circle cx="180" cy="210" r="5" class="active"/>
-            <circle cx="105" cy="295" r="3.8" class="active"/>
-            <circle cx="215" cy="295" r="3.8" class="active"/>
-            <!-- core heart -->
-            <circle cx="160" cy="155" r="7" class="active"/>
-          </g>
-          <!-- internal structural poetry -->
-          <g stroke="#e8d4a8" stroke-width="0.9" opacity="0.5">
-            <line x1="160" y1="108" x2="160" y2="198"/>
-            <path d="M132 145 Q160 158 188 145"/>
-            <path d="M132 175 Q160 188 188 175"/>
-          </g>
-        </svg>
-      </div>
-      <div class="label">Frontier Robotics</div>
-    </a>
-  </div>
-</main>
+<noscript><div class="ns">
+  <a href="brain.html">brain</a>
+  <a href="body/index.html">body</a>
+</div></noscript>
 
 <script>
-  /* artistic background: subtle cosmic dust / flowing particles. pure vanilla Canvas. */
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d', { alpha: true });
-  let w, h, particles = [];
+(function () {
+  'use strict';
+
+  var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('gl');
+  var veil = document.getElementById('veil');
+  var fallbackEl = document.getElementById('fallback');
+
+  /* ---------- shaders ---------- */
+
+  var VERT = [
+    '#version 300 es',
+    'void main(){',
+    '  vec2 p = vec2((gl_VertexID<<1 & 2), (gl_VertexID & 2));',
+    '  gl_Position = vec4(p*2.-1., 0., 1.);',
+    '}'
+  ].join('\n');
+
+  var FRAG = [
+    '#version 300 es',
+    'precision highp float;',
+    'out vec4 O;',
+    'uniform vec2 uRes;',
+    'uniform float uTime;',
+    'uniform vec3 uMouseW;',
+    'uniform float uPullA, uPullB;',
+    'uniform float uConsume;',
+    'uniform float uChosen;',   // -1 brain, +1 body
+    'uniform float uVert;',     // 1 = portrait
+    'uniform float uIntro;',
+    'uniform float uMotion;',
+    'uniform vec2 uLook;',
+
+    'float smin(float a, float b, float k){',
+    '  float h = clamp(.5 + .5*(b-a)/k, 0., 1.);',
+    '  return mix(b, a, h) - k*h*(1.-h);',
+    '}',
+
+    'vec3 cA(){ return mix(vec3(-1.06, 0., 0.), vec3(0., .92, 0.), uVert); }',
+    'vec3 cB(){ return mix(vec3( 1.06, 0., 0.), vec3(0., -.92, 0.), uVert); }',
+
+    'float cluster(vec3 p, vec3 C, float seed, float grow, float pull){',
+    '  float t = uTime * uMotion;',
+    '  vec3 o1 = vec3(sin(t*.62+seed),     cos(t*.81+seed*1.7), sin(t*.44+seed*2.3)) * .13;',
+    '  vec3 o2 = vec3(cos(t*.53+seed*2.1), sin(t*.71+seed),     cos(t*.90+seed*3.1)) * .30;',
+    '  vec3 o3 = vec3(sin(t*.85+seed*4.2), sin(t*.62+seed*2.2), cos(t*.57+seed*1.3)) * .44;',
+    '  float g = uIntro;',
+    '  float d = length(p-(C+o1)) - (.60*g + grow);',
+    '  d = smin(d, length(p-(C+o2)) - (.33*g + grow*.8), .34);',
+    '  d = smin(d, length(p-(C+o3)) - (.24*g + grow*.7), .30);',
+    '  vec3 mb = mix(C, uMouseW, .62);',
+    '  d = smin(d, length(p-mb) - ((.02 + .34*pull)*g + grow*.5), .40);',
+    '  return d;',
+    '}',
+
+    'void map(vec3 p, out float d, out float w, out float seam){',
+    '  float growA = uChosen < -.5 ? uConsume*uConsume*9. : 0.;',
+    '  float growB = uChosen >  .5 ? uConsume*uConsume*9. : 0.;',
+    '  float dA = cluster(p, cA(), 0.0, growA, uPullA);',
+    '  float dB = cluster(p, cB(), 7.3, growB, uPullB);',
+    '  d = smin(dA, dB, .46);',
+    '  w = clamp(.5 + (dB - dA)*1.4, 0., 1.);',
+    '  seam = exp(-abs(dA - dB)*22.) * exp(-max(dA + dB, 0.)*2.5);',
+    '}',
+
+    'float mapD(vec3 p){ float d, w, s; map(p, d, w, s); return d; }',
+
+    'vec3 normalAt(vec3 p){',
+    '  const vec2 e = vec2(.0015, -.0015);',
+    '  return normalize(',
+    '    e.xyy*mapD(p+e.xyy) + e.yyx*mapD(p+e.yyx) +',
+    '    e.yxy*mapD(p+e.yxy) + e.xxx*mapD(p+e.xxx));',
+    '}',
+
+    /* studio environment the metals reflect: bright softbox bands over a black void.
+       metals ARE their reflection — contrast here is what makes them read as liquid metal. */
+    /* material-aware studio: w=1 mercury (cool/silver lights), w=0 gold (warm lights).
+       each metal reflects its own world; they share only the seam glow. */
+    'vec3 env(vec3 rd, float w){',
+    '  float up = rd.y*.5 + .5;',
+    '  vec3 col = mix(vec3(.012,.014,.020), vec3(.05,.06,.085), pow(up, 2.));',
+    /* narrow key band — the dark gap beneath it is where the metal's color depth lives */
+    '  float key = exp(-pow((rd.y - .55)*4.5, 2.));',
+    '  col += vec3(1.2,1.28,1.42) * key * 1.35;',
+    '  float strip = exp(-pow((rd.y + .02)*18., 2.));',
+    '  col += vec3(.9,.95,1.05) * strip * 1.1;',
+    '  float fill = exp(-pow((rd.y + .55)*4., 2.));',
+    '  col += mix(vec3(.30,.26,.20), vec3(.20,.23,.28), w) * fill * .35;',
+    '  float l1 = pow(max(dot(rd, normalize(vec3(-.55,.45,.42))), 0.), 14.);',
+    '  col += vec3(.45,.75,1.15) * l1 * mix(.35, 1.35, w);',
+    '  float l2 = pow(max(dot(rd, normalize(vec3(.62,-.16,.40))), 0.), 16.);',
+    '  col += vec3(1.25,.58,.18) * l2 * mix(1.5, .12, w);',
+    '  col *= mix(.3, 1., smoothstep(-.95,-.05, rd.y));',
+    '  return col;',
+    '}',
+
+    'float hash21(vec2 p){ p = fract(p*vec2(234.34,435.345)); p += dot(p, p+34.23); return fract(p.x*p.y); }',
+
+    'void main(){',
+    '  vec2 px = (2.*gl_FragCoord.xy - uRes) / uRes.y;',
+    '  vec3 ro = vec3(0., 0., 3.5);',
+    '  vec3 rd = normalize(vec3(px, -1.95));',
+    '  float cy = cos(uLook.x), sy = sin(uLook.x);',
+    '  rd.xz = mat2(cy, -sy, sy, cy) * rd.xz;  ro.xz = mat2(cy, -sy, sy, cy) * ro.xz;',
+    '  float cx = cos(uLook.y), sx = sin(uLook.y);',
+    '  rd.yz = mat2(cx, -sx, sx, cx) * rd.yz;  ro.yz = mat2(cx, -sx, sx, cx) * ro.yz;',
+
+    '  float t = 0.; float d, w, seam; bool hit = false;',
+    '  for (int i = 0; i < 100; i++){',
+    '    vec3 pos = ro + rd*t;',
+    '    map(pos, d, w, seam);',
+    '    if (d < .0012*max(t, 1.)) { hit = true; break; }',
+    '    t += d*.92;',
+    '    if (t > 16.) break;',
+    '  }',
+
+    '  vec3 col;',
+    '  if (hit){',
+    '    vec3 pos = ro + rd*t;',
+    '    vec3 n = normalAt(pos);',
+    /* physically-based metal: tinted Fresnel (F0 from measured data), zero diffuse/refraction.
+       gold F0 per Filament table; mercury ≈ darker neutral silver (~73% reflectance, cool). */
+    '    float cosT = clamp(dot(-rd, n), 0., 1.);',
+    '    vec3 F0gold = vec3(1.0, .70, .29);',
+    '    vec3 F0merc = vec3(.68, .71, .74);',
+    '    vec3 F0 = mix(F0gold, F0merc, w);',
+    '    vec3 F = F0 + (1. - F0) * pow(1. - cosT, 5.);',
+    '    vec3 R = reflect(rd, n);',
+    '    vec3 eG = env(normalize(R + n*.013), w);',
+    '    vec3 eB = env(normalize(R + n*.026), w);',
+    '    vec3 refl = vec3(env(R, w).r, eG.g, eB.b);',
+    '    col = refl * F;',
+    '    vec3 L1 = normalize(vec3(-.55,.45,.42));',
+    '    vec3 L2 = normalize(vec3(.62,-.16,.40));',
+    '    col += vec3(1.3,1.45,1.7) * pow(max(dot(R, L1), 0.), 120.) * F * mix(.5, 1.3, w);',
+    '    col += vec3(1.6,.9,.45) * pow(max(dot(R, L2), 0.), 90.) * F * mix(1.1, .12, w);',
+    '    float ao = clamp(mapD(pos + n*.18)/.18, 0., 1.)*.5 + clamp(mapD(pos + n*.45)/.45, 0., 1.)*.5;',
+    '    col *= .45 + .55*ao;',
+    '    col += mix(vec3(1.,.75,.45), vec3(.55,.85,1.), .5) * seam * .8;',
+    '  } else {',
+    /* the void itself stays near-black — the studio lives only in the reflections */
+    '    float up = rd.y*.5 + .5;',
+    '    col = mix(vec3(.006,.008,.012), vec3(.022,.030,.045), pow(up, 1.8));',
+    '    float dd, ww, ss;',
+    '    map(ro + rd*3.5, dd, ww, ss);',
+    '    col += mix(vec3(.9,.55,.22), vec3(.4,.65,1.), ww) * exp(-max(dd, 0.)*1.5) * .085;',
+    '  }',
+
+    '  float cf = uConsume*uConsume;',
+    '  vec3 chosenTint = uChosen < 0. ? vec3(.55,.8,1.1) : vec3(1.1,.7,.32);',
+    '  col += chosenTint * cf * .18;',
+
+    '  vec2 q = gl_FragCoord.xy / uRes;',
+    '  col *= .35 + .65*pow(16.*q.x*q.y*(1.-q.x)*(1.-q.y), .28);',
+
+    /* ACES tonemap — keeps highlights punchy where Reinhard flattens them */
+    '  col = clamp((col*(2.51*col + .03))/(col*(2.43*col + .59) + .14), 0., 1.);',
+    '  col = pow(col, vec3(1./2.2));',
+    '  col += (hash21(gl_FragCoord.xy + fract(uTime)*13.) - .5) / 128.;',
+
+    '  O = vec4(col, 1.);',
+    '}'
+  ].join('\n');
+
+  /* ---------- boot ---------- */
+
+  function fallbackMode() {
+    canvas.style.display = 'none';
+    fallbackEl.classList.add('on');
+    document.body.classList.add('loaded');
+    reveal();
+  }
+
+  function reveal() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        veil.style.transition = 'opacity ' + (RM ? 400 : 1100) + 'ms ' + 'cubic-bezier(.16,1,.3,1)';
+        veil.style.opacity = '0';
+      });
+    });
+  }
+
+  var gl = canvas.getContext('webgl2', { antialias: false, powerPreference: 'high-performance' });
+  if (!gl) { fallbackMode(); return; }
+
+  function compile(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  var vs = compile(gl.VERTEX_SHADER, VERT);
+  var fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) { fallbackMode(); return; }
+
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error(gl.getProgramInfoLog(prog));
+    fallbackMode(); return;
+  }
+  gl.useProgram(prog);
+
+  var U = {};
+  ['uRes','uTime','uMouseW','uPullA','uPullB','uConsume','uChosen','uVert','uIntro','uMotion','uLook']
+    .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+
+  canvas.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    fallbackMode();
+  });
+
+  /* ---------- state ---------- */
+
+  var qMax = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0, quality = qMax;
+  var warmup = 90, goodStreak = 0;
+  var vert = 0;
+  var mouseW = { x: 0, y: 0 };
+  var pullA = 0, pullB = 0, pullTargetA = 0, pullTargetB = 0;
+  var look = { x: 0, y: 0 }, lookTarget = { x: 0, y: 0 };
+  var hoverSide = 0;
+  var choosing = false, chosenU = 0, consumeStart = 0, consumeP = 0;
+  var t0 = performance.now();
+  var lastT = t0;
+  var raf = 0;
+  var frames = 0, accDt = 0;
+  var WORLD = 3.5 / 1.95; // world units per ndc.y at z=0
+  var brainEl = document.getElementById('pickBrain');
+  var bodyEl = document.getElementById('pickBody');
+
+  function placeLabels() {
+    if (vert) {
+      // portrait: media-query CSS centers them; clear inline overrides
+      brainEl.style.left = '';
+      bodyEl.style.left = '';
+      return;
+    }
+    // project the forms' rest centers (world x = ±1.06) with the shader's own camera
+    var off = 1.06 / WORLD * (H / 2);
+    brainEl.style.left = (W / 2 - off) + 'px';
+    bodyEl.style.left = (W / 2 + off) + 'px';
+  }
 
   function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
+    W = window.innerWidth; H = window.innerHeight;
+    vert = H > W ? 1 : 0;
+    var raster = W * H * quality * quality;
+    if (raster > 6500000) quality = Math.sqrt(6500000 / (W * H));
+    canvas.width = Math.max(2, Math.round(W * quality));
+    canvas.height = Math.max(2, Math.round(H * quality));
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    placeLabels();
   }
   window.addEventListener('resize', resize);
   resize();
 
-  function createParticles() {
-    particles = [];
-    for (let i = 0; i < 38; i++) {
-      particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.12,
-        vy: (Math.random() - 0.5) * 0.12,
-        r: Math.random() * 1.4 + 0.6,
-        alpha: Math.random() * 0.35 + 0.12
-      });
+  function centerA() { return vert ? { x: 0, y: .92 } : { x: -1.06, y: 0 }; }
+  function centerB() { return vert ? { x: 0, y: -.92 } : { x: 1.06, y: 0 }; }
+
+  function updatePointer(clientX, clientY) {
+    var wx = ((2 * clientX - W) / H) * WORLD;
+    var wy = (-(2 * clientY - H) / H) * WORLD;
+    mouseW.x = wx; mouseW.y = wy;
+    var onA = vert ? (wy > 0) : (wx < 0);
+    var ca = centerA(), cb = centerB();
+    var dA = Math.hypot(wx - ca.x, wy - ca.y);
+    var dB = Math.hypot(wx - cb.x, wy - cb.y);
+    pullTargetA = (onA && !choosing) ? Math.max(0, Math.min(1, 1.15 - .5 * dA)) : 0;
+    pullTargetB = (!onA && !choosing) ? Math.max(0, Math.min(1, 1.15 - .5 * dB)) : 0;
+    if (!RM) {
+      lookTarget.x = (clientX / W - .5) * .10;
+      lookTarget.y = (clientY / H - .5) * .06;
     }
-  }
-  createParticles();
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(232,230,223,0.7)';
-    for (let p of particles) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0 || p.x > w) p.vx *= -1;
-      if (p.y < 0 || p.y > h) p.vy *= -1;
+    var side = onA ? -1 : 1;
+    if (side !== hoverSide && !choosing) {
+      hoverSide = side;
+      document.body.classList.toggle('hoverA', side === -1);
+      document.body.classList.toggle('hoverB', side === 1);
     }
-    requestAnimationFrame(draw);
+    canvas.style.cursor = (pullTargetA > .2 || pullTargetB > .2) ? 'pointer' : 'default';
   }
-  draw();
 
-  /* vivid artistic interactions */
-  const veilEl = document.getElementById('veil');
-  const emblems = document.querySelectorAll('.emblem');
+  window.addEventListener('pointermove', function (e) { updatePointer(e.clientX, e.clientY); }, { passive: true });
+  window.addEventListener('pointerdown', function (e) { updatePointer(e.clientX, e.clientY); }, { passive: true });
 
-  // entrance
-  setTimeout(() => {
-    if (veilEl) veilEl.style.opacity = '0';
-    setTimeout(() => { if (veilEl) veilEl.style.display = 'none'; }, 1200);
-  }, 180);
+  /* ---------- choosing ---------- */
 
-  // bfcache
-  window.addEventListener('pageshow', e => {
-    if (e.persisted && veilEl) {
-      veilEl.style.transition = 'none';
-      veilEl.style.opacity = '0';
-      veilEl.style.display = 'none';
+  function choose(side) {
+    if (choosing) return;
+    choosing = true;
+    chosenU = side;
+    consumeStart = performance.now();
+    pullTargetA = pullTargetB = 0;
+    document.body.classList.remove('hoverA', 'hoverB');
+    var target = side < 0 ? 'brain.html' : 'body/index.html';
+    var veilDelay = RM ? 0 : 380;
+    var veilDur = RM ? 320 : 900;
+    var navAt = RM ? 380 : 1150;
+    setTimeout(function () {
+      veil.style.transition = 'opacity ' + veilDur + 'ms cubic-bezier(.16,1,.3,1)';
+      veil.style.opacity = '1';
+    }, veilDelay);
+    setTimeout(function () { window.location.href = target; }, navAt);
+  }
+
+  canvas.addEventListener('click', function (e) {
+    var wx = ((2 * e.clientX - W) / H) * WORLD;
+    var wy = (-(2 * e.clientY - H) / H) * WORLD;
+    choose(vert ? (wy > 0 ? -1 : 1) : (wx < 0 ? -1 : 1));
+  });
+
+  document.getElementById('pickBrain').addEventListener('click', function (e) { e.preventDefault(); choose(-1); });
+  document.getElementById('pickBody').addEventListener('click', function (e) { e.preventDefault(); choose(1); });
+  document.getElementById('return').addEventListener('click', function (e) {
+    e.preventDefault();
+    veil.style.transition = 'opacity 500ms ease';
+    veil.style.opacity = '1';
+    setTimeout(function () { window.location.href = 'index.html'; }, 520);
+  });
+
+  /* ---------- intro / bfcache / visibility ---------- */
+
+  var introStart = performance.now() + 150;
+  var introP = RM ? 1 : 0;
+
+  document.body.classList.add('loaded');
+  reveal();
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      veil.style.transition = 'none';
+      veil.style.opacity = '0';
+      choosing = false;
+      chosenU = 0;
+      consumeP = 0;
+      document.body.classList.add('loaded');
+      if (!raf) { lastT = performance.now(); raf = requestAnimationFrame(frame); }
     }
   });
 
-  // hover magic + click drama
-  emblems.forEach(emblem => {
-    const svg = emblem.querySelector('svg');
-    let isActive = false;
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    } else if (!raf) {
+      lastT = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+  });
 
-    emblem.addEventListener('mouseenter', () => {
-      if (svg) svg.style.filter = 'drop-shadow(0 25px 60px rgba(0,0,0,.35)) brightness(1.08)';
-      isActive = true;
-    });
-    emblem.addEventListener('mouseleave', () => {
-      if (svg) svg.style.filter = '';
-      isActive = false;
-    });
+  /* ---------- frame loop ---------- */
 
-    emblem.addEventListener('click', e => {
-      e.preventDefault();
-      const target = emblem.getAttribute('href');
-      if (!target) return;
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    var dt = Math.min((now - lastT) / 1000, .1);
+    lastT = now;
 
-      // jaw-dropping exit: the chosen emblem blooms while the page gently recedes
-      emblem.style.transition = 'transform 650ms cubic-bezier(.16,1,.3,1), opacity 650ms ease';
-      emblem.style.transform = 'scale(1.08)';
-      emblem.style.opacity = '0.15';
-
-      // dim the other
-      emblems.forEach(el => { if (el !== emblem) el.style.transition = 'opacity 650ms ease'; el.style.opacity = '0.08'; });
-
-      // artistic veil re-entry
-      if (veilEl) {
-        veilEl.style.transition = 'none';
-        veilEl.style.opacity = '0';
-        veilEl.style.display = 'block';
-        requestAnimationFrame(() => {
-          veilEl.style.transition = 'opacity 950ms cubic-bezier(.16,1,.3,1)';
-          veilEl.style.opacity = '1';
-        });
+    // adaptive quality: grace period first (shader warmup reads as slow),
+    // then drop render scale if sustained-slow, climb back if sustained-fast
+    frames++; accDt += dt;
+    if (warmup > 0) {
+      warmup--; frames = 0; accDt = 0;
+    } else if (frames >= 60) {
+      var avg = accDt / frames;
+      if (avg > .022 && quality > .55) {
+        quality = Math.max(.55, quality * .8);
+        goodStreak = 0;
+        resize();
+      } else if (avg < .011 && quality < qMax) {
+        if (++goodStreak >= 3) {
+          quality = Math.min(qMax, quality * 1.15);
+          goodStreak = 0;
+          resize();
+        }
+      } else {
+        goodStreak = 0;
       }
+      frames = 0; accDt = 0;
+    }
 
-      setTimeout(() => {
-        window.location.href = target;
-      }, 820);
-    });
-  });
+    if (!RM && introP < 1) {
+      var ip = Math.max(0, Math.min(1, (now - introStart) / 1700));
+      introP = 1 - Math.pow(1 - ip, 3);
+    }
 
-  // bonus: very subtle mouse light on the whole scene for vividness
-  let mouseX = 0.5, mouseY = 0.5;
-  document.addEventListener('mousemove', e => {
-    mouseX = e.clientX / window.innerWidth;
-    mouseY = e.clientY / window.innerHeight;
-    document.body.style.setProperty('--mx', mouseX);
-    document.body.style.setProperty('--my', mouseY);
-  });
+    if (choosing && !RM) {
+      consumeP = Math.min(1, (now - consumeStart) / 950);
+    }
+
+    var k = 1 - Math.exp(-dt * 6);
+    pullA += (pullTargetA - pullA) * k;
+    pullB += (pullTargetB - pullB) * k;
+    look.x += (lookTarget.x - look.x) * k * .6;
+    look.y += (lookTarget.y - look.y) * k * .6;
+
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uTime, (now - t0) / 1000);
+    gl.uniform3f(U.uMouseW, mouseW.x, mouseW.y, 0);
+    gl.uniform1f(U.uPullA, pullA);
+    gl.uniform1f(U.uPullB, pullB);
+    gl.uniform1f(U.uConsume, consumeP);
+    gl.uniform1f(U.uChosen, chosenU);
+    gl.uniform1f(U.uVert, vert);
+    gl.uniform1f(U.uIntro, introP);
+    gl.uniform1f(U.uMotion, RM ? .18 : 1);
+    gl.uniform2f(U.uLook, look.x, look.y);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  raf = requestAnimationFrame(frame);
+})();
 </script>
 
 </body>
