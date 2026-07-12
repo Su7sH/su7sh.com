@@ -1,427 +1,451 @@
-<!DOCTYPE html>
-<!--
-  the atlas.
-  behind the face, a letter. behind the letter, a room.
-  behind the room — the map of the work itself.
--->
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#07080a">
 <title>·</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap"></noscript>
 <style>
-  /* ─── the atlas · ink & cyan, gold for paper-light ─── */
-  :root{
-    color-scheme:dark;
-    --ink:#07080a; --ink-2:#0b0d11;
-    --cyan:#64CEFB;
-    --cyan-60:rgba(100,206,251,.6); --cyan-40:rgba(100,206,251,.4);
-    --cyan-25:rgba(100,206,251,.25); --cyan-12:rgba(100,206,251,.12);
-    --cyan-07:rgba(100,206,251,.07); --cyan-04:rgba(100,206,251,.04);
-    --w-90:rgba(255,255,255,.9); --w-80:rgba(255,255,255,.8); --w-70:rgba(255,255,255,.7);
-    --w-55:rgba(255,255,255,.55); --w-45:rgba(255,255,255,.45); --w-35:rgba(255,255,255,.35);
-    --w-25:rgba(255,255,255,.25); --w-15:rgba(255,255,255,.15); --w-10:rgba(255,255,255,.1);
-    --w-08:rgba(255,255,255,.08); --w-06:rgba(255,255,255,.06); --w-04:rgba(255,255,255,.04);
-    --w-03:rgba(255,255,255,.03); --w-02:rgba(255,255,255,.02);
-    /* legacy names kept for the atlas engine */
-    --bg:var(--ink); --bg2:var(--w-02); --bg3:var(--w-04); --border:var(--w-08);
-    --text:#e9eef4; --muted:rgba(233,238,244,.46);
-    --accent:var(--cyan); --accent2:#9fbacb;
-    --green:#93d3ae; --red:#dd8f99; --gold:#d8ba7f; --purple:#b2a5df;
-    --radius:10px;
-    --serif:'Instrument Serif',Georgia,serif;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html{scroll-behavior:smooth}
+  :root{ --scrim: rgba(2,4,8,.46); }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scrollbar-width:none; }
+  html::-webkit-scrollbar{ display:none; }
   body{
-    background:var(--ink);color:var(--text);
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
-    font-weight:300;line-height:1.6;font-size:14.5px;
-    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    background:#020408; color:#dce8f2;
+    font-family:'Inter',system-ui,sans-serif;
     overflow-x:hidden;
+    transition:opacity .9s cubic-bezier(.16,1,.3,1);
   }
-  ::selection{background:rgba(100,206,251,.3);color:#fff}
-  a{color:var(--w-80);text-decoration:none;transition:color .5s ease}
-  a:hover{color:var(--cyan)}
-  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
-  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px}
+  /* scroll space — height set by JS (dwell/travel layout) */
+  #space{ width:1px; height:1420vh; }
 
-  /* grain — the same film as the surface */
-  body::before{
-    content:'';position:fixed;inset:0;pointer-events:none;z-index:2000;
-    opacity:.035;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/></svg>");
+  #gl{
+    position:fixed; inset:0; width:100vw; height:100vh; display:block;
+    z-index:0;
   }
-  /* a lamp over the map table */
-  body::after{
-    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+
+  /* static poster fallback (no WebGL / context lost) */
+  #poster{
+    position:fixed; inset:0; z-index:0; display:none;
     background:
-      radial-gradient(900px 520px at 78% -12%, rgba(100,206,251,.055), transparent 65%),
-      radial-gradient(700px 460px at 8% 108%, rgba(216,186,127,.035), transparent 60%);
+      radial-gradient(120% 90% at 50% 118%, #12466b 0%, transparent 55%),
+      linear-gradient(to top, #020408 0%, #03101f 42%, #0a2540 78%, #12466b 100%);
   }
-
-  /* arrival veil — the coordinate resolves into the map */
-  #veil{position:fixed;inset:0;background:var(--ink);z-index:3000;pointer-events:none;
-    animation:veilOut .95s ease .1s both}
-  @keyframes veilOut{from{opacity:1}to{opacity:0}}
-  #veil.on{animation:none;opacity:1;transition:opacity .55s ease}
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    #veil{animation:none;opacity:0}
-    .head-in,main{animation:none !important}
+  #poster.on{ display:block; }
+  /* without WebGL the journey becomes a quiet readable document */
+  body.nogl #space, body.nogl #gl, body.nogl #hint{ display:none; }
+  body.nogl .dwell{
+    position:relative; top:auto !important; left:auto; right:auto;
+    transform:none; opacity:1; pointer-events:auto;
+    max-width:min(36rem, 84vw); margin:16vh 8vw;
   }
+  body.nogl .dwell:first-of-type{ margin-top:22vh; }
 
-  /* quiet return — same hand as the room */
+  /* dwell text — fixed, over the living world, no boxes ever */
+  .dwell{
+    position:fixed; z-index:3; left:8vw; top:50%;
+    transform:translateY(calc(-50% + 14px));
+    max-width:min(36rem, 84vw); opacity:0; pointer-events:none;
+    will-change:opacity, transform;   /* presence is driven continuously by JS */
+  }
+  .dwell.on{ pointer-events:auto; }
+  .dwell::before{
+    content:""; position:absolute; z-index:-1;
+    left:-50%; top:-65%; width:210%; height:240%;
+    background:radial-gradient(ellipse 50% 50% at 46% 50%,
+      var(--scrim) 0%,
+      color-mix(in srgb, var(--scrim) 90%, transparent) 26%,
+      color-mix(in srgb, var(--scrim) 66%, transparent) 46%,
+      color-mix(in srgb, var(--scrim) 34%, transparent) 64%,
+      color-mix(in srgb, var(--scrim) 10%, transparent) 80%,
+      transparent 95%);
+    pointer-events:none;
+  }
+  .dwell .k{
+    font-family:'JetBrains Mono',monospace; font-weight:300;
+    font-size:11px; letter-spacing:.38em; text-transform:lowercase;
+    opacity:.85; margin-bottom:1.1rem;
+    text-shadow:0 0 10px rgba(0,0,0,.5), 0 1px 26px rgba(0,0,0,.45);
+  }
+  .dwell h2{
+    font-family:'Instrument Serif',serif; font-style:italic; font-weight:400;
+    font-size:clamp(2.5rem, 6vw, 4.4rem); line-height:1.04;
+    letter-spacing:.005em; margin-bottom:1.15rem;
+    text-shadow:0 0 10px rgba(0,0,0,.5), 0 2px 28px rgba(0,0,0,.45), 0 4px 60px rgba(0,0,0,.3);
+  }
+  .dwell p{
+    font-weight:440; font-size:16.5px; line-height:1.72; max-width:56ch;
+    color:rgba(230,241,250,.96);
+    text-shadow:0 0 10px rgba(0,0,0,.5), 0 1px 26px rgba(0,0,0,.45), 0 2px 52px rgba(0,0,0,.3);
+  }
+  #d1{ top:62%; }           /* Ascent: disc owns the upper frame */
+  #d2{ top:56%; left:9vw; } /* Cathedral: under the caustic net */
+  #d4{ top:60%; }           /* Surface: text sits low, sun owns the sky */
+  #d7{ top:40%; }           /* Estuary: over the flats, clear of the low sun */
+  #d10{ top:60%; }          /* Canopy: on the forest floor, holes stay open */
+  #d12{ top:69%; }          /* Aurora: the curtain keeps the upper sky */
+
+  /* scroll hint, first dwell only */
+  #hint{
+    position:fixed; z-index:3; left:50%; bottom:4.5vh; transform:translateX(-50%);
+    font-family:'JetBrains Mono',monospace; font-weight:300; font-size:10px;
+    letter-spacing:.42em; text-transform:lowercase; color:rgba(160,196,220,.44);
+    opacity:0; transition:opacity 1.2s ease; pointer-events:none;
+  }
+  #hint.on{ opacity:1; }
+
+  /* quiet return affordance */
   #return{
-    position:fixed;top:26px;right:30px;z-index:100;
-    font-family:var(--mono);font-size:.6rem;font-weight:300;
-    letter-spacing:.28em;text-transform:lowercase;
-    color:var(--w-25);padding:10px 14px;
-    opacity:0;animation:returnFade 2.4s ease 1.2s forwards;
-    transition:color 1.2s ease,letter-spacing 1.2s ease;
+    position:fixed; z-index:6; top:26px; right:30px;
+    font-family:'JetBrains Mono',monospace; font-weight:300;
+    font-size:10.5px; letter-spacing:.34em; text-transform:lowercase;
+    color:rgba(190,215,232,.42); text-decoration:none;
+    opacity:0; transition:opacity 1.4s ease .9s, color .4s ease;
+    padding:8px 2px;
   }
-  #return:hover,#return:focus{color:var(--cyan-60);letter-spacing:.34em;outline:none}
-  @keyframes returnFade{to{opacity:1}}
+  #return:hover, #return:focus-visible{ color:rgba(200,230,250,.85); outline:none; transition-duration:1.4s,.22s; }
+  body.ready #return{ opacity:1; }
 
-  /* ───── header · the map room ───── */
-  header{position:relative;z-index:1;padding:5.2rem 1.4rem 2rem}
-  .head-in{max-width:1160px;margin:0 auto;animation:rise 1s cubic-bezier(.16,1,.3,1) .25s both}
-  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-  .tag{
-    display:inline-flex;align-items:center;gap:.6rem;
-    font-size:.66rem;font-weight:400;letter-spacing:.22em;text-transform:lowercase;
-    color:var(--w-35);font-family:var(--mono);
+  /* ink veil for layer transitions — painted as the abyss so first paint is the world */
+  #veil{
+    position:fixed; inset:0; z-index:9;
+    background:
+      radial-gradient(90% 60% at 50% -10%, rgba(95,198,221,.10) 0%, transparent 60%),
+      linear-gradient(to top, #020408 0%, #03101f 42%, #0a2540 78%, #0e3a5c 100%);
+    opacity:1; pointer-events:none;
+    transition:opacity 1.2s cubic-bezier(.16,1,.3,1);
   }
-  .tag::before{content:'';width:32px;height:1px;background:var(--cyan-40)}
-  header h1{
-    margin-top:1rem;font-family:var(--serif);font-weight:400;font-style:normal;
-    font-size:clamp(2.6rem,6vw,4rem);line-height:1;letter-spacing:.005em;color:var(--w-90);
+  body.ready #veil{ opacity:0; }
+  #veil.cover{ opacity:1 !important; pointer-events:auto; transition:opacity .7s ease; }
+
+  /* site grain */
+  #grain{
+    position:fixed; inset:-50%; width:200%; height:200%; z-index:8;
+    pointer-events:none; opacity:.035; mix-blend-mode:overlay;
   }
-  header h1 em{font-style:italic;color:var(--cyan);text-shadow:0 0 34px rgba(100,206,251,.25)}
-  .epigraph{margin-top:.9rem;font-family:var(--serif);font-style:italic;font-size:1.06rem;color:var(--w-55);max-width:620px}
-  .creed{margin-top:1.1rem;font-size:.8rem;color:var(--gold);letter-spacing:.02em;max-width:640px}
-  .creed::before{content:'— ';color:var(--w-25)}
-  .metaline{margin-top:.5rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;color:var(--w-25);text-transform:lowercase}
 
-  .progresswrap{max-width:640px;margin-top:1.6rem}
-  .pbar{height:2px;background:var(--w-06);border-radius:2px;overflow:hidden}
-  .pbar div{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-40));
-    box-shadow:0 0 12px rgba(100,206,251,.5);transition:width .5s ease}
-  .pmeta{display:flex;justify-content:space-between;margin-top:.55rem;
-    font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--w-35);text-transform:lowercase}
-  .pace{margin-top:.35rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;color:var(--green)}
-  .pbtns{margin-top:.9rem;display:flex;gap:.5rem;flex-wrap:wrap}
-  .pbtns button{
-    font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:lowercase;
-    color:var(--w-35);border:1px solid var(--w-08);border-radius:999px;padding:7px 14px;
-    transition:color .45s ease,border-color .45s ease,background .45s ease;
+  /* ---- the work layer: folio · library · ledger — no boxes, ever ---- */
+  #pbar{ position:fixed; top:0; left:0; right:0; height:2px; z-index:7; pointer-events:none; }
+  #pfill{ height:100%; width:0%;
+    background:linear-gradient(90deg, rgba(100,206,251,.08), rgba(100,206,251,.55));
+    box-shadow:0 0 12px rgba(100,206,251,.22);
+    transition:width .8s cubic-bezier(.16,1,.3,1); }
+  #ledgerBtn{ position:fixed; z-index:6; top:26px; left:30px; background:none; border:0; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; font-weight:300; font-size:10.5px; letter-spacing:.34em;
+    text-transform:lowercase; color:rgba(190,215,232,.42); padding:8px 2px;
+    opacity:0; transition:opacity 1.4s ease .9s, color .4s ease; }
+  body.ready #ledgerBtn{ opacity:1; }
+  #ledgerBtn:hover, #ledgerBtn:focus-visible{ color:rgba(200,230,250,.85); outline:none; transition-duration:1.4s,.22s; }
+  #sndBtn{ position:fixed; z-index:6; bottom:22px; left:30px; background:none; border:0; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; font-weight:300; font-size:10.5px; letter-spacing:.34em;
+    text-transform:lowercase; color:rgba(190,215,232,.42); padding:8px 2px;
+    opacity:0; transition:opacity 1.4s ease .9s, color .22s ease; }
+  body.ready #sndBtn{ opacity:1; }
+  body.nogl #sndBtn{ display:none; }
+  #sndBtn:hover, #sndBtn:focus-visible{ color:rgba(200,230,250,.85); outline:none; }
+
+  /* the page's principal action: a mote of light and a current running
+     along the underline — the water language, not a button */
+  .openwork{ position:relative; display:inline-flex; align-items:center; gap:12px;
+    margin-top:1.6rem; background:none; border:0; cursor:pointer;
+    padding:13px 8px 13px 0; font-family:'JetBrains Mono',monospace; font-weight:400;
+    font-size:12.5px; letter-spacing:.3em; text-transform:lowercase;
+    color:rgba(216,238,252,.92);
+    text-shadow:0 0 10px rgba(0,0,0,.55), 0 1px 24px rgba(0,0,0,.45);
+    transition:color .22s ease; }
+  .openwork::before{ content:""; flex:none; width:8px; height:8px; border-radius:50%;
+    background:radial-gradient(circle, #d8f2ff 0%, rgba(100,206,251,.65) 45%, transparent 72%);
+    box-shadow:0 0 10px rgba(100,206,251,.85), 0 0 24px rgba(100,206,251,.4);
+    animation:owPulse 3.8s ease-in-out infinite; }
+  .openwork::after{ content:""; position:absolute; left:0; right:6px; bottom:7px; height:1px;
+    background:linear-gradient(90deg,
+      rgba(159,220,255,.14) 0%, rgba(214,240,255,.85) 50%, rgba(159,220,255,.14) 100%);
+    background-size:220% 100%;
+    animation:owFlow 5s linear infinite; }
+  @keyframes owPulse{ 0%,100%{ opacity:.7; transform:scale(1); } 50%{ opacity:1; transform:scale(1.3); } }
+  @keyframes owFlow{ 0%{ background-position:140% 0; } 100%{ background-position:-140% 0; } }
+  .openwork:hover, .openwork:focus-visible{ color:#ffffff; outline:none; }
+  .openwork:hover::before, .openwork:focus-visible::before{
+    box-shadow:0 0 14px rgba(140,220,255,1), 0 0 34px rgba(100,206,251,.6); }
+  .openwork.done{ color:rgba(240,216,150,.95); }
+  .openwork.done::before{
+    background:radial-gradient(circle, #ffeec2 0%, rgba(232,201,122,.65) 45%, transparent 72%);
+    box-shadow:0 0 10px rgba(232,201,122,.85), 0 0 24px rgba(232,201,122,.4); }
+  .openwork.done::after{
+    background:linear-gradient(90deg,
+      rgba(232,201,122,.14) 0%, rgba(255,238,194,.85) 50%, rgba(232,201,122,.14) 100%);
+    background-size:220% 100%; }
+
+  .ov{ position:fixed; top:0; right:0; bottom:0; width:min(620px, 96vw); z-index:7;
+    overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+    padding:10vh 5vw 14vh 4vw;
+    background:linear-gradient(to right, transparent 0, rgba(3,7,12,.7) 4%, rgba(3,7,12,.93) 15%, rgba(4,8,14,.97) 32%);
+    opacity:0; transform:translateX(28px); pointer-events:none; visibility:hidden;
+    transition:opacity .55s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1),
+               visibility 0s linear .55s; }
+  .ov.on{ opacity:1; transform:none; pointer-events:auto; visibility:visible; transition-delay:0s; }
+  body.ov-open .dwell, body.ov-open #hint{ opacity:0 !important; pointer-events:none !important; }
+  .ov::-webkit-scrollbar{ width:0; }
+  .ov .ovx{ position:fixed; top:24px; right:30px; }
+  .ov .k{ font-family:'JetBrains Mono',monospace; font-weight:300; font-size:10px;
+    letter-spacing:.38em; text-transform:lowercase; color:rgba(159,220,255,.68); margin:2.2rem 0 .8rem; }
+  .ov h3{ font-family:'Instrument Serif',serif; font-style:italic; font-weight:400;
+    font-size:2.15rem; line-height:1.1; margin:0 0 .6rem; color:#e8f2fa; }
+  .ov p{ font-size:14.5px; line-height:1.7; color:rgba(230,241,250,.88); max-width:58ch; margin:0 0 .6rem; }
+  .ov a{ color:#a5ddf7; text-decoration:none; border-bottom:1px solid rgba(143,210,242,.22); }
+  .ov a:hover{ border-color:rgba(143,210,242,.6); }
+  .mono{ font-family:'JetBrains Mono',monospace; font-weight:300; font-size:11.5px; letter-spacing:.06em;
+    color:rgba(205,225,240,.75); line-height:1.8; }
+  .mk label{ display:flex; align-items:baseline; gap:12px; padding:10px 2px; cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,.06); font-size:14px; line-height:1.55;
+    color:rgba(230,241,250,.92); }
+  .mk label:hover{ color:#eaf4fb; }
+  .mk input{ flex:none; width:14px; height:14px; accent-color:#64CEFB; transform:translateY(1px); }
+  .mk.gold input{ accent-color:#e8c97a; }
+  .mk .t{ transition:opacity .25s ease; }
+  .mk label.checked .t{ opacity:.38; }
+  .mk .hrs{ margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px;
+    letter-spacing:.18em; color:rgba(190,215,232,.55); white-space:nowrap; padding-left:10px; }
+  .tbtn{ background:none; border:0; border-bottom:1px solid rgba(190,215,232,.18); cursor:pointer;
+    font-family:'JetBrains Mono',monospace; font-weight:300; font-size:10px; letter-spacing:.3em;
+    text-transform:lowercase; color:rgba(190,215,232,.6); padding:6px 1px 4px; margin-right:22px;
+    transition:color .22s ease, border-color .22s ease; }
+  .tbtn:hover, .tbtn:focus-visible{ color:#9fdcff; border-color:rgba(159,220,255,.4); outline:none; }
+  select, #q{ background:transparent; border:0; border-bottom:1px solid rgba(190,215,232,.18);
+    color:rgba(226,238,248,.85); font-family:'JetBrains Mono',monospace; font-size:11px;
+    letter-spacing:.05em; padding:6px 2px; outline:none; border-radius:0; }
+  select option{ background:#0a141c; }
+  #q::placeholder{ color:rgba(190,215,232,.3); letter-spacing:.2em; text-transform:lowercase; }
+  .filters{ display:flex; flex-wrap:wrap; gap:14px 18px; margin:0 0 12px; }
+  #rtable{ width:100%; border-collapse:collapse; }
+  #rtable td{ padding:11px 6px 11px 0; border-bottom:1px solid rgba(255,255,255,.045); vertical-align:top; }
+  .cbc{ width:24px; } .cbc input{ accent-color:#64CEFB; width:12px; height:12px; }
+  .rname{ font-size:14px; }
+  .rwhy{ font-size:12.5px; color:rgba(228,240,249,.72); line-height:1.55; margin-top:3px; max-width:52ch; }
+  .rmeta{ margin-top:7px; display:flex; flex-wrap:wrap; gap:6px; }
+  .chip{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:lowercase;
+    color:rgba(200,220,235,.55); border:1px solid rgba(255,255,255,.09); border-radius:999px; padding:2.5px 9px; }
+  .chip.t-core{ color:rgba(100,206,251,.8); border-color:rgba(100,206,251,.25); }
+  .chip.t-rec{ color:rgba(159,220,212,.75); border-color:rgba(159,220,212,.22); }
+  .chip.t-spec{ color:rgba(157,123,255,.75); border-color:rgba(157,123,255,.25); }
+  .chip.cost{ color:rgba(232,201,122,.8); border-color:rgba(232,201,122,.25); }
+  .chip.prim{ color:rgba(100,206,251,.85); border-color:rgba(100,206,251,.3); }
+  .snav{ display:flex; flex-wrap:wrap; gap:2px 18px; margin-top:.4rem; }
+  #qtext{ width:100%; background:transparent; border:0;
+    border-bottom:1px solid rgba(232,236,255,.28); color:#e8ecff;
+    font-family:'Instrument Serif',serif; font-style:italic; font-size:1.2rem;
+    line-height:1.5; padding:8px 2px; outline:none; resize:none; }
+  #qtext::placeholder{ color:rgba(232,236,255,.3); }
+  .qshow{ font-family:'Instrument Serif',serif; font-style:italic;
+    font-size:1.3rem; line-height:1.45; color:#e8ecff; margin:.2rem 0 .6rem; }
+  .snav .tbtn.act{ color:#9fdcff; border-color:rgba(159,220,255,.5); }
+
+  /* reference plates */
+  .plate{ display:none; }
+  .plate.on{ display:block; }
+  .row{ display:flex; gap:12px; align-items:baseline; padding:12px 2px;
+    border-bottom:1px solid rgba(255,255,255,.06); font-size:13.5px; line-height:1.6;
+    color:rgba(230,241,250,.9); }
+  .row input{ flex:none; width:12px; height:12px; accent-color:#64CEFB; transform:translateY(1px); }
+  .gid{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em;
+    color:rgba(100,206,251,.8); flex:none; width:34px; padding-top:2px; }
+  .sub{ display:block; font-size:12.5px; color:rgba(228,240,249,.72); margin-top:4px;
+    line-height:1.55; max-width:56ch; }
+  .dnote{ font-style:italic; color:rgba(226,238,248,.5); }
+  .dlayer{ margin-bottom:.4rem; }
+  .d0{ opacity:.92; } .d1{ opacity:.74; } .d2{ opacity:.58; }
+  .chip.kb{ color:rgba(232,201,122,.75); border-color:rgba(232,201,122,.22); }
+  .chip.cat{ color:rgba(159,220,212,.7); border-color:rgba(159,220,212,.2); }
+
+  @media (max-width:719px){
+    .dwell{ left:7vw; right:7vw; max-width:none; }
+    .dwell h2{ font-size:clamp(2.1rem, 9vw, 3rem); }
+    #return{ top:18px; right:18px; }
+    #ledgerBtn{ top:18px; left:18px; }
+    .ov{ width:100vw; padding:9vh 7vw 14vh;
+      background:linear-gradient(to right, rgba(3,7,12,.82), rgba(4,8,14,.95) 30%); }
+    .ov .ovx{ top:16px; right:18px; }
   }
-  .pbtns button:hover{color:var(--cyan);border-color:var(--cyan-25);background:var(--cyan-04)}
-
-  /* ───── nav · a quiet rail ───── */
-  nav{
-    position:sticky;top:0;z-index:50;
-    background:rgba(7,8,10,.82);
-    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-    border-top:1px solid var(--w-04);border-bottom:1px solid var(--w-06);
+  @media (pointer:coarse){
+    .tbtn{ padding:11px 2px 9px; }
+    .openwork{ padding:12px 0 10px; }
+    .mk label{ padding:13px 2px; }
+    .row{ padding:14px 2px; }
+    .snav{ gap:6px 22px; }
   }
-  .nav-in{max-width:1160px;margin:0 auto;padding:0 1.4rem;display:flex;gap:.15rem;overflow-x:auto;scrollbar-width:none}
-  .nav-in::-webkit-scrollbar{display:none}
-  nav button{
-    position:relative;padding:.85rem .8rem .8rem;white-space:nowrap;
-    font-family:var(--mono);font-size:.6rem;font-weight:400;
-    letter-spacing:.18em;text-transform:lowercase;color:var(--w-35);
-    transition:color .45s ease;
-  }
-  nav button::after{
-    content:'';position:absolute;left:.8rem;right:.8rem;bottom:-1px;height:1px;
-    background:var(--cyan);opacity:0;transform:scaleX(.4);transition:opacity .45s ease,transform .45s ease;
-  }
-  nav button:hover{color:var(--w-70)}
-  nav button.active{color:var(--cyan)}
-  nav button.active::after{opacity:.9;transform:scaleX(1);box-shadow:0 0 10px rgba(100,206,251,.55)}
-
-  /* ───── main plates ───── */
-  main{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:2.4rem 1.4rem 6rem;
-    animation:rise 1s cubic-bezier(.16,1,.3,1) .35s both}
-  section{display:none}section.active{display:block}
-  main h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.7rem;color:var(--w-90);letter-spacing:.005em}
-  .sub{color:var(--w-45);font-size:.86rem;margin:.5rem 0 1.6rem;max-width:820px;line-height:1.65}
-  .sub b{color:var(--w-70);font-weight:500}
-
-  /* chips — etched, not painted */
-  .chip{
-    display:inline-block;font-family:var(--mono);font-size:.56rem;font-weight:400;
-    letter-spacing:.14em;text-transform:lowercase;
-    padding:2px 8px;border-radius:999px;border:1px solid;vertical-align:middle;background:transparent;
-  }
-  .c-core{color:var(--cyan);border-color:var(--cyan-25)}
-  .c-rec{color:var(--accent2);border-color:var(--w-10)}
-  .c-opt{color:var(--w-35);border-color:var(--w-08)}
-  .c-spec{color:var(--purple);border-color:rgba(178,165,223,.3)}
-  .c-cost{color:var(--gold);border-color:rgba(216,186,127,.35)}
-  .c-free{color:var(--green);border-color:rgba(147,211,174,.3)}
-  .c-cat{color:var(--w-45);border-color:var(--w-08)}
-
-  /* stage plates — field notes */
-  details.stage{background:var(--w-02);border:1px solid var(--w-06);border-radius:var(--radius);margin-bottom:.7rem;overflow:hidden;transition:border-color .5s ease,background .5s ease}
-  details.stage:hover{border-color:var(--w-10)}
-  details.stage[open]{background:var(--w-03);border-color:var(--cyan-12)}
-  details.stage summary{cursor:pointer;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;list-style:none}
-  details.stage summary::-webkit-details-marker{display:none}
-  .snum{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:lowercase;
-    color:var(--cyan);background:var(--cyan-07);border:1px solid var(--cyan-12);
-    border-radius:6px;padding:4px 8px;min-width:58px;text-align:center;flex-shrink:0}
-  .stitle{font-weight:500;font-size:.92rem;color:var(--w-80);flex:1;letter-spacing:.005em}
-  .sdur{color:var(--w-25);font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;white-space:nowrap;text-transform:lowercase}
-  .sbody{padding:.2rem 1.2rem 1.1rem;border-top:1px solid var(--w-06);font-size:.86rem}
-  .sbody h4{font-size:.6rem;font-family:var(--mono);font-weight:400;text-transform:lowercase;letter-spacing:.2em;color:var(--cyan-60);margin:1rem 0 .3rem}
-  .sbody h4.alt{color:var(--accent2)}.sbody h4.warn{color:var(--red)}.sbody h4.gate{color:var(--gold)}
-  .sbody p{color:var(--w-55);margin-bottom:2px;line-height:1.6}
-  .sbody a{color:var(--w-70);border-bottom:1px solid var(--w-10);transition:color .4s ease,border-color .4s ease}
-  .sbody a:hover{color:var(--cyan);border-color:var(--cyan-40)}
-  label.done{display:flex;align-items:center;gap:.55rem;margin-top:1rem;font-size:.8rem;color:var(--w-45);cursor:pointer}
-
-  /* micro-milestones */
-  .micro{margin-top:.3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 18px}
-  .micro label{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;color:var(--w-55);cursor:pointer;padding:3px 5px;border-radius:5px;transition:background .35s ease,color .35s ease}
-  .micro label:hover{background:var(--cyan-04);color:var(--w-80)}
-  .micro label.checked{color:var(--w-25);text-decoration:line-through;text-decoration-color:var(--w-15)}
-  .micro .hrs{color:var(--w-25);font-size:.58rem;font-family:var(--mono);white-space:nowrap;margin-left:auto;padding-left:8px;padding-top:.2em}
-  .sprog{display:flex;align-items:center;gap:.5rem;min-width:106px}
-  .sbar{width:60px;height:3px;background:var(--w-06);border-radius:3px;overflow:hidden;flex-shrink:0}
-  .sbar>span{display:block;height:100%;background:var(--cyan);box-shadow:0 0 8px rgba(100,206,251,.5);width:0%;transition:width .4s ease}
-  .stxt{font-size:.58rem;color:var(--w-25);font-family:var(--mono);white-space:nowrap}
-  input[type=checkbox]{accent-color:var(--cyan);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin-top:.15em}
-
-  /* filters + the resource table */
-  .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
-  .filters input,.filters select{
-    background:var(--w-03);border:1px solid var(--w-08);color:var(--text);
-    padding:8px 12px;border-radius:8px;font-size:.82rem;font-family:'Inter',sans-serif;font-weight:300;
-    transition:border-color .4s ease,background .4s ease;
-  }
-  .filters input::placeholder{color:var(--w-25)}
-  .filters input:focus,.filters select:focus{outline:none;border-color:var(--cyan-40);background:var(--cyan-04)}
-  .filters input{flex:1;min-width:180px}
-  .count{color:var(--w-25);font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:lowercase;margin-bottom:.7rem}
-  table{width:100%;border-collapse:collapse;font-size:.84rem}
-  th{font-family:var(--mono);font-size:.56rem;font-weight:400;text-transform:lowercase;letter-spacing:.18em;color:var(--w-25);
-    text-align:left;padding:.5rem;border-bottom:1px solid var(--w-08);position:sticky;top:42px;background:var(--ink);z-index:5}
-  td{padding:.6rem .5rem;border-bottom:1px solid var(--w-04);vertical-align:top;color:var(--w-55)}
-  tr{transition:background .3s ease}
-  tr:hover td{background:var(--cyan-04)}
-  .rname{font-weight:500;color:var(--w-80);overflow-wrap:anywhere}
-  .rname a{border-bottom:1px solid transparent}
-  .rname a:hover{border-bottom-color:var(--cyan-40)}
-  .rwhy{color:var(--w-35);font-size:.76rem;margin-top:2px;font-weight:300;overflow-wrap:anywhere}
-
-  /* plates & cards */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:.7rem}
-  .card{background:var(--w-02);border:1px solid var(--w-06);border-radius:var(--radius);padding:1rem 1.1rem;transition:border-color .5s ease}
-  .card:hover{border-color:var(--w-10)}
-  .card h3{font-size:.88rem;font-weight:500;color:var(--w-80);margin-bottom:.4rem;line-height:1.45}
-  .card p{font-size:.8rem;color:var(--w-45);line-height:1.6}
-  .card .meta{font-size:.74rem;color:var(--w-35);margin-top:.55rem}
-  .card a{color:var(--w-80)}.card a:hover{color:var(--cyan)}
-  .gaterow{display:flex;gap:.8rem;align-items:flex-start;background:var(--w-02);border:1px solid var(--w-06);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:.55rem;transition:border-color .5s ease}
-  .gaterow:hover{border-color:rgba(216,186,127,.25)}
-  .gaterow .gid{font-family:var(--mono);color:var(--gold);font-size:.7rem;letter-spacing:.08em;min-width:38px;padding-top:2px}
-  .gaterow b{font-size:.86rem;font-weight:500;color:var(--w-80)}
-  .gaterow p{font-size:.8rem;color:var(--w-45);margin-top:2px}
-  .tier{margin-bottom:1.6rem}
-  .tier h3{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.05rem;color:var(--gold);margin-bottom:.5rem}
-  .paper{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .2rem;border-bottom:1px solid var(--w-04);font-size:.84rem;color:var(--w-55)}
-  .paper b{font-weight:500;color:var(--w-80)}
-  .paper .pw{color:var(--w-35);font-size:.76rem}
-  ol.traps{margin-left:1.3rem}
-  ol.traps li{margin-bottom:.6rem;font-size:.86rem;color:var(--w-55)}
-  ol.traps li::marker{color:var(--w-25);font-family:var(--mono);font-size:.7rem}
-  ol.traps li b{color:var(--red);font-weight:500}
-  /* drift — untracked plates, a dimmer light */
-  #drift .tier h3{color:var(--accent2)}
-  #drift .paper{padding-left:.1rem}
-  .bibgroup{margin-bottom:1.2rem}
-  .bibgroup h3{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1rem;color:var(--accent2);margin-bottom:.3rem}
-  .bibgroup p{font-size:.8rem;color:var(--w-45);line-height:1.7}
-
-  /* footer — two doors, kept quiet */
-  footer{
-    position:relative;z-index:1;border-top:1px solid var(--w-04);
-    max-width:1160px;margin:0 auto;padding:1.6rem 1.4rem 2.2rem;
-    display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
-    font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:lowercase;color:var(--w-25);
-  }
-  .f-doors{display:flex;gap:1.4rem}
-  .f-doors a{color:var(--w-25);transition:color 1s ease,letter-spacing 1s ease}
-  .f-doors a:hover{color:var(--cyan-60)}
-
-  /* ───── mobile ───── */
-  @media(max-width:719px){
-    header{padding:4.6rem 1.1rem 1.6rem}
-    main{padding:1.8rem 1.1rem 4.5rem}
-    #return{top:18px;right:14px;font-size:.54rem}
-    .nav-in{padding:0 1.1rem}
-    /* the resource table folds into field cards */
-    #resources table,#resources tbody{display:block}
-    #resources thead{display:none}
-    #resources tr{display:block;position:relative;border:1px solid var(--w-06);border-radius:10px;
-      padding:.8rem .9rem .7rem 2.4rem;margin-bottom:.55rem;background:var(--w-02)}
-    #resources tr:hover td{background:transparent}
-    #resources td{display:inline-block;border:none;padding:0}
-    #resources td:first-child{position:absolute;left:.8rem;top:.85rem}
-    #resources td:nth-child(2){display:block;margin-bottom:.45rem}
-    #resources td:nth-child(n+3){font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:lowercase;color:var(--w-35);margin-right:.7rem}
-    .micro{grid-template-columns:1fr}
-    .sprog{display:none}
-    .grid{grid-template-columns:1fr}
+  @media (prefers-reduced-motion: reduce){
+    body, .dwell, #veil, #hint, .ov, .openwork, #pfill{ transition:none !important; }
   }
 </style>
 </head>
 <body>
 
-<div id="veil" aria-hidden="true"></div>
+<div id="space"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="poster" aria-hidden="true"></div>
 
-<a id="return" href="index.html">&larr; return</a>
+<section class="dwell" id="d0" style="--scrim:rgba(2,6,12,.46)">
+  <div class="k">00 · setup — the abyss</div>
+  <h2>Begin below the light</h2>
+  <p>The deepest water on the whole journey. One faint promise burns far overhead; everything else is silhouette and falling snow. This is where the curriculum starts — in the dark, before the first tool is even named.</p>
+</section>
 
-<header>
-  <div class="head-in">
-    <div class="tag">field map &middot; the work behind the face</div>
-    <h1>the <em>atlas</em></h1>
-    <p class="epigraph">a private map of technical becoming &mdash; evidence, gates, resources, papers.</p>
-    <p class="creed">progress means externally legible artifacts, not completed resources.</p>
-    <div class="metaline">all plates free &middot; &#128176; marks optional compute &middot; 20&ndash;30 hrs/wk &asymp; 2.5&ndash;3.5 yrs &middot; verified jul 2026</div>
-    <div class="progresswrap">
-      <div class="pbar"><div id="pfill"></div></div>
-      <div class="pmeta"><span id="ptext">0 / 0 complete</span><span>kept in this browser</span></div>
-      <div class="pace" id="pace"></div>
-      <div class="pbtns">
-        <button onclick="exportProgress()">export</button>
-        <button onclick="importProgress()">import</button>
-        <button onclick="resetProgress()">reset</button>
-      </div>
-    </div>
-  </div>
-</header>
+<section class="dwell" id="d1" style="--scrim:rgba(8,32,54,.46)">
+  <div class="k">01 · python · git · swe — the ascent</div>
+  <h2>Rise toward the surface</h2>
+  <p>The promise becomes a milky disc of daylight. Color returns in physical order — blue, then teal, then green — as the water thins. The first real work happens here, on the way up.</p>
+</section>
 
-<nav id="nav" aria-label="atlas plates">
-  <div class="nav-in">
-    <button data-s="roadmap" class="active">roadmap</button>
-    <button data-s="resources">resources</button>
-    <button data-s="gates">gates</button>
-    <button data-s="capstones">capstones</button>
-    <button data-s="papers">papers</button>
-    <button data-s="insights">signals</button>
-    <button data-s="drift">drift</button>
-    <button data-s="traps">illusions</button>
-    <button data-s="compute">compute</button>
-    <button data-s="bib">bibliography</button>
-  </div>
-</nav>
+<section class="dwell" id="d2" style="--scrim:rgba(7,42,60,.5)">
+  <div class="k">02 · mathematics — the cathedral</div>
+  <h2>Stand inside the light</h2>
+  <p>Sunlight folded by the surface into a living net of caustics, rays leaning through the blue. Mathematics is this building: light obeying rules, and the rules made visible.</p>
+</section>
 
-<main>
+<section class="dwell" id="d3" style="--scrim:rgba(10,40,44,.55)">
+  <div class="k">03 · cs foundations — the shallows</div>
+  <h2>Where the light lands</h2>
+  <p>The cathedral's caustics finally reach the ground and break across the sand. Algorithms, data structures, the machine itself — solid footing under clear water, the first place on the journey where you can stand.</p>
+</section>
 
-<!-- ================= ROADMAP ================= -->
-<section id="roadmap" class="active">
-  <h2>Staged Roadmap</h2>
-  <p class="sub">Stages overlap deliberately (math ∥ CS; systems ∥ specialization). Never advance past a failed gate — the gates exist because self-assessment is unreliable. <b>Progress means externally legible artifacts, not completed resources</b> — every stage terminates in a completion contract, not a feeling.</p>
-  <div class="card" id="auditcard" style="margin-bottom:14px;border-color:var(--gold)">
-    <h3 style="color:var(--gold)">🗓 Quarterly resource audit</h3>
-    <p>Every 3 months: <b>remove</b> stale resources · <b>add</b> new frontier papers/tools · <b>check for updates</b> to CS336, Inspect, TRL, vLLM, ARENA, GPU MODE · <b>rewrite</b> the next 90-day plan in your learning log.</p>
-    <p class="meta" id="auditstatus"></p>
-    <div class="pbtns" style="margin-top:8px"><button onclick="logAudit()">Mark audit done today</button></div>
-  </div>
+<section class="dwell" id="d4" style="--scrim:rgba(6,30,40,.56)">
+  <div class="k">04 · classical ml — the surface</div>
+  <h2>Learn to read the sea</h2>
+  <p>Regression, trees, clustering — the old instruments. Up here the water is all signal: every crest a distribution, every fleck of glitter a residual. Learn what the sea is saying before you ask it to speak.</p>
+</section>
+
+<section class="dwell" id="d5" style="--scrim:rgba(8,10,12,.44)">
+  <div class="k">05 · deep learning — the river</div>
+  <h2>Follow the gradient down</h2>
+  <p>Water never computes the slope; it simply descends. Backpropagation is this river — and braided beneath the bright channel lie the ghosts of every path it tried before. The river remembers itself.</p>
+</section>
+
+<section class="dwell" id="d6" style="--scrim:rgba(16,12,8,.46)">
+  <div class="k">06 · transformers — the confluence</div>
+  <h2>Two waters meet</h2>
+  <p>Attention is a meeting of currents: every token weighing every other, and refusing to blur. The dark water and the jade water braid along one live seam — the architecture this whole journey is named for.</p>
+</section>
+
+<section class="dwell" id="d7" style="--scrim:rgba(28,24,36,.58)">
+  <div class="k">07 · evals &amp; post-training — the estuary</div>
+  <h2>Measured against the sea</h2>
+  <p>The river ends where it is tested. Twice a day the tide climbs the flats and grades every channel the water carved. Benchmarks, alignment, preference — here fresh water learns what the ocean wants.</p>
+</section>
+
+<section class="dwell" id="d8" style="--scrim:rgba(10,14,22,.52)">
+  <div class="k">08 · agents — the rain</div>
+  <h2>Water leaves the river</h2>
+  <p>Until now the water only flowed. Here it climbs into the sky and goes out to act on the world — tools, plans, consequences. And it arrives the way rain always does: on the glass, an inch from your face.</p>
+</section>
+
+<section class="dwell" id="d9" style="--scrim:rgba(4,3,6,.42)">
+  <div class="k">09 · systems &amp; gpus — the roots</div>
+  <h2>The buried network</h2>
+  <p>Under every forest runs a web that trades light for sugar. Kernels, memory, interconnects — the cold infrastructure pulsing beneath everything you have built so far, wavelength-coded and quietly alive.</p>
+</section>
+
+<section class="dwell" id="d10" style="--scrim:rgba(14,24,16,.58)">
+  <div class="k">10 · specialization — the canopy</div>
+  <h2>Choose your tree</h2>
+  <p>The forest the roots were feeding. Sunlight falls through a thousand possible crowns — vision, language, biology, control — and you climb only one. The light that reaches you is shaped by the tree you chose.</p>
+</section>
+
+<section class="dwell" id="d11" style="--scrim:rgba(8,12,24,.48)">
+  <div class="k">11 · replication — the garden at dusk</div>
+  <h2>Tend what others planted</h2>
+  <p>Blue hour. You take a published result and grow it again from seed. Every reproduced finding is a firefly — one small verified light, answering the others across the dark garden.</p>
+</section>
+
+<section class="dwell" id="d12" style="--scrim:rgba(1,3,8,.46)">
+  <div class="k">12 · original research — the aurora</div>
+  <h2>The ceiling of the world</h2>
+  <p>Above the garden the sky itself is alive. This is work no one has done yet — charged, rare, visible for miles. The journey ends where the water began: as light, returned to the sky.</p>
+</section>
+
+<div id="hint">scroll to descend</div>
+<a id="return" href="atlas.html">atlas</a>
+
+<div id="pbar" aria-hidden="true"><div id="pfill"></div></div>
+<button id="ledgerBtn" type="button">ledger</button>
+<button id="sndBtn" type="button">♪ sound</button>
+
+<aside id="folio" class="ov" role="dialog" aria-label="stage work">
+  <button class="ovx tbtn" type="button" data-close>close</button>
   <div id="stages"></div>
-</section>
+</aside>
 
-<!-- ================= RESOURCES ================= -->
-<section id="resources">
-  <h2>Resource Bank</h2>
-  <p class="sub"><b style="color:var(--accent)">Core</b> = skipping caps your ceiling · <b style="color:var(--accent2)">Recommended</b> = strong add · Optional = deepening · <b style="color:var(--purple)">Specialization</b> = lane-only. Bold rows are the primary choice for their topic.</p>
+<aside id="library" class="ov" role="dialog" aria-label="resource library">
+  <button class="ovx tbtn" type="button" data-close>close</button>
+  <div class="k" style="margin-top:0">the library</div>
+  <h3>Every resource on the journey</h3>
   <div class="filters">
-    <input id="q" type="search" placeholder="Search resources…">
-    <select id="ftopic"><option value="">All topics</option></select>
-    <select id="flevel"><option value="">All levels</option><option>beginner</option><option>intermediate</option><option>advanced</option></select>
-    <select id="ftier"><option value="">All tiers</option><option value="core">Core</option><option value="rec">Recommended</option><option value="opt">Optional</option><option value="spec">Specialization</option></select>
-    <select id="fcost"><option value="">Any cost</option><option value="0">Fully free</option><option value="1">💰 compute may cost</option></select>
+    <input id="q" placeholder="search" autocomplete="off">
+    <select id="ftopic"><option value="">all topics</option></select>
+    <select id="flevel"><option value="">any level</option><option value="beginner">beginner</option><option value="intermediate">intermediate</option><option value="advanced">advanced</option></select>
+    <select id="ftier"><option value="">any tier</option><option value="core">core</option><option value="rec">recommended</option><option value="opt">optional</option><option value="spec">specialization</option></select>
+    <select id="fcost"><option value="">any cost</option><option value="0">free</option><option value="1">paid</option></select>
   </div>
-  <div class="count" id="rcount"></div>
-  <table><thead><tr><th style="width:26px">✓</th><th>Resource</th><th>Topic</th><th>Type</th><th>Level</th><th>Tier</th></tr></thead><tbody id="rbody"></tbody></table>
-</section>
+  <div id="rcount" class="mono"></div>
+  <table id="rtable"><tbody id="rbody"></tbody></table>
+</aside>
 
-<!-- ================= GATES ================= -->
-<section id="gates">
-  <h2>Diagnostic Gates</h2>
-  <p class="sub">Hard checkpoints: closed-book, from a blank file, pushed to GitHub with a write-up. Failing a gate and returning to the stage is the system working, not failing.</p>
-  <div id="gatelist"></div>
-</section>
+<aside id="ledger" class="ov" role="dialog" aria-label="ledger">
+  <button class="ovx tbtn" type="button" data-close>close</button>
+  <div class="k" style="margin-top:0">the ledger</div>
+  <h3>What the water remembers</h3>
+  <p id="ptext" class="mono"></p>
+  <p id="pace" class="mono"></p>
+  <p id="qline" class="mono" style="color:rgba(255,238,194,.7)"></p>
+  <div style="margin:12px 0 0">
+    <button class="tbtn" id="expBtn" type="button">export</button>
+    <button class="tbtn" id="impBtn" type="button">import</button>
+    <button class="tbtn" id="rstBtn" type="button">reset</button>
+  </div>
+  <div class="k">quarterly audit</div>
+  <p id="auditstatus" class="mono"></p>
+  <button class="tbtn" id="auditBtn" type="button">log an audit today</button>
+  <div class="k">the thirteen</div>
+  <nav id="nav" class="snav"></nav>
+  <div class="k">the library</div>
+  <button class="tbtn" id="libBtn" type="button">open the library</button>
+  <div class="k">the reference</div>
+  <nav id="refnav" class="snav"></nav>
+</aside>
 
-<!-- ================= CAPSTONES ================= -->
-<section id="capstones">
-  <h2>Capstone Ladder</h2>
-  <p class="sub">Each capstone = public repo + README + write-up. Together they are the portfolio a frontier lab actually evaluates.</p>
-  <div class="grid" id="caplist"></div>
-</section>
+<aside id="plates" class="ov" role="dialog" aria-label="reference plates">
+  <button class="ovx tbtn" type="button" data-close>close</button>
+  <div class="k" style="margin-top:0">the reference</div>
+  <h3 id="platesTitle"></h3>
+  <p id="platesSub"></p>
+  <nav id="prail" class="snav" style="margin:0 0 1.4rem"></nav>
+  <div id="gatelist" class="plate"></div>
+  <div id="caplist" class="plate"></div>
+  <div id="tierlist" class="plate"></div>
+  <div id="inslist" class="plate"></div>
+  <div id="traplist" class="plate"></div>
+  <div id="complist" class="plate"></div>
+  <div id="biblist" class="plate"></div>
+  <div id="driftlist" class="plate"></div>
+</aside>
 
-<!-- ================= PAPERS ================= -->
-<section id="papers">
-  <h2>Sequenced Paper Reading List</h2>
-  <p class="sub">Read in tier order. Every paper comes with a reproduction idea — reading without implementing is entertainment.</p>
-  <div id="tierlist"></div>
-</section>
+<div id="veil"></div>
 
-<!-- ================= INSIGHTS ================= -->
-<section id="insights">
-  <h2>X / Practitioner Insight</h2>
-  <p class="sub">High-signal posts from people doing the work. Marked Practitioner/X insight — not primary academic evidence. Each includes the concrete action it implies.</p>
-  <div class="grid" id="inslist"></div>
-</section>
-
-<!-- ================= DRIFT ================= -->
-<section id="drift">
-  <h2>drift</h2>
-  <p class="sub">for the evenings the mind is dim but the pull is still there. pick the layer the head allows tonight. nothing here is counted or checked — the current only keeps you in the water. anything marked <b>⌨</b> is reconnaissance: it must be re-done with hands on keyboard before it counts anywhere else in the atlas.</p>
-  <div id="driftlist"></div>
-</section>
-
-<!-- ================= TRAPS ================= -->
-<section id="traps">
-  <h2>Dangerous Illusions &amp; Traps</h2>
-  <p class="sub">The failure modes that consume career-changers. Reread this list quarterly.</p>
-  <ol class="traps" id="traplist"></ol>
-</section>
-
-<!-- ================= COMPUTE ================= -->
-<section id="compute">
-  <h2>Free Compute Strategy</h2>
-  <p class="sub">Total realistic spend over 3 years: ~$250–350. Everything else is $0. Rule one: debug on CPU with tiny tensors before any GPU touches your code.</p>
-  <div class="grid" id="complist"></div>
-</section>
-
-<!-- ================= BIBLIOGRAPHY ================= -->
-<section id="bib">
-  <h2>Bibliography by Type</h2>
-  <p class="sub">The full universe, grouped. Everything here appears with context in the Resource Bank, Papers, or Insights tabs.</p>
-  <div id="biblist"></div>
-</section>
-
-</main>
-<footer>
-  <span>the atlas &middot; plates verified jul 2026</span>
-  <span class="f-doors">
-    <a href="index.html" data-door>&larr; the surface</a>
-    <a href="room.html" data-door>the room</a>
-  </span>
-</footer>
+<svg id="grain" aria-hidden="true"><filter id="gf"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#gf)"/></svg>
 
 <script>
-/* ---------------- DATA ---------------- */
+/* ============================================================
+   THE CONFLUENCE — step 2: the full journey
+   One parameterized world · scroll scrub · depth stack · film finish
+   Thirteen scenes, water → land → sky:
+   Abyss → Ascent → Cathedral → Shallows → Surface → River →
+   CONFLUENCE → Estuary → Rain → Roots → Canopy → Garden → Aurora
+   Twelve bridges: two-waters seams or staggered in-place transforms
+   ============================================================ */
+/* ==== curriculum data — carried VERBATIM from the old atlas engine ==== */
 const STAGES=[
 {n:"0",t:"Setup & technical literacy",d:"2 weeks",goal:"Working dev environment + accurate mental map of the field.",res:[["Missing Semester 2026 (first 3 lectures)","https://missing.csail.mit.edu/"],["Karpathy — Deep Dive into LLMs (orientation)","https://www.youtube.com/@AndrejKarpathy"]],del:"Dotfiles repo · public learning-log repo (weekly entries, forever) · one-page field map in your own words.",gate:"Terminal + git clone/branch/commit/push without lookups.",trap:"Tool perfectionism; watching orientation videos as entertainment."},
 {n:"1",t:"Python, shell, Git, software engineering",d:"2.5–3 months",goal:"Clean, tested Python; shell fluency; Git like breathing.",res:[["CS50P (all 10 psets)","https://cs50.harvard.edu/python/"],["Missing Semester (complete)","https://missing.csail.mit.edu/"],["Learn Git Branching","https://learngitbranching.js.org/"],["Pro Git ch.1–3,5","https://git-scm.com/book/en/v2"],["Good Research Code Handbook","https://goodresearch.dev/"],["pytest + GitHub Actions","https://docs.pytest.org/en/stable/"]],del:"3 CLI projects with tests, CI badge, README, pyproject.toml.",gate:"H0 + H1: unseen medium problem <45 min; pytest green in CI on push.",trap:"Tutorial loops; skipping tests 'until later'."},
@@ -801,121 +825,6 @@ const BIB=[
 ["X / practitioner","See the Practitioner Insight tab — 24 verified items with links, categories, and actions"],
 ["Communities","GPU MODE Discord · EleutherAI Discord · Alignment Forum / LessWrong (curated sequences) · Hugging Face Hub/forums · Kaggle · MATS · SPAR · ARC Prize · CS336/ARENA study groups"]
 ];
-
-/* ---------------- STATE ---------------- */
-const KEY="faicc-progress-v1";
-let state={};
-try{state=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){state={}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
-
-/* ---------------- RENDER ---------------- */
-function cb(id){return `<input type="checkbox" data-pid="${id}" ${state[id]?"checked":""}>`}
-
-// stages
-document.getElementById("stages").innerHTML=STAGES.map((s,i)=>{
-  const micro=(MICRO[s.n]||[]).map((m,mi)=>{
-    const id="m"+s.n+"_"+mi;
-    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span>${esc(m[0])}</span><span class="hrs">~${m[1]}h</span></label>`;
-  }).join("");
-  const contract=CONTRACT.map((c,ci)=>{
-    const id="c"+s.n+"_"+ci;
-    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span>${esc(c)}</span></label>`;
-  }).join("");
-  const lock = s.n==="7" ? `
-<div class="card" id="lanecard" style="margin-bottom:12px;border-color:var(--purple)">
-  <h3 style="color:var(--purple)">🔒 Specialization lock (after Stage 7)</h3>
-  <p>Pick ONE primary lane and commit for 6–12 months. Everything else drops to literacy-level. Without this, the curriculum stays broad but never sharp.</p>
-  <div id="lanestatus" class="meta" style="margin-top:8px"></div>
-  <div class="pbtns" style="margin-top:8px">
-    <select id="lanesel" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 9px;border-radius:6px;font-size:12.5px">
-      ${LANES.map(l=>`<option>${l}</option>`).join("")}
-    </select>
-    <button onclick="lockLane()">Lock it in</button>
-    <button onclick="unlockLane()">Unlock (requires confirmation)</button>
-  </div>
-</div>` : "";
-  return `
-<details class="stage" ${i===0?"open":""}>
-  <summary><span class="snum">Stage ${s.n}</span><span class="stitle">${s.t}</span>
-    <span class="sprog"><span class="sbar"><span id="sb-${s.n}"></span></span><span class="stxt" id="st-${s.n}"></span></span>
-    <span class="sdur">${s.d}</span></summary>
-  <div class="sbody">
-    <h4>Goal</h4><p>${s.goal}</p>
-    <h4 class="alt">Best resources</h4><p>${s.res.map(r=>`<a href="${r[1]}" target="_blank">${esc(r[0])}</a>`).join(" · ")}</p>
-    <h4 style="color:var(--green)">Session milestones (~2–4h each — check one per sitting)</h4>
-    <div class="micro">${micro}</div>
-    <h4>Deliverables</h4><p>${s.del}</p>
-    <h4 class="gate">Gate</h4><p>${s.gate}</p>
-    <p style="color:var(--red);font-size:13px;margin-top:4px"><b>⛔ ${esc(BLOCK[s.n])}</b></p>
-    <h4 class="warn">Traps</h4><p>${s.trap}</p>
-    <h4 style="color:var(--gold)">Stage completion contract — all four must exist, publicly</h4>
-    <div class="micro">${contract}</div>
-    <label class="done">${cb("stage"+s.n)} Stage ${s.n} complete <span style="color:var(--muted)">(locked until the contract above is fully checked)</span></label>
-  </div>
-</details>${lock}`;}).join("");
-
-function updateStageBars(){
-  STAGES.forEach(s=>{
-    const items=(MICRO[s.n]||[]);
-    const done=items.filter((_,mi)=>state["m"+s.n+"_"+mi]).length;
-    const pct=items.length?Math.round(100*done/items.length):0;
-    const bar=document.getElementById("sb-"+s.n), txt=document.getElementById("st-"+s.n);
-    if(bar){bar.style.width=pct+"%"; if(pct===100)bar.style.background="var(--gold)";}
-    if(txt)txt.textContent=done+"/"+items.length;
-  });
-}
-
-// resources
-const topics=[...new Set(RES.map(r=>r[0]))];
-const tsel=document.getElementById("ftopic");
-topics.forEach(t=>{const o=document.createElement("option");o.textContent=t;tsel.appendChild(o)});
-const tierName={core:"Core",rec:"Recommended",opt:"Optional",spec:"Specialization"};
-const tierCls={core:"c-core",rec:"c-rec",opt:"c-opt",spec:"c-spec"};
-function renderRes(){
-  const q=document.getElementById("q").value.toLowerCase();
-  const ft=tsel.value, fl=document.getElementById("flevel").value,
-        fr=document.getElementById("ftier").value, fc=document.getElementById("fcost").value;
-  let rows="",n=0;
-  RES.forEach((r,i)=>{
-    const [topic,name,url,type,level,tier,cost,prim,why]=r;
-    if(ft&&topic!==ft)return; if(fl&&level!==fl&&level!=="all")return;
-    if(fr&&tier!==fr)return; if(fc!==""&&String(cost)!==fc)return;
-    if(q&&!(name+" "+why+" "+topic+" "+type).toLowerCase().includes(q))return;
-    n++;
-    rows+=`<tr><td>${cb("res"+i)}</td>
-      <td><div class="rname" ${prim?'style="color:var(--accent)"':''}><a href="${url}" target="_blank" ${prim?'style="color:var(--accent)"':''}>${esc(name)}</a>${cost?' <span class="chip c-cost">💰</span>':''}</div>
-      <div class="rwhy">${esc(why)}</div></td>
-      <td>${topic}</td><td>${type}</td><td>${level}</td>
-      <td><span class="chip ${tierCls[tier]}">${tierName[tier]}</span></td></tr>`;
-  });
-  document.getElementById("rbody").innerHTML=rows;
-  document.getElementById("rcount").textContent=`${n} resources shown (of ${RES.length}) · orange = primary choice for its topic`;
-  bindChecks();
-}
-["q","ftopic","flevel","ftier","fcost"].forEach(id=>document.getElementById(id).addEventListener("input",renderRes));
-
-// gates
-document.getElementById("gatelist").innerHTML=GATES.map((g,i)=>`
-<div class="gaterow">${cb("gate"+i)}<span class="gid">${g[0]}</span>
-<div><b>${g[1]}</b> <span class="chip c-cat">${g[3]}</span><p>${g[2]}</p></div></div>`).join("");
-
-// capstones
-document.getElementById("caplist").innerHTML=CAPS.map((c,i)=>`
-<div class="card"><h3>${cb("cap"+i)} ${c[0]}</h3><p>${c[1]}</p></div>`).join("");
-
-// papers
-document.getElementById("tierlist").innerHTML=TIERS.map((t,ti)=>`
-<div class="tier"><h3>${t[0]}</h3>${t[1].map((p,pi)=>`
-<div class="paper">${cb("pap"+ti+"_"+pi)}<div><a href="${p[1]}" target="_blank"><b>${esc(p[0])}</b></a> — ${esc(p[2])}<div class="pw">Reproduce: ${esc(p[3])}</div></div></div>`).join("")}</div>`).join("");
-
-// insights
-document.getElementById("inslist").innerHTML=INS.map(x=>`
-<div class="card"><h3><a href="${x[1]}" target="_blank">${esc(x[0])}</a></h3>
-<span class="chip c-cat">${x[2]}</span><span class="chip c-free" style="margin-left:6px">Practitioner/X insight</span>
-<p style="margin-top:8px">${esc(x[3])}</p><p class="meta"><b>Action:</b> ${esc(x[4])}</p></div>`).join("");
-
-// drift — passive plates by dimness. deliberately untracked: no ids, no checkboxes, no ledger.
 const DRIFT=[
 ["i · shapes — pictures first, equations later",[
 ["3Blue1Brown — Neural networks (incl. 'But what is a GPT?' + attention chapters)","https://www.3blue1brown.com/topics/neural-networks","s5·s6","","the geometry of the thing you are building"],
@@ -942,153 +851,2625 @@ const DRIFT=[
 ["GPU MODE — lecture archive","https://www.youtube.com/@GPUMODE","s9","⌨","kernels and rooflines; watch, then puzzle"],
 ["Neel Nanda — paper & code walkthroughs","https://www.youtube.com/@neelnanda2469","s10","⌨","interpretability over someone's shoulder"]]]
 ];
-document.getElementById("driftlist").innerHTML=DRIFT.map(L=>`
-<div class="tier"><h3>${L[0]}</h3>${L[1].map(v=>`
-<div class="paper"><div><a href="${v[1]}" target="_blank"><b>${esc(v[0])}</b></a>
- <span class="chip c-cat">${v[2]}</span>${v[3]?' <span class="chip c-cost">⌨ keyboard pass later</span>':''}
-<div class="pw">${esc(v[4])}</div></div></div>`).join("")}</div>`).join("");
 
-// traps
-document.getElementById("traplist").innerHTML=TRAPS.map(t=>`<li><b>${t[0]}.</b> ${t[1]}</li>`).join("");
+/* ---------- shaders ---------- */
+const VS = `#version 300 es
+layout(location=0) in vec2 aP;
+out vec2 vUv;
+void main(){ vUv = aP*0.5+0.5; gl_Position = vec4(aP,0.,1.); }`;
 
-// compute
-document.getElementById("complist").innerHTML=COMPUTE.map(c=>`<div class="card"><h3>${c[0]}</h3><p>${c[1]}</p></div>`).join("");
+const LIB = `
+float h1(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p,p+45.32); return fract(p.x*p.y); }
+vec2  h2(vec2 p){ float n = h1(p); return vec2(n, h1(p+n+17.7)); }
+float vnoise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  f = f*f*(3.-2.*f);
+  return mix(mix(h1(i),h1(i+vec2(1,0)),f.x), mix(h1(i+vec2(0,1)),h1(i+vec2(1,1)),f.x), f.y);
+}
+float fbm(vec2 p){
+  float a=.5, s=0.;
+  for(int i=0;i<4;i++){
+    if(float(i) >= uQ) break;              /* quality ladder trims octaves */
+    s += a*vnoise(p); p = p*2.03 + 17.1; a *= .5;
+  }
+  return s;
+}
+float fbm2(vec2 p){ return .6*vnoise(p) + .4*vnoise(p*2.13+9.1); }
+vec2 curl(vec2 p){
+  float e=.04;
+  float a = fbm2(p+vec2(0.,e)) - fbm2(p-vec2(0.,e));
+  float b = fbm2(p+vec2(e,0.)) - fbm2(p-vec2(e,0.));
+  return vec2(a,-b)/(2.*e);
+}
+/* animated voronoi, returns F2-F1 (0 at cell borders) */
+float vorEdge(vec2 p, float t){
+  vec2 n = floor(p), f = fract(p);
+  float F1=8., F2=8.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){
+    vec2 g = vec2(float(i),float(j));
+    vec2 o = h2(n+g);
+    o = .5 + .42*sin(t*.9 + 6.2831*o);
+    float d = dot(g+o-f, g+o-f);
+    if(d<F1){ F2=F1; F1=d; } else if(d<F2){ F2=d; }
+  }
+  return sqrt(F2)-sqrt(F1);
+}
+/* connected ridge veins — one branching algorithm, worn by tidal lace,
+   roots and mycelium alike (the site rhyme) */
+float vein(vec2 p, float warp){
+  p += warp * vec2(fbm2(p*.9+3.1), fbm2(p*.9-7.7));
+  float v = 0., a = 1.;
+  for(int i=0;i<3;i++){
+    float n = fbm2(p);
+    v = max(v, a * pow(clamp(1. - abs(2.*n - 1.)*2.1, 0., 1.), 3.));
+    p = p*2.07 + 13.7; a *= .62;
+  }
+  return v;
+}
+/* cell-point field — stars, fireflies, glitter share one skeleton */
+vec3 cellPt(vec2 p, float jit){
+  vec2 id = floor(p), f = fract(p) - .5;
+  vec2 o = (h2(id) - .5) * jit;
+  return vec3(f - o, h1(id + 5.5));   /* xy: offset to point · z: cell id hash */
+}`;
 
-// bibliography
-document.getElementById("biblist").innerHTML=BIB.map(b=>`<div class="bibgroup"><h3>${b[0]}</h3><p>${b[1]}</p></div>`).join("");
+const SCENE_FS = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform vec2  uRes;
+uniform float uTime, uSeam, uF, uVel, uTextDim, uQ, uCalm;
+uniform vec3  uFxq;   /* x: HIGH extras (dual caustic net + ghost) · y: fringes · z: 3rd particle layer */
+uniform vec2  uPar;
+uniform vec4  uTextRect;
+/* param set A (always) and B (seam dual-eval)
+   uFx : caustic, rays, snow, snowVel
+   uFx2: silhouette, strat, ghost, mote
+   uFx3: waves, terrain(sand), braid(river), dendrite(estuary)
+   uFx4: rain, roots, canopy, fireflies
+   uFx5: aurora, stars, glitter, confluence
+   uAx1..uAx4: per-scene accent colors (meaning changes per world) */
+uniform vec3 uDeep,uMid,uHi,uAcc,uSnowC,uDiscC,uDiscH,uCausC,uCausF1,uCausF2,uRayC,uAx1,uAx2,uAx3,uAx4,uMarkC;
+uniform vec4 uDisc, uFx, uFx2, uFx3, uFx4, uFx5, uMarkP;
+uniform vec3 uDeepB,uMidB,uHiB,uAccB,uSnowCB,uDiscCB,uDiscHB,uCausCB,uCausF1B,uCausF2B,uRayCB,uAx1B,uAx2B,uAx3B,uAx4B,uMarkCB;
+uniform vec4 uDiscB, uFxB, uFx2B, uFx3B, uFx4B, uFx5B, uMarkPB;
+uniform vec4 uPart, uPartB;   /* particulate character per world */
+/* THE ENCOUNTER (scene 8, Agents): the first world that notices you.
+   uTouch holds the visitor's recent presence on the glass — position,
+   accumulated strength (revisited places are remembered longer), age.
+   uCause drives the one drop that becomes the first root (bridge 8→9). */
+uniform vec4  uTouch[8];
+uniform float uTouchN, uCause;
+/* THE TRAVELER — one light that survives the whole journey by changing
+   its body: promise, bubble, caustic knot, sun-fleck, river signal,
+   seam thread, raindrop, root pulse, canopy opening, firefly, star.
+   uEvt/uEvtK: the rare events stillness earns (whale, far lightning, meteor). */
+uniform vec3  uHeroC;
+uniform vec4  uHeroP;      /* x, y, size, brightness */
+uniform float uEvt, uEvtK;
+/* THE PROMISE CONSTELLATION — thirteen stars over the aurora, faint for
+   everyone (the map of the journey ahead), each burning bright when its
+   stage is truly complete; lines join only walked ground. The fourteenth
+   is the visitor's own question, once they have dared to set it. */
+uniform vec4  uCstP[14];   /* x, y, brightness, size */
+uniform float uCstOn;
+/* uArr: the arrival — one drop falls, and where it lands the world rings
+   into existence. uEco: milestones leave evidence (math strengthens a
+   caustic branch, systems quickens the pulses, research raises a curtain).
+   uEcho: a checked box breathes once through the world.
+   uOvDim: the world steps back while you read. */
+uniform vec4  uEco;
+uniform float uArr, uEcho, uOvDim;
+uniform float uMk, uMkB;   /* progress-mark visibility, per parameter set */
+uniform vec3 uSeamC;   /* bridge seam-line color, per scene pair */
+uniform vec4 uSeamP;   /* seam temper: lineIntensity, fingeringAmp, lineWidth, intermittency */
+uniform float uSeamI;  /* which pair is crossing — causal seams know their scenes */
+/* ---- the aliveness layer ----
+   uBreath: one shared respiration (~9s, frequency itself wanders — HRV)
+   uMood:   the world's weather temperament 0 calm → 1 gust (Markov, slow)
+   uAg:     living individuals — fish / heavy raindrops / fireflies —
+            simulated on the CPU with interior state, drawn here */
+uniform float uBreath, uMood, uAgN;
+uniform vec4  uAg[24];
+${'' /* LIB injected here by JS */}
+__LIB__
 
-/* ---------------- NAV ---------------- */
-document.getElementById("nav").addEventListener("click",e=>{
-  if(e.target.tagName!=="BUTTON")return;
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));
-  e.target.classList.add("active");
-  document.getElementById(e.target.dataset.s).classList.add("active");
-  window.scrollTo(0,0);
-});
+const float TAU = 6.2831853;
 
-/* ---------------- PROGRESS ---------------- */
-function bindChecks(){
-  document.querySelectorAll("input[data-pid]").forEach(el=>{
-    el.onchange=()=>{
-      // Stage-complete is locked behind the completion contract
-      if(el.checked && el.dataset.pid.startsWith("stage")){
-        const n=el.dataset.pid.slice(5);
-        const missing=CONTRACT.filter((_,ci)=>!state["c"+n+"_"+ci]);
-        if(missing.length){
-          alert("Stage "+n+" contract not met. Still missing:\n\n• "+missing.join("\n• ")+"\n\nProgress means externally legible artifacts, not completed resources.");
-          el.checked=false; return;
+vec3 ramp(float y, vec3 d, vec3 m, vec3 h, vec3 a){
+  vec3 c = mix(d, m, smoothstep(0., .45, y));
+  c = mix(c, h, smoothstep(.40, .80, y));
+  c = mix(c, a, smoothstep(.74, 1.0, y));
+  return c;
+}
+
+float rays(vec2 uv, float asp, float t){
+  /* the beam makes slow saccades — nothing alive holds perfectly still */
+  float an = .36 + .05*(vnoise(vec2(t*.011, 3.3)) - .5);
+  mat2 R = mat2(cos(an),-sin(an),sin(an),cos(an));
+  vec2 r = R * vec2(uv.x*asp, uv.y);
+  float body = fbm(vec2(r.x*5.5, r.y*.55 - t*.045));       /* slow drift */
+  body = pow(smoothstep(.42,.97,body), 2.6);
+  float shim = .68 + .32*vnoise(vec2(r.x*16., t*.85));      /* fast shimmer */
+  float mask = smoothstep(.05,.85,uv.y);
+  mask *= exp(-(1.-uv.y)*1.6);
+  return body*shim*mask;
+}
+
+float caustic(vec2 p, float t){
+  float c1 = pow(clamp(1. - 2.4*vorEdge(p, t), 0., 1.), 6.);
+  if(uFxq.x > .5){                    /* HIGH: two nets multiplied — true interference */
+    float c2 = pow(clamp(1. - 2.4*vorEdge(p*1.63 + 11.3, t*.83), 0., 1.), 6.);
+    return c1*c2*2.0;
+  }
+  /* BALANCED/LOW: one net, breathing modulation — same composition, half the cost */
+  float m = .45 + .55*vnoise(p*2.2 - t*.35);
+  return c1*c1*m*1.55;
+}
+
+float snowL(vec2 uv, float asp, float sc, float sp, float t, float seed, float stretch, vec4 pt){
+  vec2 p = vec2(uv.x*asp - t*pt.z, uv.y - t*sp)*(sc/max(pt.x,.2)) + seed;
+  vec2 id = floor(p), f = fract(p)-.5;
+  vec2 o = (h2(id)-.5)*.82;
+  vec2 d = f-o;
+  d.y /= (1. + stretch)*pt.w;
+  float m = exp(-dot(d,d)*560.);
+  m *= step(.78, h1(id+7.7));
+  m *= .55 + .45*sin(t*1.95*pt.y + h1(id)*TAU);   /* twinkle, at this world's tempo */
+  return m;
+}
+
+/* ==== scene painters — each world gated by its own amplitude ==== */
+
+/* 12 · aurora — folded curtain, marched front-to-back with real
+   translucent accumulation (emission–absorption, tier-consistent):
+   hard narrow lower rim, long upward fade, green→pink→violet chemistry,
+   two clocks (slow curtain drift, fast internal shimmer).
+   Returns rgb + coverage alpha so the stars can stand behind it. */
+vec4 aurora(vec2 uv, float asp, float t, vec3 rim, vec3 body, vec3 top, vec3 vio){
+  if(uv.y < .18) return vec4(0.);
+  float x = uv.x*asp;
+  float steps = uQ > 3.5 ? 40. : (uQ > 2.5 ? 28. : 18.);
+  vec3 acc = vec3(0.); float al = 0.;
+  for(float i=0.; i<40.; i++){
+    if(i >= steps) break;
+    float z = (i + .5)/steps;
+    /* ONE curtain seen through depth: the fold pattern persists slice to
+       slice (slight parallax shear), so sheets stay sheets instead of
+       averaging into haze — slow clock */
+    float fold = fbm2(vec2(x*(1.5 + z*.35) - z*.7, z*.5 + t*.014));
+    float sheet = 1. - abs(2.*fold - 1.);
+    float fold2 = fbm2(vec2(x*3.1 + z*1.1 + t*.009, z*.8 + 5.));
+    sheet *= .5 + .5*(1. - abs(2.*fold2 - 1.));
+    sheet = pow(sheet, 3.5);
+    sheet *= 1. + uEco.z*.55*exp(-pow(x - 1.15, 2.)*2.5);   /* the research curtain */
+    /* each sheet hangs from its own wavering base; deeper hangs higher */
+    float base = .40 + .10*z + .14*(fold - .5);
+    float h = (uv.y - base) / (.55 + .35*z);
+    if(h < -.07) continue;
+    /* each slice fades in — a hard onset leaves contour stairs on the rim */
+    float on = smoothstep(-.06, .03, h);
+    h = max(h, 0.);
+    float vert = exp(-h*3.4) * smoothstep(1.45, .6, h);   /* long fade, real sky above */
+    float rimK = uQ > 2.5 ? 40. : 24.;             /* LOW renders softer, never stepped */
+    float rimT = exp(-h*rimK) * 2.2 * on;          /* hard narrow lower rim */
+    float shim = .62 + .38*vnoise(vec2(x*24. + fold*9., h*6. - (t + 3.2*(vnoise(vec2(t*.023, 7.7)) - .5))*1.25));
+    vec3 chem = mix(body, top, smoothstep(.26, .70, h));  /* green owns ~70% */
+    chem = mix(chem, vio, smoothstep(.60, 1.05, h));
+    float dens = sheet * vert * shim * on;
+    dens *= .7 + .6*sheet;                       /* folds stay dimensional, never wash */
+    float dd = dens + rimT*sheet*.5;
+    if(dd < 1e-4) continue;
+    vec3 ce = (chem*dens*1.5 + rim*rimT*sheet*1.7) / dd;
+    float aS = 1. - exp(-dd * 26./steps);          /* slab opacity */
+    acc += (1. - al) * ce * aS;
+    al  += (1. - al) * aS;
+    if(al > .96) break;
+  }
+  /* soft shoulder on the emission: the brightest sheets stop clipping to
+     white so adjacent folds keep value separation — mids barely move */
+  vec3 A = acc * 3.0;
+  A /= 1. + .09*A;
+  return vec4(A, al);
+}
+
+/* stars — two depths; subtle twinkle on fewer than one in ten */
+float stars(vec2 uv, float asp, float t){
+  vec2 sp = vec2(uv.x*asp, uv.y);
+  float s = 0.;
+  for(int L=0; L<2; L++){
+    float sc = L==0 ? 34. : 71.;
+    vec3 cp = cellPt(sp*sc + float(L)*29., .8);
+    float m = exp(-dot(cp.xy,cp.xy)*(300.+float(L)*260.))
+            * step(.86 - float(L)*.05, cp.z) * (.25 + .75*cp.z);
+    float tw = h1(floor(sp*sc + float(L)*29.) + 9.1);
+    if(tw > .9) m *= .55 + .45*sin(t*(1.2 + tw*2.) + tw*40.);
+    s += m * (L==0 ? 1. : .45);
+  }
+  return s;
+}
+
+/* 4 · the surface — choppy asymmetric crests, height-tinted translucency,
+   voronoi foam lace, crest lines as filaments, sun-glitter path */
+void wavesP(inout vec3 c, vec2 uv, float asp, float t, float amp, float glitAmp,
+            vec3 base, vec3 body, vec3 crest, vec3 foamC, vec3 glit, vec4 disc){
+  float yh = .66;
+  float m = 1. - smoothstep(yh-.012, yh+.006, uv.y);
+  if(m < .003) return;
+  float d = max(yh - uv.y, .001);
+  float per = 1./(d + .085);
+  vec2 w = vec2((uv.x - .5)*asp*per*.62, per*.85 + t*.22);   /* swell clock */
+  float h = fbm(w*vec2(1., .62));
+  h = .62*h + .38*(1. - abs(2.*vnoise(w*vec2(2.7,1.7) + t*(.35 + .45*uMood)) - 1.));  /* chop follows the weather */
+  float depthFade = smoothstep(0., .34, d);
+  float hh = mix(.42, h, clamp(depthFade*1.4, .25, 1.));
+  vec3 wc = mix(base, body, smoothstep(.18, .55, hh));
+  wc = mix(wc, crest, smoothstep(.55, .82, hh));
+  wc += crest * pow(smoothstep(.60, .95, hh), 3.) * .9;      /* crests glow — fake SSS */
+  float lace = 1. - smoothstep(0., .16, vorEdge(w*2.3, t*.7));
+  wc = mix(wc, foamC, lace * smoothstep(.62, .85, hh) * .75);
+  wc += crest * pow(smoothstep(.70, .92, hh), 6.) * 1.4;     /* filament crest-lines */
+  float path = exp(-pow((uv.x - disc.x)/.16, 2.));
+  vec3 gp = cellPt(w*7.3, .85);
+  float spark = exp(-dot(gp.xy,gp.xy)*240.) * step(.68, gp.z);
+  spark *= .4 + .6*sin(t*2.3 + gp.z*40.);
+  wc += glit * spark * path * smoothstep(.45, .8, hh) * glitAmp * 2.2;
+  wc = mix(c, wc, smoothstep(0., .10, d));                   /* aerial haze to the sky */
+  c = mix(c, wc, m*amp);
+}
+
+/* 5 · the river — live braid bright, four ghost channels beneath:
+   the river remembering itself */
+void riverP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+            vec3 milk, vec3 jade, vec3 silt, vec3 chan){
+  vec2 rp = vec2(uv.x*asp, uv.y*1.45 + t*.021);
+  rp.x += .42*fbm2(rp*vec2(.7,1.1) + 2.2) - .21;
+  int NG = uFxq.z > .5 ? 5 : 3;
+  for(int k=0; k<5; k++){
+    if(k >= NG) break;
+    float fk = float(k);
+    vec2 q = rp*vec2(2.5,.8) + vec2(fk*7.31, fk*2.7);
+    float n = fbm2(q);
+    float ch = pow(clamp(1. - abs(2.*n - 1.)*2.4, 0., 1.), 2.4);
+    if(k == 0){
+      float flow = .78 + .22*vnoise(vec2(rp.x*9., rp.y*22. - t*(1. + .7*uMood)));
+      vec3 wc = mix(jade, milk, smoothstep(.25, .9, ch));
+      c = mix(c, wc*flow, smoothstep(.12, .55, ch)*amp);
+      float edge = smoothstep(.05,.22,ch)*(1.-smoothstep(.22,.5,ch));
+      c = mix(c, silt, edge*.45*amp);
+    } else {
+      float a = amp * (k==1 ? .30 : k==2 ? .18 : k==3 ? .10 : .05);
+      c = mix(c, chan, smoothstep(.2, .6, ch)*a);
+    }
+  }
+  /* relief: banks rise dark between the channels; the plain descends */
+  float bank = fbm2(rp*vec2(1.3, .5) + 4.4);
+  c *= 1. - .16*amp*smoothstep(.45, .8, bank);
+  c *= 1. + .07*amp*(uv.y - .5);
+}
+
+/* 6 · the confluence — two waters refuse to mix; the site's cyan and
+   gold threads physically braid along the live seam */
+void confP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+           vec3 tann, vec3 jade, vec3 seamC, vec3 mixC){
+  vec2 w = vec2(uv.x*asp, uv.y);
+  float texA = .85 + .15*fbm2(w*3.1 + vec2(.13, -.6)*t*.35);
+  float texB = .82 + .18*fbm2(w*2.6 + vec2(-.07, -.9)*t*.5);
+  float fing = fbm(vec2(w.y*4.6, w.x*1.2) + vec2(t*.03, 0.)) - .5;
+  vec2 cu = curl(w*2.8 + t*.019);
+  float sd = (w.x - .52*asp) + fing*.30 + cu.x*.14 + .05*sin(w.y*9. + t*.22)*cu.y;
+  float m = smoothstep(-.045, .045, sd);
+  vec3 wa = tann*texA + tann*.6*pow(fbm2(w*7. - t*.12), 3.);
+  vec3 wb = jade*texB + jade*.5*pow(vnoise(w*11. + t*.3), 4.);
+  vec3 wc = mix(wa, wb, m);
+  wc = mix(wc, mixC, exp(-sd*sd/.003) * .35);
+  float line = exp(-sd*sd/(.00009 + .00025*abs(fing)));
+  line *= .45 + .55*vnoise(vec2(w.y*30., t*.7));
+  wc += seamC * line * .85;
+  float ph = w.y*22. + t*.4;
+  float th1 = exp(-pow(sd - .011*sin(ph), 2.)/9e-6);
+  float th2 = exp(-pow(sd + .011*sin(ph), 2.)/9e-6);
+  float over = step(0., sin(ph));
+  wc += vec3(.128,.618,.965) * th1 * (1.3 + over*.8);       /* the cyan thread */
+  wc += vec3(.790,.585,.200) * th2 * (1.3 + (1.-over)*.8);  /* the gold thread */
+  c = mix(c, wc, amp);
+}
+
+/* 7 · the estuary — wet flats mirror the twilight sky; dendritic tidal
+   lace (same branching algorithm the roots will wear) stays dark */
+void estuaryP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+              vec3 cD, vec3 cM, vec3 cH, vec3 cA,
+              vec3 chanC, vec3 tannC, vec3 wetHi, vec4 disc){
+  float yh = .60;
+  float m = 1. - smoothstep(yh-.008, yh+.004, uv.y);
+  if(m < .003) return;
+  float d = max(yh - uv.y, .001);
+  vec3 flats = ramp(yh + d*.85, cD, cM, cH, cA) * .82;
+  flats *= .92 + .08*fbm2(vec2(uv.x*asp*3., uv.y*14.));
+  vec2 w = vec2((uv.x-.5)*asp/(d+.09), 1./(d+.09))*.5;
+  float v = vein(w*vec2(1.,.8) + vec2(0., t*.006), .5);
+  float ch = smoothstep(.42, .8, v);
+  flats = mix(flats, chanC, ch*.85);
+  float tb = exp(-pow(w.x + .9 - .5*sin(w.y*.7 + 1.3), 2.)*1.6);
+  flats = mix(flats, tannC, tb*ch*.7);
+  float streak = exp(-pow((uv.x - disc.x)/.05, 2.)) * (1.-ch);
+  streak *= .55 + .45*vnoise(vec2(uv.y*60., t*.8));
+  flats += wetHi * streak * smoothstep(0., .3, d) * 1.3;
+  c = mix(c, flats, m*amp);
+}
+
+/* 9 · the roots — two scales of one branching language: a dim coarse
+   net and a bright fine net, junctions lit where the scales agree,
+   signal pulses confined to the filaments, a few thick roots in front */
+void rootsP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+            vec3 cyanC, vec3 vioC, vec3 pulseC, vec3 silC){
+  vec2 w = vec2(uv.x*asp, uv.y);
+  /* narrow filament masks — crest cores only, never broad bands */
+  float vc = vein(w*2.3 + 11., .7);
+  float vf = vein(w*4.6 + 27., .55);
+  float filC = smoothstep(.84, .99, vc);
+  float filF = smoothstep(.78, .97, vf);     /* soft outer body — keeps it organic */
+  float coreF = smoothstep(.91, .995, vf);   /* narrow bright core — true mycelium gauge */
+  /* wavelength-coded by function — hue changes by region, not noise */
+  float fn = fbm2(w*.9 + 31.);
+  vec3 wl = mix(cyanC, vioC, smoothstep(.45, .55, fn));
+  float jn = filC * filF;                    /* junctions: the scales agree */
+  /* travelling signals, riding the filaments only */
+  float puF = pow(fract(fbm2(w*6.0 + 53.)*4. - t*.26), 22.);
+  float puC = pow(fract(fbm2(w*2.4 + 71.)*3. - t*.15), 22.);
+  c += wl * filC * .30 * amp;
+  c += wl * filF * (.38 + .45*jn) * amp;     /* dim halo around the core */
+  c += wl * coreF * (.75 + .9*jn) * amp;     /* the fine bright thread itself */
+  c += pulseC * ((coreF*1.3 + filF*.4)*puF*(1. + .9*uEco.y) + filC*puC*.5) * amp;
+  /* a few thick roots cross in front — sparse, directional, occluding */
+  float rv = vein(vec2(w.x*.8, w.y*.45) + 7.3, .85);
+  float sil = smoothstep(.78, .93, rv);
+  c = mix(c, silC, sil * .88 * amp);
+  /* soil breathes faintly */
+  c *= 1. - .12*amp*fbm2(w*5. + t*.008)*(1.-sil);
+}
+
+/* 10 · the canopy — komorebi: three layers of oriented leaf clusters,
+   far small & light, near large & dark (a different hue, never just
+   darker), sky holes the light actually comes through, trembling coins */
+void canopyP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+             vec3 litC, vec3 holeC, vec3 mossC, vec3 coinC, vec3 shadowC, vec2 par){
+  vec2 w = vec2(uv.x*asp, uv.y);
+  float wind = fbm2(vec2(t*.11, 3.3)) - .5;
+  float openAll = 1.;
+  /* far → near: dense foliage (the canopy is mostly closed); leaf cells
+     serrate the clump edges — jitter kept small so no cell ever shows */
+  for(int L=0; L<3; L++){
+    float fl = float(L);
+    float sc = 13. - fl*4.2;                        /* leaf size grows nearer */
+    vec2 q = w + par*(2. + fl*3.5) + vec2(wind*(.012 + fl*.02), 0.);
+    float clump = fbm(q*(1.7 + fl*.5) + fl*19.);
+    vec3 cp = cellPt(q*sc + fl*31., .45);
+    float ca_ = cp.z*6.2831;
+    vec2 rl = mat2(cos(ca_),-sin(ca_),sin(ca_),cos(ca_)) * cp.xy;
+    float leaf = 1. - smoothstep(.10, .24, length(rl*vec2(1., 1.8)));
+    float mask = smoothstep(.33, .40, clump + (leaf - .5)*.13);
+    vec3 lc = mix(litC, shadowC, fl*.48);
+    lc = mix(lc, holeC, (1. - fl*.5)*.14);          /* far leaves lift toward light */
+    lc *= 1. - .26*step(1.5, fl);                    /* the near crown hangs darkest */
+    lc *= .62 + .38*vnoise(q*(sc*.55) + fl*7.);     /* smooth cluster shading — never tiles */
+    lc *= 1. + (cp.z - .55)*(.4 + fl*.3)*leaf;      /* leaves articulate INSIDE the mass,
+                                                       strongest on the nearer layers */
+    c = mix(c, lc, mask * amp * (.86 + fl*.06));
+    openAll *= 1. - mask*amp;
+  }
+  /* the branches the foliage hangs from — the crown has bones */
+  for(int b2 = 0; b2 < 3; b2++){
+    float fb2 = float(b2);
+    vec2 org = vec2(asp*(.12 + .36*fb2), 1.06);
+    vec2 dirB = vec2(.34 - .13*fb2, -(.5 + .16*fb2));
+    vec2 pa2 = w - org;
+    float hh2 = clamp(dot(pa2, dirB)/dot(dirB, dirB), 0., 1.);
+    float ds2 = length(pa2 - dirB*hh2);
+    float br2 = smoothstep(.013*(1. - hh2*.55), .003, ds2);
+    c = mix(c, shadowC*.5, br2*.8*amp);
+  }
+  /* sky holes — small, brilliant, and the light actually comes THROUGH */
+  c += holeC * pow(openAll, 6.) * amp * 3.0;
+  /* moss floor with trembling light-coins where the holes allow */
+  float fm = 1. - smoothstep(.18, .26, uv.y);
+  if(fm > .001){
+    vec3 floorC = mossC * (.75 + .35*fbm2(w*7.));
+    float mossLit = smoothstep(.45, .62, fbm(vec2(w.x*1.2, 4.1) + wind*.3));
+    vec3 cp2 = cellPt(vec2(w.x*11., w.y*34.), .9);
+    float coin = exp(-dot(cp2.xy*vec2(1.,2.6), cp2.xy*vec2(1.,2.6))*140.) * step(.55, cp2.z);
+    coin *= .3 + .7*smoothstep(.25, .85, vnoise(vec2(cp2.z*40., t*1.1) + wind*3.));
+    floorC += coinC * coin * mossLit * 2.0;
+    c = mix(c, floorC, fm * amp);
+  }
+}
+
+/* 11 · the garden at dusk — one wind field through the grass; fireflies
+   with attack-decay envelopes, loose synchrony, decaying trails */
+void gardenP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+             vec3 coreC, vec3 haloC, vec3 grassC, vec3 grassLit){
+  vec2 w = vec2(uv.x*asp, uv.y);
+  float gh_ = .30 + .04*fbm2(vec2(w.x*1.7, 2.2));
+  if(uv.y < gh_ + .02){
+    /* the dark mass the blades grow out of */
+    c = mix(c, grassC*.62, smoothstep(gh_*.9, gh_*.25, uv.y)*.92*amp);
+    float wind = (fbm2(vec2(w.x*.8 - t*(.09 + .12*uMood), 1.1)) - .5) * (.7 + .9*uMood);
+    /* two layers of tapered blades; the wind shears the whole field
+       lookup with height², so blades genuinely BEND, together */
+    for(int L=0; L<2; L++){
+      float fl = float(L);
+      float sc = 170. - fl*85.;                    /* far fine, near broad */
+      float hSq = uv.y*uv.y;
+      float shear = wind*(2.2 + fl*1.3)*hSq*.055;
+      float bx = (w.x + shear)*sc + fl*37.;
+      float id = floor(bx);
+      float cx = fract(bx) - .5;
+      float rnd = h1(vec2(id, 7. + fl*3.));
+      float rnd2 = h1(vec2(id, 29.5 + fl*3.));
+      float bh = gh_*(.62 + fl*.38) - rnd*.16;     /* ragged tips */
+      float hN = clamp(uv.y/max(bh, .01), 0., 1.);
+      float ctr = cx - (rnd - .5)*.7*hN*hN;        /* each blade adds its own arc */
+      float halfW = (.22 + fl*.12)*(1. - hN*.78) * (.7 + .8*rnd2) + .04;
+      float blade = smoothstep(halfW, halfW*.35, abs(ctr))
+                  * smoothstep(bh + .006, bh - .012, uv.y)
+                  * step(.12, h1(vec2(id, 51.)));  /* gaps break the picket fence */
+      vec3 gcol = mix(grassC, grassLit, rnd*.55 + (1.-fl)*.30);
+      gcol *= .5 + .8*rnd2;                        /* some blades catch the dusk */
+      c = mix(c, gcol * (L == 0 ? .85 : .6), blade * amp * (.6 + fl*.4));
+    }
+  }
+  /* a far, faint field of answering lights — depth behind the individuals */
+  {
+    vec2 base = w*8. + 11.;
+    float fz = h1(floor(base));
+    if(fz > .86){
+      float ph = fract(t*(.06 + fz*.05) + fz*13.);
+      float env = smoothstep(0., .05, ph) * exp(-(ph-.05)*5.5);
+      vec2 dd = fract(base) - (vec2(.5) + .3*vec2(sin(t*.2 + fz*40.), sin(t*.27 + fz*17.)));
+      float g = exp(-dot(dd,dd)*900.);
+      c += (coreC*1.2 + haloC*.5) * g * env * smoothstep(.58, .30, uv.y) * amp * .35;
+    }
+  }
+  /* the near fireflies — living individuals. Each has her own rhythm and
+     her own fatigue: she flashes, tires, rests dim in the grass, lifts
+     again. No two share a phase; none obeys a clock exactly. */
+  if(uAgN > .5){
+    for(int k = 0; k < 24; k++){
+      if(float(k) >= uAgN) break;
+      vec4 A = uAg[k];
+      vec2 dd = vec2(uv.x*asp, uv.y) - A.xy;
+      float d2 = dot(dd, dd);
+      float sz = .005 + .005*A.w;
+      float hue = h1(vec2(float(k), 11.));
+      vec3 fc = mix(coreC, haloC, .25 + .5*hue);
+      float g = exp(-d2/(sz*sz)) * 2.2 + exp(-d2/pow(sz*3.4, 2.)) * .3;
+      c += fc * g * A.z * amp;
+    }
+  }
+}
+
+/* 8 · the rain — one warm lantern owns a dark blue-gray night; the rain
+   is visible where it crosses the light; the lens fogs and every drop
+   cuts it clear again */
+void rainP(inout vec3 c, vec2 uv, float asp, float t, float amp,
+           vec3 mist, vec3 fogSh, vec3 glintC, vec3 lantC, vec4 disc){
+  /* the lantern's reach — computed FIRST; it governs everything else */
+  vec2 ld = (uv - disc.xy)*vec2(asp, 1.);
+  float lant = exp(-dot(ld, ld)*7.5);
+  /* the visitor's presence on the glass — where they have touched, the
+     condensation clears; places revisited are remembered longer */
+  float clr = 0.;
+  if(uTouchN > .5 && amp > .1){
+    for(int k = 0; k < 8; k++){
+      vec4 T = uTouch[k];
+      if(T.z < .02) continue;
+      vec2 dtp = vec2((uv.x - T.x)*asp, uv.y - T.y);
+      clr += T.z * exp(-dot(dtp, dtp)*70.);
+    }
+    clr = clamp(clr, 0., 1.);
+  }
+  /* layered mist — near fast, far slow; only the cone lights it up */
+  for(int L=0; L<3; L++){
+    float fl = float(L);
+    float b = fbm(vec2(uv.x*asp*(1.2+fl*1.1) + t*(.05+fl*fl*.11) + fl*13.,
+                       uv.y*(1.9+fl*1.8) + fl*7.));
+    vec3 mc = mix(fogSh*.7, mist, .15 + .85*lant);
+    c = mix(c, mc, smoothstep(.42,.8,b)*(.11+fl*.05)*amp);
+  }
+  /* the night pools at the edges — the lantern is a place, not a wash */
+  c *= 1. - .2*(1. - lant)*amp;
+  /* the lantern breathes, and once in a while something passes in front */
+  float flick = 1. - .35*pow(vnoise(vec2(t*.9, 17.)), 8.);
+  flick *= 1. + .04*(uBreath - .5);
+  /* the atmospheric cone itself — warm, soft, unmistakable */
+  c += lantC * lant*lant * .55 * amp * flick;
+  /* falling rain — it lives where the light is; the gusts slant it */
+  vec2 rr = vec2(uv.x*asp*90. + (uv.y - .5)*(uMood - .3)*26., uv.y*7. + t*(6.5 + 2.5*uMood));
+  rr.x += floor(rr.y)*.31;
+  vec2 rf = fract(rr) - .5;
+  float lum = dot(c, vec3(.3,.6,.1));
+  float rainVis = .06 + .94*smoothstep(.06, .5, lant);
+  rainVis *= .6 + .4*smoothstep(.10, .45, lum);
+  /* falling rain parts, subtly, where the visitor is present */
+  float fall = exp(-rf.x*rf.x*90.) * step(mix(.82, .70, uMood), h1(floor(rr))) * rainVis;
+  fall *= 1. - .65*clr;
+  c += mix(vec3(.60,.68,.82), lantC*1.25, lant) * fall * .14 * amp * flick;
+  /* a wet reflection runs down the glass beneath the lantern — it hangs
+     somewhere real */
+  float refl = exp(-pow((uv.x - disc.x)*asp/.022, 2.)) * smoothstep(disc.y, disc.y - .5, uv.y);
+  refl *= .55 + .45*vnoise(vec2(uv.y*30., t*.5));
+  c += lantC * refl * .2 * amp * flick;
+  /* the glass: a breath of fog — and it CLEARS where you have touched,
+     then slowly breathes closed again */
+  vec3 clearC = c;
+  c = mix(c, mix(mist*.8, lantC, lant*.45), .30*amp*(1. - .85*clr));
+  /* the lantern is only truly visible through the opening you make */
+  c += lantC * lant * clr * .45 * amp * flick;
+  vec3 bp = cellPt(vec2(uv.x*asp, uv.y)*22., .9);            /* static beads */
+  float bead = smoothstep(.012, .006, length(bp.xy)) * step(.55, bp.z);
+  bead *= .8 + .2*sin(t*1.7 + bp.z*20.);
+  /* inside the clearing the spray is wiped; at its boundary it gathers */
+  float rimB = smoothstep(.12, .3, clr) * (1. - smoothstep(.45, .75, clr));
+  bead *= (1. - .85*smoothstep(.45, .85, clr)) * (1. + 1.6*rimB);
+  c = mix(c, clearC*1.06, bead*amp);
+  c += glintC * bead * (.06 + .18*lant + .1*rimB) * amp;
+  /* the heavy drops — individuals with mass. Each one sits, gathers
+     condensation, trembles as it nears its threshold, then commits and
+     runs, dragging a clear trail down the fogged glass. */
+  if(uAgN > .5){
+    for(int k = 0; k < 24; k++){
+      if(float(k) >= uAgN) break;
+      vec4 A = uAg[k];
+      float mass = min(A.z, 1.);
+      float r = .0055 + .012*mass;
+      vec2 ap = A.xy;
+      ap.x += smoothstep(.72, .98, mass)*(1. - step(1., A.z)) * .0022*sin(t*31. + float(k)*7.3);
+      /* the trail above a running drop — youngest clearest, oldest fogging over */
+      if(A.w - A.y > .012){
+        float ff = (uv.y - A.y)/max(A.w - A.y, 1e-4);
+        float inT = step(0., ff)*step(ff, 1.);
+        float tw2 = .0024*(1. - ff*.55);
+        float tm = smoothstep(tw2, tw2*.35, abs(uv.x*asp - A.x - .004*sin(uv.y*40. + float(k)*9.)))
+                 * inT * (1.-ff)*(1.-ff);
+        c = mix(c, clearC*.98, tm*.7*amp);
+      }
+      vec2 dd = (vec2(uv.x*asp, uv.y) - ap)*vec2(1., .78);    /* gravity bulge */
+      float dl = length(dd);
+      float m2 = smoothstep(r, r*.45, dl);
+      float rim = smoothstep(r*1.3, r*.95, dl) * (1. - m2);   /* the meniscus shadow */
+      c = mix(c, c*.6, rim*.85*amp);
+      c = mix(c, clearC*1.12, m2*amp);                        /* the lens cuts clear */
+      /* drop optics: the refracted world darkens the belly (screen-down),
+         and an inverted sliver of the lantern lives in the shoulder */
+      float belly = m2 * smoothstep(r*.1, -r*.5, dd.y);
+      c = mix(c, c*.55, belly*.7*amp);
+      vec2 gv = dd - vec2(-r*.28, r*.3);
+      float gl2 = exp(-dot(gv, gv)/(r*r*.13));
+      c += (glintC*.7 + lantC*(.5 + lant*1.7)) * (gl2*1.3 + m2*.15) * amp * flick;
+    }
+  }
+}
+
+/* ---- one evaluation of the world under a parameter set ---- */
+vec3 world(vec2 uv, float asp, float t,
+  vec3 cD, vec3 cM, vec3 cH, vec3 cA, vec3 snC, vec3 dC, vec3 dH,
+  vec3 caC, vec3 caF1, vec3 caF2, vec3 rayC,
+  vec3 a1, vec3 a2, vec3 a3, vec3 a4,
+  vec4 disc, vec4 fx, vec4 fx2, vec4 fx3, vec4 fx4, vec4 fx5,
+  vec3 mkC, vec4 mkP, float mkAmt, vec4 part)
+{
+  float y = uv.y;
+  vec3 c = ramp(y, cD, cM, cH, cA);
+
+  /* idle breathing (slow, unnameable) + the one shared breath */
+  c *= 1. + .05*(fbm(uv*1.7 + t*.021) - .5);
+  c *= 1. + .022*(uBreath - .5);
+  c *= (1. + .05*uEcho) * (1. - .22*uOvDim);   /* acknowledgement · reading hush */
+
+  /* stratification — color returning in physical order (ascent) */
+  if(fx2.y > .003){
+    float s = fx2.y;
+    c = mix(c, vec3(.25,.68,.62)*length(c)*1.5, s * smoothstep(.62,.86,y)*.20);
+    c = mix(c, vec3(.85,.78,.48)*length(c)*1.6, s * smoothstep(.90,1.0,y)*.08);
+  }
+
+  /* the ceiling of the world — the curtain first, so stars stand behind it */
+  vec4 aur = vec4(0.);
+  if(fx5.x > .003) aur = aurora(uv + uPar*.35, asp, t, a1, a2, a3, a4);
+  if(fx5.y > .003) c += snC * stars(uv + uPar*.15, asp, t) * fx5.y * (1. - .65*aur.a);
+  c += aur.rgb * fx5.x;
+
+  /* the constellation — your journey, written in the sky */
+  if(uCstOn > .5 && fx5.x > .25){
+    vec2 wq = vec2(uv.x*asp, uv.y);
+    for(int k = 0; k < 14; k++){
+      vec4 S = uCstP[k];
+      if(S.z < .01) continue;
+      vec2 d3 = (uv - S.xy)*vec2(asp, 1.);
+      float dd3 = dot(d3, d3);
+      float core = exp(-dd3/(S.w*S.w));
+      float flare = exp(-(abs(d3.x) + abs(d3.y))/(S.w*2.2));
+      c += (k == 13 ? vec3(1., .92, .7) : vec3(.88, .93, 1.)) * (core*1.7 + flare*.3) * S.z * fx5.x;
+      if(k > 0 && k < 13){
+        vec4 P = uCstP[k-1];
+        float lb = min(S.z, P.z) - .14;      /* lines join only walked ground */
+        if(lb > .01){
+          vec2 aP = P.xy*vec2(asp, 1.), bP = S.xy*vec2(asp, 1.);
+          vec2 ab = bP - aP, ap = wq - aP;
+          float h4 = clamp(dot(ap, ab)/dot(ab, ab), 0., 1.);
+          c += vec3(.7, .85, 1.) * smoothstep(.0016, .0004, length(ap - ab*h4)) * lb * .2 * fx5.x;
         }
       }
-      if(el.checked)state[el.dataset.pid]=Date.now(); else delete state[el.dataset.pid];
+    }
+  }
+
+  /* god rays */
+  if(fx.y > .003){
+    float r = rays(uv + uPar*.25, asp, t);
+    c += rayC * r * fx.y * .55;
+    c += rayC * r*r * fx.y * .35;     /* hot core, still never white */
+  }
+
+  /* the open-water and river worlds (full-frame painters, journey order) */
+  if(fx3.x > .003) wavesP(c, uv, asp, t, fx3.x, fx5.z, cD, a4, a1, a2, a3, disc);
+  if(fx3.z > .003) riverP(c, uv + uPar*.4, asp, t, fx3.z, a1, a2, a3, a4);
+  if(fx5.w > .003) confP(c, uv + uPar*.4, asp, t, fx5.w, a1, a2, a3, a4);
+  if(fx3.w > .003) estuaryP(c, uv, asp, t, fx3.w, cD, cM, cH, cA, a2, a3, a4, disc);
+
+  /* caustic net + chromatic fringes + ghost layer */
+  if(fx.x > .003){
+    vec2 cp = vec2(uv.x*asp, uv.y)*5.5 + uPar*.6;
+    cp = mat2(.955,-.297,.297,.955) * cp;                       /* off-grid: no straight runs */
+    cp += .32*vec2(fbm(cp*1.8 + t*.05), fbm(cp*1.8 - t*.043));  /* strong swell warp — filaments, not polygons */
+    float dm = .30 + .55*smoothstep(.15,.95,y);                 /* stronger near light */
+    float ca = caustic(cp, t*(.8 + .5*uMood)) * dm;             /* agitation follows the weather */
+    c += caC * ca * fx.x;
+    if(uEco.x > .01){          /* mathematics strengthened one branch of the net */
+      float bnd = exp(-pow(uv.y - .25 - .28*uv.x*asp, 2.)*60.);
+      c += caC * ca * bnd * uEco.x * .8 * fx.x;
+    }
+    if(uFxq.y*uCalm > .02){                        /* fringes rest during fast travel, return on settle */
+      float caOff = pow(clamp(1. - 2.4*vorEdge(cp + vec2(.05,.02), t), 0., 1.), 6.)*2.0*dm;
+      c += caF1 * max(caOff-ca, 0.) * fx.x * .8 * uCalm;   /* cyan fringe */
+      c += caF2 * max(ca-caOff, 0.) * fx.x * .55 * uCalm;  /* warm fringe */
+    }
+    if(fx2.z*uFxq.x*uCalm > .02){                  /* spent caustics — the scene remembers */
+      float gh = caustic(cp*1.12 + 3.7, t - 2.6) * dm;
+      c += caC * gh * fx.x * .13 * fx2.z * uCalm;
+    }
+  }
+
+  /* 3 · the shallows — the cathedral's light finally lands on ground */
+  if(fx3.y > .003){
+    float sh = .26 + .05*fbm2(vec2(uv.x*asp*2.3, 1.1));
+    float sm2 = 1. - smoothstep(sh-.05, sh+.02, uv.y);
+    if(sm2 > .001){
+      vec3 sand = a1 * (.85 + .25*fbm2(vec2(uv.x*asp*9., uv.y*22.)));
+      sand *= 1. - .12*pow(.5+.5*sin(uv.x*asp*60. + fbm2(vec2(uv.x*asp*3., uv.y*8.))*6.), 2.);
+      vec2 scp = vec2(uv.x*asp, uv.y*2.6)*4.2 + uPar*.5;
+      scp += .3*vec2(fbm(scp*1.6 + t*.06), fbm(scp*1.6 - t*.05));
+      float sca = caustic(scp, t*1.1);
+      sand += a2 * sca * 1.1;
+      sand += a3 * sca*sca * .5;              /* gold blooms in the hottest knots */
+      c = mix(c, sand, sm2 * fx3.y);
+    }
+    /* a distant school — soft, far, one body */
+    vec2 fw = vec2(uv.x*asp, uv.y);
+    vec2 sc0 = vec2(.5*asp + .3*asp*sin(t*.05), .52 + .1*sin(t*.083 + 1.7));
+    vec2 rel = fw - sc0;
+    float schoolBody = exp(-dot(rel*vec2(1.,2.2), rel*vec2(1.,2.2))*8.);
+    vec2 cu2 = curl(fw*3. + t*.1);
+    float fish = smoothstep(.55, .9, vnoise(fw*26. + cu2*1.4 + vec2(t*.6, 0.)));
+    c = mix(c, a4, schoolBody * fish * .3 * fx3.y);
+    /* the near school — individuals with intentions, not a mask.
+       Each fish is simulated on the CPU: it wanders, keeps loose company,
+       and startles its neighbours a heartbeat after it startles. */
+    if(uAgN > .5){
+      for(int k = 0; k < 24; k++){
+        if(float(k) >= uAgN) break;
+        vec4 A = uAg[k];
+        vec2 d = fw - A.xy;
+        float ca2 = cos(A.z), sa2 = sin(A.z);
+        vec2 dr = vec2(ca2*d.x + sa2*d.y, -sa2*d.x + ca2*d.y);
+        float len = .015 + .007*h1(vec2(float(k), 3.7));   /* no two alike */
+        dr.x /= 1. - .3*step(0., dr.x);                    /* blunt head, long tail */
+        float body = exp(-(dr.x*dr.x/(len*len) + dr.y*dr.y/(len*len*.13)));
+        c = mix(c, a4, body * .85 * fx3.y);
+        c += vec3(.85,.95,.92) * body * A.w * .4 * fx3.y;  /* a dart catches the light */
+      }
+    }
+  }
+
+  /* the light above — promise / surface disc (HDR core feeds bloom) */
+  {
+    vec2 dc = vec2(disc.x, disc.y) + uPar*.22;
+    vec2 dv = (uv-dc)*vec2(asp,1.);
+    float d = length(dv);
+    float wob = 1. + .09*fbm(vec2(atan(dv.y,dv.x)*1.6, t*.13)*2.4);
+    float rr = disc.z*wob;
+    float core = exp(-pow(d/max(rr,1e-4), 2.)*2.6);
+    float halo = rr*rr*2.2/(d*d + rr*rr*.55);      /* inverse-square falloff */
+    c += disc.w * (1. + .06*(uBreath - .5)) * (core*dC + .15*halo*dH);
+  }
+
+  /* the land worlds — roots, canopy, garden (light source sits behind them) */
+  if(fx4.y > .003) rootsP(c, uv + uPar*.5, asp, t, fx4.y, a1, a2, a3, a4);
+  if(fx4.z > .003) canopyP(c, uv, asp, t, fx4.z, a1, a2, a3, a4, cD, uPar);
+  if(fx4.w > .003) gardenP(c, uv + uPar*.3, asp, t, fx4.w, a1, a2, a3, a4);
+
+  /* THE TRAVELER — it is always somewhere, wearing this world's light */
+  if(uHeroP.w > .003){
+    vec2 hp = (uv - uHeroP.xy - uPar*.3)*vec2(asp, 1.);
+    float hd2 = dot(hp, hp);
+    float hs = uHeroP.z;
+    float hpu = .8 + .2*sin(t*.6 + 2.*vnoise(vec2(t*.05, 9.3)));
+    c += uHeroC * (exp(-hd2/(hs*hs))*1.5 + hs*hs*.4/(hd2 + hs*hs*2.5)) * uHeroP.w * hpu;
+  }
+
+  /* THE RARE EVENTS — what a minute of stillness can earn */
+  if(uEvt > .001){
+    float win = sin(uEvt*3.14159);
+    if(uEvtK < .5){
+      /* the whale — a vast quiet body crossing the deep, once */
+      float ex = mix(-.3, 1.3, uEvt);
+      vec2 wp = vec2((uv.x - ex)*3.2, (uv.y - .62 - .05*sin(uEvt*6.28))*9.);
+      float body = exp(-dot(wp, wp));
+      vec2 fp = (wp - vec2(.15, -.55))*vec2(3., 2.);
+      float fin = exp(-dot(fp, fp));
+      c = mix(c, cD*.35, (body + fin*.6)*.65*win);
+    } else if(uEvtK < 1.5){
+      /* far lightning — the sky remembers electricity */
+      float fl2 = pow(vnoise(vec2(uEvt*47., 3.3)), 4.) * step(.55, vnoise(vec2(uEvt*9., 7.)));
+      c += vec3(.72,.8,1.) * fl2 * (1. - uv.y*.35) * .6 * win;
+    } else {
+      /* a meteor over the dark */
+      vec2 mp0 = vec2((.22 + uEvt*.5)*asp, .9 - uEvt*.3);
+      vec2 md = vec2(uv.x*asp, uv.y) - mp0;
+      float along = dot(md, vec2(-.86, .51));
+      float perp  = dot(md, vec2(.51, .86));
+      float tr = exp(-perp*perp*30000.) * smoothstep(.16, 0., along) * step(-.002, along);
+      c += vec3(.95,.9,.78) * (exp(-dot(md,md)*14000.)*1.4 + tr*.5) * win;
+    }
+  }
+
+  /* THE CAUSE — leaving the rain, one last drop runs the full height of
+     the glass; its trail forks, forks again, and becomes the first root.
+     Rain does not fade into Roots. Rain CAUSES Roots. */
+  if(uCause > .001){
+    float cf = uCause;
+    float dxw = .52*asp + .012*sin(uv.y*24. + 3.);          /* the path, per pixel */
+    float dy2 = mix(.94, .2, smoothstep(.05, .6, cf));      /* the descent */
+    float within = step(dy2, uv.y)*step(uv.y, .94);
+    float trailM = smoothstep(.0028, .0009, abs(uv.x*asp - dxw)) * within;
+    vec3 trailCol = mix(vec3(.85,.93,1.)*.4, vec3(.34,.9,.86), smoothstep(.35, .85, cf));
+    c += trailCol * trailM * .45 * smoothstep(.02, .2, cf);
+    float dxh = .52*asp + .012*sin(dy2*24. + 3.);
+    vec2 hd = vec2(uv.x*asp - dxh, (uv.y - dy2)*1.25);
+    c += vec3(.85,.94,1.) * exp(-dot(hd,hd)*11000.) * (1. - smoothstep(.5, .68, cf)) * 1.3;
+    /* below its rest, the trail becomes filament — the fork */
+    float fk = smoothstep(.5, .95, cf);
+    if(fk > .001){
+      for(int b = 0; b < 4; b++){
+        float fb = float(b);
+        float ang = (fb - 1.5)*.55 + .25*sin(fb*3.7 + 1.);
+        vec2 org = vec2(dxh, .21);
+        vec2 dir = vec2(sin(ang), -1.) * .13 * fk * (1. - .12*fb);
+        vec2 pa = vec2(uv.x*asp, uv.y) - org;
+        float hseg = clamp(dot(pa, dir)/max(dot(dir, dir), 1e-5), 0., 1.);
+        float dseg = length(pa - dir*hseg);
+        c += vec3(.34,.9,.86) * smoothstep(.0032, .001, dseg) * fk
+           * (.4 + .6*pow(1. - hseg, 2.)) * .9;
+      }
+    }
+  }
+
+  /* the progress mark — one small thing this world keeps lit for you */
+  if(mkAmt > .003){
+    vec2 mp = (uv - mkP.xy - uPar*.35)*vec2(asp, 1.);
+    float d2 = dot(mp, mp);
+    float pu = .78 + .16*sin(t*.47 + mkP.w) + .06*sin(t*1.63 + mkP.w*2.1);
+    c += mkC * (mkP.z/(d2 + mkP.z*3.5)) * .5 * pu * mkAmt;          /* soft reach */
+    c += mkC * exp(-d2/max(mkP.z*.6, 1e-5)) * 1.4 * pu * mkAmt;    /* hot core → bloom */
+  }
+
+  /* particulate depth stack — near / mid / far, riding the flow;
+     the drift itself inhales and exhales with the shared breath */
+  if(fx.z > .003){
+    float st = clamp(abs(uVel)*.9, 0., 2.2);
+    float sv = fx.w * (1. + .28*(uBreath - .5));
+    float sn = snowL(uv + uPar*1.0, asp, 7., sv, t, 3.1, st, part) * 1.0;
+    if(uFxq.z > .5){                               /* HIGH/BALANCED: three depths */
+      sn += snowL(uv + uPar*.6, asp, 12., sv*.72, t, 11.7, st*.7, part) * .55
+          + snowL(uv + uPar*.3, asp, 21., sv*.5,  t, 27.3, st*.4, part) * .28;
+    } else {                                       /* LOW: two layers, spread wide so depth still reads */
+      sn += snowL(uv + uPar*.32, asp, 17., sv*.55, t, 11.7, st*.5, part) * .38;
+    }
+    c += snC * sn * fx.z * .55;
+  }
+
+  /* bioluminescent mote — the abyss keeps one thing lit */
+  if(fx2.w > .003){
+    vec2 mv = (uv - vec2(.635,.44) - uPar*.5)*vec2(asp,1.);
+    float md = dot(mv,mv);
+    /* its pulse wanders like a heartbeat, never metronomic */
+    float twm = t + 2.4*(vnoise(vec2(t*.031, 5.1)) - .5);
+    float pulse = .72 + .18*sin(twm*.44) + .10*sin(twm*1.31+2.1);
+    c += vec3(.392,.808,.984) * (2.4e-4/(md + 2.0e-4)) * .34 * pulse * fx2.w;
+  }
+
+  /* near-black foreground silhouette layer — amplitude is a scene param
+     (aurora >1 raises the ridgeline; aerial scenes keep only a breath of it) */
+  float silA = clamp(fx2.x, 0., 1.3);
+  if(silA > .003){
+    float sil = fbm(vec2(uv.x*asp*1.25 + 31.7, uv.y*3.4));
+    float sm = 1. - smoothstep(0., .14*silA, uv.y - (sil-.5)*.10*silA - .035*silA);
+    c = mix(c, cD*.42, sm*.85*min(silA, 1.));
+  }
+
+  /* 8 · the rain arrives on the lens itself — always the last thing */
+  if(fx4.x > .003) rainP(c, uv, asp, t, fx4.x, a1, a4, a3, a2, disc);
+
+  return c;
+}
+
+void main(){
+  vec2 uv = vUv;
+  float asp = uRes.x/uRes.y;
+  float t = uTime;
+
+  vec3 col = world(uv, asp, t, uDeep,uMid,uHi,uAcc,uSnowC,uDiscC,uDiscH,
+                   uCausC,uCausF1,uCausF2,uRayC,uAx1,uAx2,uAx3,uAx4,
+                   uDisc,uFx,uFx2,uFx3,uFx4,uFx5,uMarkC,uMarkP,uMk,uPart);
+
+  /* ---- the seam: two waters refusing to mix (full bridging standard) ---- */
+  if(uSeam > .5){
+    vec3 colB = world(uv, asp, t, uDeepB,uMidB,uHiB,uAccB,uSnowCB,uDiscCB,uDiscHB,
+                      uCausCB,uCausF1B,uCausF2B,uRayCB,uAx1B,uAx2B,uAx3B,uAx4B,
+                      uDiscB,uFxB,uFx2B,uFx3B,uFx4B,uFx5B,uMarkCB,uMarkPB,uMkB,uPartB);
+    vec2 w = vec2(uv.x*asp, uv.y);
+    /* anisotropic fingering along travel direction (vertical) —
+       tempered per pair so a sky front can move like weather, not water */
+    float fing = (fbm(vec2(w.x*6.2, w.y*1.35) + t*.038) - .5) * uSeamP.y;
+    vec2 cu = curl(w*2.6 + t*.024);                 /* Kelvin-Helmholtz curls */
+    float front = mix(1.35, -.35, smoothstep(0.,1.,uF));
+    float sd = uv.y + fing*.30 + cu.y*.13*uSeamP.y - front;
+    float m = smoothstep(-.09, .09, sd);
+    col = mix(col, colB, m);
+    /* seam line — the shared element, peaking mid-travel; per-pair temper */
+    float bell = exp(-pow((uF-.5)/.16, 2.));
+    float win = smoothstep(0., .08, uF) * (1. - smoothstep(.92, 1., uF));
+    float line = exp(-sd*sd/((.00012 + .00022*abs(fing)) * uSeamP.z));
+    line *= .5 + .5*vnoise(vec2(w.x*26., t*.6));    /* glints, not a caterpillar */
+    line *= mix(1., smoothstep(.25, .75, vnoise(vec2(w.x*5.5, t*.28))), uSeamP.w);
+    col += uSeamC * line * (.12 + .38*bell) * win * uSeamP.x;
+    /* causal seams: the outgoing world MAKES the incoming one */
+    if(uSeamI > .5 && uSeamI < 1.5){
+      /* the ascent's disc fractures — its light becomes the cathedral's net */
+      vec2 fc2 = (uv - vec2(uDisc.x, uDisc.y))*vec2(asp, 1.);
+      float rr2 = length(fc2);
+      float crack = pow(clamp(1. - 2.2*vorEdge(fc2*9. + 3.7, t*.4), 0., 1.), 5.);
+      float grow = smoothstep(.05, .8, uF)*1.1 - rr2;
+      col += uCausCB * crack * smoothstep(0., .22, grow) * (0.3 + bell) * .9;
+    } else if(uSeamI > 6.5 && uSeamI < 7.5){
+      /* the estuary's mist condenses — beads form along the arriving front */
+      vec3 cpg = cellPt(vec2(w.x, w.y)*26., .9);
+      float bead2 = smoothstep(.010, .005, length(cpg.xy)) * step(.35, cpg.z);
+      col += vec3(.85,.9,.95) * bead2 * exp(-sd*sd*70.) * bell * .55;
+    }
+  }
+
+  /* THE ARRIVAL — from darkness, one drop falls; where it lands, the
+     world rings outward into existence. Once per visit; any scroll skips. */
+  if(uArr < .999){
+    float a = uArr;
+    float d = length((uv - vec2(.5, .45))*vec2(asp, 1.));
+    float rr = max(a - .3, 0.)*2.1;
+    float reveal = max(smoothstep(rr, rr - .38, d), smoothstep(.75, .98, a));
+    col *= .03 + .97*reveal;
+    col += vec3(.55,.82,1.) * exp(-pow((d - rr)*8., 2.)) * step(.001, rr) * (1. - smoothstep(.75, .95, a)) * .9;
+    float dyp = mix(1.08, .45, smoothstep(0., .3, a));
+    vec2 dp2 = (uv - vec2(.5, dyp))*vec2(asp, 1.);
+    col += vec3(.8,.95,1.) * exp(-dot(dp2, dp2)*4000.) * (1. - smoothstep(.28, .32, a)) * 1.6;
+  }
+
+  /* the world makes room for the words */
+  if(uTextDim > .003){
+    vec2 dTR = abs(uv - uTextRect.xy) - uTextRect.zw;
+    float outside = length(max(dTR, 0.));
+    float m = exp(-outside*outside*22.);      /* gaussian skirt — no edge to see */
+    float dim = uTextDim * m;
+    float lum = dot(col, vec3(.299,.587,.114));
+    col = mix(col, vec3(lum), dim*.38);
+    col *= 1. - dim*.30;
+  }
+
+  frag = vec4(col, 1.);
+}`;
+/* ---------- film-finish pipeline ---------- */
+const BRIGHT_FS = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uTex;
+void main(){
+  vec3 c = texture(uTex, vUv).rgb;
+  float br = max(c.r, max(c.g, c.b));
+  float knee = .5, thr = 1.0;                 /* soft-knee threshold */
+  float soft = clamp(br - thr + knee, 0., 2.*knee);
+  soft = soft*soft/(4.*knee);
+  float w = max(soft, br - thr) / max(br, 1e-4);
+  frag = vec4(c*w, 1.);
+}`;
+
+const BLUR_FS = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uTex;
+uniform vec2 uDir;                            /* (1,0)/texel or (0,1)/texel · radius */
+void main(){
+  vec3 s = texture(uTex, vUv).rgb * .227027;
+  vec2 o1 = uDir*1.3846, o2 = uDir*3.2308;
+  s += (texture(uTex, vUv+o1).rgb + texture(uTex, vUv-o1).rgb) * .3162162;
+  s += (texture(uTex, vUv+o2).rgb + texture(uTex, vUv-o2).rgb) * .0702703;
+  frag = vec4(s, 1.);
+}`;
+
+const COMP_FS = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uTex, uBloomS, uBloomW;
+uniform vec2  uRes;
+uniform float uTime, uVel, uBloomAmt, uCAAmt, uWide;
+
+float gh(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p,p+45.32); return fract(p.x*p.y); }
+
+/* AgX (minimal fit) — keeps aurora greens, gentle on saturated brights */
+vec3 agxContrast(vec3 x){
+  vec3 x2 = x*x, x4 = x2*x2;
+  return 15.5*x4*x2 - 40.14*x4*x + 31.96*x4 - 6.868*x2*x + .4298*x2 + .1191*x - .00232;
+}
+vec3 agx(vec3 v){
+  const mat3 inset = mat3(
+    .842479062253094, .0423282422610123, .0423756549057051,
+    .0784335999999992, .878468636469772, .0784336,
+    .0792237451477643, .0791661274605434, .879142973793104);
+  const mat3 outset = mat3(
+    1.19687900512017, -.0528968517574562, -.0529716355144438,
+    -.0980208811401368, 1.15190312990417, -.0980434501171241,
+    -.0990297440797205, -.0989611768448433, 1.15107367264116);
+  v = inset * max(v, 0.);
+  v = clamp((log2(max(v, 1e-10)) + 12.47393) / 16.5, 0., 1.);
+  v = clamp(agxContrast(v), 0., 1.);
+  return outset * v;
+}
+float softlight(float a, float b){
+  return (b < .5) ? 2.*a*b + a*a*(1.-2.*b) : 2.*a*(1.-b) + sqrt(a)*(2.*b-1.);
+}
+void main(){
+  vec2 uv = vUv;
+  vec2 fromC = uv - .5;
+  float r2 = dot(fromC, fromC);
+
+  /* chromatic aberration — radial, zero center, scales with scroll speed */
+  float ca = (.0016 + .0022*clamp(abs(uVel)*.8, 0., 1.)) * r2 * 2. * uCAAmt;
+  vec2 off = fromC * ca;
+  vec3 c;
+  c.r = texture(uTex, uv + off).r;
+  c.g = texture(uTex, uv).g;
+  c.b = texture(uTex, uv - off).b;
+
+  /* bloom pre-tonemap: white cores, saturated halos */
+  vec3 bl = texture(uBloomS, uv).rgb * .6 + texture(uBloomW, uv).rgb * uWide;
+  c += bl * uBloomAmt;
+
+  c = agx(c);
+
+  /* one unified grade for the whole journey */
+  c = max(c, 0.) + vec3(.010, .012, .016);                  /* colored shadow floor */
+  float lum = dot(c, vec3(.2126,.7152,.0722));
+  c = mix(c, c*vec3(.90,.97,1.06), (1.-smoothstep(0.,.45,lum))*.12);  /* shadows → blue-cyan */
+  c = mix(c, c*vec3(1.05,1.01,.94),  smoothstep(.55,1.,lum)*.10);     /* highlights → warm */
+  c = mix(c, smoothstep(0., 1., c), .22);                   /* gentle S-curve */
+
+  /* vignette */
+  c *= 1. - smoothstep(.3, 1.2, sqrt(r2)*1.414) * .16;
+
+  /* animated luminance-weighted grain, soft-light — subsumes dithering */
+  float g = gh(uv*uRes + vec2(fract(uTime*13.7)*191., fract(uTime*7.3)*113.)) - .5;
+  float lw = 1. - smoothstep(0., 1., dot(c, vec3(.333)));
+  float ga = .045 * (.4 + .6*lw);
+  c = vec3(softlight(c.r, .5+g*ga), softlight(c.g, .5+g*ga), softlight(c.b, .5+g*ga));
+  c += (gh(uv*uRes.yx + uTime) - .5) / 255.;                /* dither */
+
+  frag = vec4(clamp(c, 0., 1.), 1.);
+}`;
+/* ---------- the world's parameter space ---------- */
+const hex = s => [1,3,5].map(i => parseInt(s.slice(i,i+2),16)/255);
+/* sRGB → OKLab and back, so palettes travel round the gray-free way */
+const toLin = c => c.map(v => v <= .04045 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4));
+const toSrgb = c => c.map(v => { v = Math.max(0,v); return v <= .0031308 ? v*12.92 : 1.055*Math.pow(v,1/2.4)-.055; });
+function okFromLin([r,g,b]){
+  const l = Math.cbrt(.4122214708*r + .5363325363*g + .0514459929*b);
+  const m = Math.cbrt(.2119034982*r + .6806995451*g + .1073969566*b);
+  const s = Math.cbrt(.0883024619*r + .2817188376*g + .6299787005*b);
+  return [.2104542553*l + .793617785*m - .0040720468*s,
+          1.9779984951*l - 2.428592205*m + .4505937099*s,
+          .0259040371*l + .7827717662*m - .808675766*s];
+}
+function linFromOk([L,a,b]){
+  const l = (L + .3963377774*a + .2158037573*b)**3;
+  const m = (L - .1055613458*a - .0638541728*b)**3;
+  const s = (L - .0894841775*a - 1.291485548*b)**3;
+  return [ 4.0767416621*l - 3.3077115913*m + .2309699292*s,
+          -1.2684380046*l + 2.6097574011*m - .3413193965*s,
+          -.0041960863*l - .7034186147*m + 1.707614701*s];
+}
+const okOf = s => okFromLin(toLin(hex(s)));
+/* OKLab-lerp straight into a target array — the travel hot path allocates
+   nothing; the scene accumulates in linear HDR, AgX maps back */
+function mixColInto(out, a, b, f){
+  const L = a[0]+(b[0]-a[0])*f, A = a[1]+(b[1]-a[1])*f, B = a[2]+(b[2]-a[2])*f;
+  const l = (L + .3963377774*A + .2158037573*B)**3;
+  const m = (L - .1055613458*A - .0638541728*B)**3;
+  const s = (L - .0894841775*A - 1.291485548*B)**3;
+  out[0] = Math.min(Math.max( 4.0767416621*l - 3.3077115913*m + .2309699292*s, 0), 8);
+  out[1] = Math.min(Math.max(-1.2684380046*l + 2.6097574011*m - .3413193965*s, 0), 8);
+  out[2] = Math.min(Math.max(-.0041960863*l - .7034186147*m + 1.707614701*s, 0), 8);
+}
+function mixCol(a, b, f){ const o = [0,0,0]; mixColInto(o, a, b, f); return o; }
+
+/* keyframe rows — every scene is a point in one shared space */
+const COLK = ['deep','mid','hi','acc','snowC','discC','discH',
+              'causC','causF1','causF2','rayC','ax1','ax2','ax3','ax4','markC'];
+const V4K  = ['disc','fx','fx2','fx3','fx4','fx5','markP','part'];
+function row(o){
+  o.ax1 = o.ax1 || o.acc; o.ax2 = o.ax2 || o.acc;
+  o.ax3 = o.ax3 || o.acc; o.ax4 = o.ax4 || o.deep;
+  o.markC = o.markC || o.discC;
+  o.fx3 = o.fx3 || [0,0,0,0]; o.fx4 = o.fx4 || [0,0,0,0]; o.fx5 = o.fx5 || [0,0,0,0];
+  o.markP = o.markP || [.5,.5,.0013,0];
+  /* particulate character: [size, twinkle-rate, sideways drift, streak] —
+     marine snow, motes, silt, spray, spores and pollen must not be one dust */
+  o.part = o.part || [1, 1, 0, 1];
+  COLK.forEach(k => o[k] = okOf(o[k]));
+  return o;
+}
+/* fx: caustic, rays, snow, snowVel · fx2: silhouette, strat, ghost, mote
+   fx3: waves, sand, braid, dendrite · fx4: rain, roots, canopy, fireflies
+   fx5: aurora, stars, glitter, confluence */
+const SCENES = [
+  row({ /* 0 · THE ABYSS — deep still water, shortest view of all */
+    deep:'#020408', mid:'#03101f', hi:'#0a2540', acc:'#12466b',
+    snowC:'#7fa8c4', discC:'#cfeefb', discH:'#5fc6dd',
+    causC:'#12466b', causF1:'#12466b', causF2:'#12466b', rayC:'#1b4d6b',
+    disc:[.5, 1.16, .05, 2.4],
+    part:[1.15, .5, 0, 1],
+    fx:[0, .10, 1.0, .10],
+    fx2:[1, 0, 0, 1]
+  }),
+  row({ /* 1 · THE ASCENT — twilight zone, first light */
+    deep:'#0a2540', mid:'#155e8a', hi:'#1d7ea6', acc:'#2f96b8',
+    snowC:'#a9dcec', discC:'#a9e7f5', discH:'#5fc6dd',
+    causC:'#9fdcd4', causF1:'#7fe0ff', causF2:'#ffe9b0', rayC:'#8fd2ce',
+    disc:[.5, .90, .21, 3.4],
+    part:[.9, .8, .02, 1.2],
+    fx:[.05, .32, .6, .28],
+    fx2:[1, 1, 0, 0]
+  }),
+  row({ /* 2 · THE CATHEDRAL — caustics & god rays */
+    deep:'#0c3c58', mid:'#0e4c6e', hi:'#17678f', acc:'#1d7ea6',
+    snowC:'#bfe6df', discC:'#d6f2ef', discH:'#7fc9c2',
+    causC:'#c9f3ec', causF1:'#7fe0ff', causF2:'#ffe9b0', rayC:'#9fdcd4',
+    disc:[.5, 1.10, .26, 1.1],
+    part:[1.5, .4, 0, 1],
+    fx:[1, .85, .35, -.06],
+    fx2:[1, .3, 1, 0]
+  }),
+  row({ /* 3 · THE SHALLOWS — light lands on ground; the first gold */
+    deep:'#2495ad', mid:'#31b6c9', hi:'#5cd0d6', acc:'#7fdfe0',
+    snowC:'#d8f2ea', discC:'#fdfbe8', discH:'#8fe3e0',
+    causC:'#d8f6e8', causF1:'#7fe0ff', causF2:'#ffe9b0', rayC:'#c4ecda',
+    ax1:'#8fc4a8', ax2:'#fdf6d8', ax3:'#e8c97a', ax4:'#0d3f48',
+    disc:[.5, 1.05, .34, 1.5],
+    part:[1.25, 1.4, .015, 1],
+    fx:[.45, .45, .5, -.05],
+    fx2:[.4, .15, .6, 0],
+    fx3:[0, 1, 0, 0]
+  }),
+  row({ /* 4 · THE SURFACE — reading the sea */
+    deep:'#0a3140', mid:'#16657f', hi:'#a9d3d2', acc:'#dceee8',
+    snowC:'#eef7f2', discC:'#fff3cd', discH:'#ffe1a0',
+    causC:'#4fae94', causF1:'#4fae94', causF2:'#ffedb8', rayC:'#d8ecd8',
+    ax1:'#4fae94', ax2:'#e9f4ee', ax3:'#ffedb8', ax4:'#16657f',
+    disc:[.72, .80, .07, 2.2],
+    part:[.75, 1.8, .06, 1],
+    fx:[0, .05, .3, -.16],
+    fx2:[.15, 0, 0, 0],
+    fx3:[1, 0, 0, 0],
+    fx5:[0, 0, 1, 0]
+  }),
+  row({ /* 5 · THE RIVER — gradient descent; the river remembers itself */
+    deep:'#131518', mid:'#1b1f22', hi:'#23282b', acc:'#2c3134',
+    snowC:'#9fb4ae', discC:'#cfe8e2', discH:'#6fa89f',
+    causC:'#3fa8a0', causF1:'#3fa8a0', causF2:'#b7a06b', rayC:'#3a4a48',
+    ax1:'#8fd6cf', ax2:'#3fa8a0', ax3:'#b7a06b', ax4:'#1c6e78',
+    disc:[.5, .93, .10, .8],
+    part:[1.1, .9, .01, 2.4],
+    fx:[0, 0, .35, -.10],
+    fx2:[.3, 0, 0, 0],
+    fx3:[0, 0, 1, 0]
+  }),
+  row({ /* 6 · THE CONFLUENCE — the title scene; two waters refuse to mix */
+    deep:'#1d1712', mid:'#2b2118', hi:'#3a2c1e', acc:'#4a3826',
+    snowC:'#cabf9e', discC:'#e8dcb8', discH:'#9a8c68',
+    causC:'#5f7a63', causF1:'#5f7a63', causF2:'#d9ceae', rayC:'#5f7a63',
+    ax1:'#3a2c1e', ax2:'#8fd6cf', ax3:'#d9ceae', ax4:'#5f7a63',
+    disc:[.5, 1.05, .18, .55],
+    part:[1.05, .7, 0, 1.8],
+    fx:[0, 0, .3, -.08],
+    fx2:[.25, 0, 0, 0],
+    fx5:[0, 0, 0, 1]
+  }),
+  row({ /* 7 · THE ESTUARY — the first warm reds of the journey */
+    deep:'#f2c9a0', mid:'#e39aa0', hi:'#a48bb8', acc:'#5d6b96',
+    snowC:'#f2d8c0', discC:'#ffd9a8', discH:'#f2a68a',
+    causC:'#a06a2e', causF1:'#a06a2e', causF2:'#f6e2c8', rayC:'#e8b48e',
+    ax1:'#c9a8a8', ax2:'#26374f', ax3:'#a06a2e', ax4:'#f6e2c8',
+    disc:[.62, .64, .045, 2.6],
+    part:[.9, 1, .04, 1],
+    fx:[0, .10, .25, -.04],
+    fx2:[.2, 0, 0, 0],
+    fx3:[0, 0, 0, 1]
+  }),
+  row({ /* 8 · THE RAIN — a dark night, one warm lantern, rain in its cone */
+    deep:'#121926', mid:'#202b39', hi:'#333d48', acc:'#46525e',
+    snowC:'#8fa0b0', discC:'#ffd9a0', discH:'#e0b370',
+    causC:'#46525e', causF1:'#46525e', causF2:'#e0b370', rayC:'#6b7788',
+    ax1:'#8b96a3', ax2:'#e0b370', ax3:'#dfe5e6', ax4:'#242e3c',
+    disc:[.68, .47, .045, 2.3],
+    part:[.95, 1.1, .012, 1.4],
+    fx:[0, 0, .15, -.30],
+    fx2:[.35, 0, 0, 0],
+    fx4:[1, 0, 0, 0]
+  }),
+  row({ /* 9 · THE ROOTS — the world generates its own cold light */
+    deep:'#070609', mid:'#0c0a0e', hi:'#120e14', acc:'#181218',
+    snowC:'#6a7a88', discC:'#ffd9a0', discH:'#c98d4e',
+    causC:'#57e6e0', causF1:'#57e6e0', causF2:'#9d7bff', rayC:'#1c1410',
+    ax1:'#57e6e0', ax2:'#9d7bff', ax3:'#b8ff5e', ax4:'#160f0c',
+    disc:[.62, .40, .022, 1.0],
+    part:[1.7, .35, 0, 1],
+    fx:[0, 0, .25, .05],
+    fx2:[.55, 0, 0, 0],
+    fx4:[0, 1, 0, 0]
+  }),
+  row({ /* 10 · THE CANOPY — komorebi; choose your tree */
+    deep:'#16241e', mid:'#24382c', hi:'#3a5232', acc:'#5c7c46',
+    snowC:'#e8e2b8', discC:'#f4eecb', discH:'#e8d99a',
+    causC:'#a8b558', causF1:'#a8b558', causF2:'#e8d99a', rayC:'#d8d8a0',
+    ax1:'#a8b558', ax2:'#f4eecb', ax3:'#4a6a3e', ax4:'#e8d99a',
+    disc:[.60, .74, .06, 2.2],
+    part:[1.1, 1.2, .05, 1],
+    fx:[0, .8, .3, .06],
+    fx2:[1, 0, 0, 0],
+    fx4:[0, 0, 1, 0]
+  }),
+  row({ /* 11 · THE GARDEN AT DUSK — nautical dusk, never black */
+    deep:'#7a5a6e', mid:'#3c4a72', hi:'#243358', acc:'#16294d',
+    snowC:'#c9d4e8', discC:'#ffd9a0', discH:'#e8b96a',
+    causC:'#c9e86a', causF1:'#c9e86a', causF2:'#e8b96a', rayC:'#3c4a72',
+    ax1:'#f5ffb8', ax2:'#c9e86a', ax3:'#101c14', ax4:'#22301e',
+    disc:[.78, .335, .03, 1.1],
+    part:[1.3, .8, .018, 1],
+    fx:[0, 0, .18, .03],
+    fx2:[.8, 0, 0, 0],
+    fx4:[0, 0, 0, 1],
+    fx5:[0, .25, 0, 0]
+  }),
+  row({ /* 12 · THE AURORA — the full spectral chord, spent exactly once */
+    deep:'#02040c', mid:'#030612', hi:'#040816', acc:'#050a1c',
+    snowC:'#e8ecff', discC:'#e8ecff', discH:'#6a52c9',
+    causC:'#19b06a', causF1:'#7dffb8', causF2:'#e0679a', rayC:'#19b06a',
+    ax1:'#7dffb8', ax2:'#19b06a', ax3:'#e0679a', ax4:'#6a52c9',
+    disc:[.5, .85, .2, 0],
+    fx:[0, 0, 0, 0],
+    fx2:[.45, 0, 0, 0],
+    fx5:[1, 1, 0, 0]
+  })
+];
+const N_SCENES = SCENES.length;
+
+/* progress marks — the trace each world keeps once its stage is complete.
+   color + [x, y, glow-size, pulse-phase]; each position sits ON the scene's
+   signature element (sand, seam, web, moss, grass, sky…) */
+const MARKD = [
+  ['#aef2ff', [.38, .30, .0016, 0.0]],   /* 0  a second mote stays lit */
+  ['#d8f6ff', [.30, .78, .0014, 1.1]],   /* 1  a bubble that joined the disc */
+  ['#eafff7', [.62, .72, .0013, 2.2]],   /* 2  a glint fixed in the caustic net */
+  ['#ffe9b0', [.44, .16, .0015, 3.3]],   /* 3  a stone set on the sand */
+  ['#ffedb8', [.58, .60, .0013, 4.4]],   /* 4  a fleck of sun-glitter that persists */
+  ['#ffd9a0', [.47, .42, .0016, 5.5]],   /* 5  a lantern afloat on the channel */
+  ['#d9ceae', [.52, .55, .0014, 0.7]],   /* 6  a knot tied in the seam */
+  ['#ffd9a8', [.55, .34, .0016, 1.8]],   /* 7  one tidal channel lights and holds */
+  ['#e0b370', [.62, .52, .0012, 2.9]],   /* 8  a drop's permanent clear streak */
+  ['#ffd9a0', [.40, .55, .0014, 4.0]],   /* 9  a warm node lights in the web */
+  ['#e8d99a', [.52, .22, .0014, 5.1]],   /* 10 a light-coin lands and stays */
+  ['#f5ffb8', [.36, .26, .0013, 0.4]],   /* 11 a firefly settles, keeps glowing */
+  ['#e8ecff', [.66, .80, .0012, 1.5]],   /* 12 you place a star; it joins the sky */
+];
+SCENES.forEach((s, i) => { s.markC = okOf(MARKD[i][0]); s.markP = MARKD[i][1].slice(); });
+/* mark visibility per scene — eased toward its target in the frame loop */
+const MARKS = new Float32Array(N_SCENES), MARKT = new Float32Array(N_SCENES);
+
+/* one bridge per travel zone i→i+1.
+   m: 1 = two-waters seam (dual eval, fingering front) · 0 = in-place transform
+   d/s/x: bell boosts at mid-travel (disc flare / particulate surge / caustic surge)
+   stag: [outEnd, inStart] — the leaving world exits before the arriving world
+         enters, so full-frame painters never sit muddily at half strength
+   p: [lineIntensity, fingeringAmp, lineWidth, intermittency] seam temper
+   c: seam-line & bridge color */
+const BRIDGES = [
+  { m:0, d:.9,        c:'#9fdcd4' },  /* 0→1  the promise flares into the surface */
+  { m:1,              c:'#9fdcd4' },  /* 1→2  twilight refuses the cathedral blue */
+  { m:0, d:.5, x:.8,  c:'#c9f3ec' },  /* 2→3  the caustics surge as they land */
+  { m:1,              c:'#e9f4ee' },  /* 3→4  breaking the surface — a foam seam */
+  { m:1,              c:'#8fd6cf' },  /* 4→5  the sea refuses the black sand */
+  { m:0, d:.4,        c:'#d9ceae' },  /* 5→6  the second water fingers in */
+  { m:0, d:.6,        c:'#f2c9a0' },  /* 6→7  the low sun warms everything */
+  { m:1,              c:'#dfe5e6' },  /* 7→8  the mist rolls over the flats */
+  { m:0, d:.8, s:.6, stag:[.55,.45], c:'#e0b370' },  /* 8→9  one drop becomes the first root */
+  { m:0, d:.7, stag:[.55,.45], c:'#f4eecb' },  /* 9→10 roots sink, THEN the sun-hole opens */
+  { m:0, d:.5,        c:'#e8b96a' },  /* 10→11 dusk falls through the leaves */
+  { m:1, p:[.22,.5,.5,.8], c:'#7dffb8' },  /* 11→12 the night sky descends — a breath, not a rope */
+];
+
+const ss = (a,b,x) => { x = Math.min(Math.max((x-a)/(b-a),0),1); return x*x*(3-2*x); };
+
+/* staggered timings — sequence is transformation, simultaneity is crossfade.
+   The result is written into ONE reused scratch row: travel frames allocate
+   nothing, so no GC pause can ever land mid-journey. */
+const SCRATCH = (() => {
+  const o = {};
+  COLK.forEach(k => o[k] = [0,0,0]);
+  V4K.forEach(k => o[k] = [0,0,0,0]);
+  return o;
+})();
+const STAGK = ['fx3','fx4','fx5'];
+function lerp4(out, a, b, t){ for(let i=0;i<4;i++) out[i] = a[i] + (b[i]-a[i])*t; }
+function blendRows(A, B, f, br){
+  const fLight = ss(0, .6, f);      /* light & structure move first */
+  const fPal   = ss(.2, .8, f);     /* palette travels through the middle */
+  const fFx    = ss(.3, .9, f);     /* worlds/particulate arrive last */
+  const o = SCRATCH;
+  for(let c = 0; c < COLK.length; c++){
+    const k = COLK[c];
+    mixColInto(o[k], A[k], B[k], fPal);
+  }
+  lerp4(o.disc, A.disc, B.disc, fLight);
+  lerp4(o.fx,   A.fx,   B.fx,   fFx);
+  o.fx2[0] = A.fx2[0] + (B.fx2[0]-A.fx2[0]) * fLight;   /* silhouette rides the light */
+  for(let i = 1; i < 4; i++) o.fx2[i] = A.fx2[i] + (B.fx2[i]-A.fx2[i]) * fFx;
+  lerp4(o.fx3, A.fx3, B.fx3, fFx);
+  lerp4(o.fx4, A.fx4, B.fx4, fFx);
+  lerp4(o.fx5, A.fx5, B.fx5, fFx);
+  lerp4(o.markP, A.markP, B.markP, fLight);
+  lerp4(o.part, A.part, B.part, fFx);
+  /* staggered handover: the leaving world exits before the arriving one
+     enters — never two full-frame painters muddy at half strength */
+  if(br && br.stag){
+    const fOut = 1 - ss(0, br.stag[0], f);
+    const fIn  = ss(br.stag[1], 1, f);
+    for(let s2 = 0; s2 < 3; s2++){
+      const a = A[STAGK[s2]], b = B[STAGK[s2]], oo = o[STAGK[s2]];
+      for(let i = 0; i < 4; i++){
+        if(a[i] > .001 && b[i] < .001)      oo[i] = a[i] * fOut;
+        else if(b[i] > .001 && a[i] < .001) oo[i] = b[i] * fIn;
+        else                                oo[i] = a[i] + (b[i]-a[i]) * fFx;
+      }
+    }
+  }
+  /* bridging beat — the shared bright element peaks at mid-travel */
+  const bell = Math.exp(-Math.pow((f-.5)/.14, 2));
+  if(br){
+    if(br.d) o.disc[3] *= 1 + br.d * bell;
+    if(br.s) o.fx[2]   *= 1 + br.s * bell;
+    if(br.x) o.fx[0]   *= 1 + br.x * bell;
+  }
+  return o;
+}
+function rowToGL(A){
+  const o = {};
+  COLK.forEach(k => o[k] = mixCol(A[k], A[k], 0));
+  V4K.forEach(k => o[k] = A[k].slice());
+  return o;
+}
+/* ---------- GL core ---------- */
+const canvas = document.getElementById('gl');
+const poster = document.getElementById('poster');
+const PRM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let gl = canvas.getContext('webgl2', { antialias:false, alpha:false, depth:false, powerPreference:'high-performance' });
+
+function fallback(){
+  poster.classList.add('on');
+  canvas.style.display = 'none';
+  document.body.classList.add('ready');
+  document.body.classList.add('nogl');   /* dwells become a flowing document */
+  document.querySelectorAll('.dwell').forEach(d => d.classList.add('on'));
+}
+if(!gl){ fallback(); }
+
+let engine = null;
+if(gl){
+  const HDR = !!gl.getExtension('EXT_color_buffer_float');
+
+  function compile(vsSrc, fsSrc){
+    const mk = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if(!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+        throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    };
+    const p = gl.createProgram();
+    gl.attachShader(p, mk(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(p);
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS))
+      throw new Error(gl.getProgramInfoLog(p));
+    const u = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for(let i=0;i<n;i++){
+      const info = gl.getActiveUniform(p,i);
+      u[info.name.replace('[0]','')] = gl.getUniformLocation(p, info.name);
+    }
+    return { p, u };
+  }
+
+  /* fullscreen triangle-strip quad */
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const vb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+  function makeRT(w, h){
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if(HDR) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+    else    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8,  w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    return { tex, fb, w, h };
+  }
+
+  const progScene = compile(VS, SCENE_FS.replace('__LIB__', LIB));
+  const progBright = compile(VS, BRIGHT_FS);
+  const progBlur = compile(VS, BLUR_FS);
+  const progComp = compile(VS, COMP_FS);
+
+  /* three quality tiers — same composition at every level; only invisible cost varies.
+     HIGH: dual caustic nets + ghosts + fringes + full bloom + 3 particle layers.
+     BALANCED: one modulated caustic net, no ghosts, lighter wide bloom, all rays.
+     LOW-POWER: no CA/wide bloom, 2 particle layers, stable 30fps over jittery 45. */
+  const QT = [
+    { rs:.70, oct:4, hifx:1, fringe:1, layer3:1, wide:.40, ca:1, half:false },
+    { rs:.55, oct:3, hifx:0, fringe:1, layer3:1, wide:.25, ca:1, half:false },
+    { rs:.42, oct:2, hifx:0, fringe:0, layer3:0, wide:0,   ca:0, half:true  },
+  ];
+  let qLevel = 1, dpr = 1, W = 0, H = 0;
+  let rtScene, rtA, rtB, rtWA, rtWB;
+
+  function buildRTs(){
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    const rs = QT[qLevel].rs;
+    const sw = Math.max(2, Math.round(canvas.width * rs));
+    const sh = Math.max(2, Math.round(canvas.height * rs));
+    [rtScene, rtA, rtB, rtWA, rtWB].forEach(rt => {
+      if(rt){ gl.deleteTexture(rt.tex); gl.deleteFramebuffer(rt.fb); }
+    });
+    rtScene = makeRT(sw, sh);
+    rtA  = makeRT(sw>>1, sh>>1);
+    rtB  = makeRT(sw>>1, sh>>1);
+    rtWA = makeRT(sw>>2, sh>>2);
+    rtWB = makeRT(sw>>2, sh>>2);
+  }
+  buildRTs();
+
+  const setV3 = (u,n,v) => { if(u[n]) gl.uniform3f(u[n], v[0],v[1],v[2]); };
+  const setV4 = (u,n,v) => { if(u[n]) gl.uniform4f(u[n], v[0],v[1],v[2],v[3]); };
+  function setRowU(u, sfx, P){
+    setV3(u,'uDeep'+sfx,P.deep); setV3(u,'uMid'+sfx,P.mid); setV3(u,'uHi'+sfx,P.hi);
+    setV3(u,'uAcc'+sfx,P.acc); setV3(u,'uSnowC'+sfx,P.snowC);
+    setV3(u,'uDiscC'+sfx,P.discC); setV3(u,'uDiscH'+sfx,P.discH);
+    setV3(u,'uCausC'+sfx,P.causC); setV3(u,'uCausF1'+sfx,P.causF1);
+    setV3(u,'uCausF2'+sfx,P.causF2); setV3(u,'uRayC'+sfx,P.rayC);
+    setV3(u,'uAx1'+sfx,P.ax1); setV3(u,'uAx2'+sfx,P.ax2);
+    setV3(u,'uAx3'+sfx,P.ax3); setV3(u,'uAx4'+sfx,P.ax4);
+    setV3(u,'uMarkC'+sfx,P.markC);
+    setV4(u,'uDisc'+sfx,P.disc); setV4(u,'uFx'+sfx,P.fx); setV4(u,'uFx2'+sfx,P.fx2);
+    setV4(u,'uFx3'+sfx,P.fx3); setV4(u,'uFx4'+sfx,P.fx4); setV4(u,'uFx5'+sfx,P.fx5);
+    setV4(u,'uMarkP'+sfx,P.markP);
+    setV4(u,'uPart'+sfx,P.part);
+  }
+
+  function drawTo(rt){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt ? rt.fb : null);
+    gl.viewport(0, 0, rt ? rt.w : canvas.width, rt ? rt.h : canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  function bindTex(unit, tex){
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+  }
+
+  function renderFrame(st){
+    /* 1 · the world, in HDR at reduced res */
+    const { u } = progScene;
+    gl.useProgram(progScene.p);
+    gl.uniform2f(u.uRes, rtScene.w, rtScene.h);
+    gl.uniform1f(u.uTime, st.time);
+    gl.uniform1f(u.uSeam, st.seam ? 1 : 0);
+    gl.uniform1f(u.uF, st.f);
+    gl.uniform1f(u.uVel, st.vel);
+    const tier = QT[qLevel];
+    gl.uniform1f(u.uTextDim, st.textDim);
+    if(u.uQ) gl.uniform1f(u.uQ, tier.oct);
+    if(u.uCalm) gl.uniform1f(u.uCalm, st.calm);
+    if(u.uFxq) gl.uniform3f(u.uFxq, tier.hifx, tier.fringe, tier.layer3);
+    gl.uniform2f(u.uPar, st.par[0], st.par[1]);
+    gl.uniform4f(u.uTextRect, st.rect[0], st.rect[1], st.rect[2], st.rect[3]);
+    if(u.uSeamC){ const sc = st.seamC || [.62,.86,.82]; gl.uniform3f(u.uSeamC, sc[0], sc[1], sc[2]); }
+    if(u.uSeamP){ const sp = st.seamP || [1,1,1,0]; gl.uniform4f(u.uSeamP, sp[0], sp[1], sp[2], sp[3]); }
+    if(u.uMk)  gl.uniform1f(u.uMk,  st.markA || 0);
+    if(u.uMkB) gl.uniform1f(u.uMkB, st.markB || 0);
+    if(u.uBreath) gl.uniform1f(u.uBreath, st.breath ?? .5);
+    if(u.uMood)   gl.uniform1f(u.uMood,   st.mood ?? .35);
+    if(u.uAgN)    gl.uniform1f(u.uAgN,    st.agN || 0);
+    if(u.uAg && st.agN) gl.uniform4fv(u.uAg, st.agents);
+    if(u.uCause)  gl.uniform1f(u.uCause,  st.cause || 0);
+    if(u.uTouchN) gl.uniform1f(u.uTouchN, st.touchN || 0);
+    if(u.uTouch && st.touchN) gl.uniform4fv(u.uTouch, st.touch);
+    if(u.uHeroP) gl.uniform4f(u.uHeroP, st.heroX || 0, st.heroY || 0, st.heroS || 0, st.heroA || 0);
+    if(u.uHeroC){ const h = st.heroC || [1,1,1]; gl.uniform3f(u.uHeroC, h[0], h[1], h[2]); }
+    if(u.uEvt)  gl.uniform1f(u.uEvt,  st.evt || 0);
+    if(u.uEvtK) gl.uniform1f(u.uEvtK, st.evtK || 0);
+    if(u.uSeamI) gl.uniform1f(u.uSeamI, st.seamI ?? -1);
+    if(u.uCstOn) gl.uniform1f(u.uCstOn, st.cstOn || 0);
+    if(u.uCstP && st.cstOn) gl.uniform4fv(u.uCstP, st.cst);
+    if(u.uArr)  gl.uniform1f(u.uArr,  st.arr ?? 1);
+    if(u.uEcho) gl.uniform1f(u.uEcho, st.echo || 0);
+    if(u.uOvDim) gl.uniform1f(u.uOvDim, st.ovDim || 0);
+    if(u.uEco) gl.uniform4f(u.uEco, st.eco1 || 0, st.eco2 || 0, st.eco3 || 0, 0);
+    setRowU(u, '', st.rowA);
+    if(st.seam) setRowU(u, 'B', st.rowB);
+    if(st.warm){                 /* warm-up: force both shader paths at quarter res */
+      gl.uniform2f(u.uRes, rtWB.w, rtWB.h);
+      drawTo(rtWB);
+      return;
+    }
+    drawTo(rtScene);
+
+    /* 2 · soft-knee brightpass at half res */
+    gl.useProgram(progBright.p);
+    bindTex(0, rtScene.tex); gl.uniform1i(progBright.u.uTex, 0);
+    drawTo(rtA);
+
+    /* 3 · tight bloom (≈4px) — two separable passes at half res */
+    gl.useProgram(progBlur.p);
+    gl.uniform1i(progBlur.u.uTex, 0);
+    bindTex(0, rtA.tex); gl.uniform2f(progBlur.u.uDir, 1.0/rtA.w, 0); drawTo(rtB);
+    bindTex(0, rtB.tex); gl.uniform2f(progBlur.u.uDir, 0, 1.0/rtA.h); drawTo(rtA);
+
+    /* 4 · wide bloom (≈24px) — downsample then two wider passes; skipped at LOW-POWER */
+    if(tier.wide > 0){
+      bindTex(0, rtA.tex); gl.uniform2f(progBlur.u.uDir, 0, 0); drawTo(rtWA);
+      bindTex(0, rtWA.tex); gl.uniform2f(progBlur.u.uDir, 2.2/rtWA.w, 0); drawTo(rtWB);
+      bindTex(0, rtWB.tex); gl.uniform2f(progBlur.u.uDir, 0, 2.2/rtWA.h); drawTo(rtWA);
+    }
+
+    /* 5 · composite: bloom → AgX → grade → vignette → CA → grain → dither */
+    gl.useProgram(progComp.p);
+    bindTex(0, rtScene.tex); gl.uniform1i(progComp.u.uTex, 0);
+    bindTex(1, rtA.tex);     gl.uniform1i(progComp.u.uBloomS, 1);
+    bindTex(2, rtWA.tex);    gl.uniform1i(progComp.u.uBloomW, 2);
+    gl.uniform2f(progComp.u.uRes, canvas.width, canvas.height);
+    gl.uniform1f(progComp.u.uTime, st.time);
+    gl.uniform1f(progComp.u.uVel, st.vel);
+    gl.uniform1f(progComp.u.uBloomAmt, st.bloom);
+    gl.uniform1f(progComp.u.uCAAmt, tier.ca);
+    gl.uniform1f(progComp.u.uWide, tier.wide);
+    drawTo(null);
+  }
+
+  engine = { buildRTs, renderFrame, QT,
+    get qLevel(){ return qLevel; }, set qLevel(v){ qLevel = v; },
+    get W(){ return W; }, get H(){ return H; } };
+}
+/* ---------- choreography ---------- */
+if(engine){
+  /* one scene per 1.1 viewport-heights — no dwell plateau, no dead zones.
+     The hand owns the journey: every wheel tick moves the world. */
+  const U = 1.1;
+  const maxS = (N_SCENES-1)*U;
+  document.getElementById('space').style.height = ((maxS+1)*100) + 'vh';
+
+  const dwells = [...document.querySelectorAll('.dwell')];
+  const hint = document.getElementById('hint');
+  const veil = document.getElementById('veil');
+
+  /* smoothed state — smoothing lives on VISUAL parameters, not on the scroll itself */
+  let p = 0, vel = 0, parX = 0, parY = 0, parTX = 0, parTY = 0;
+  let textDim = 0, rect = [.5,.5,0,0], rectFor = -1, calm = 1;
+  let hintOn = false;
+  /* per-dwell presence (written to style only on real change) + class state.
+     OPS is the smoothed truth; OWR is what the DOM last saw — they must be
+     separate, or the write threshold freezes the fade's tail as a ghost. */
+  const OPS = new Float32Array(N_SCENES), OWR = new Float32Array(N_SCENES),
+        ONS = new Uint8Array(N_SCENES);
+  /* one reused frame-state object — the render loop allocates nothing */
+  const ST = { time:0, seam:false, f:0, vel:0, calm:1, seamC:null, seamP:null,
+               markA:0, markB:0, par:[0,0], textDim:0, rect:null,
+               rowA:null, rowB:null, bloom:.42, breath:.5, mood:.35,
+               agN:0, agents:null };
+
+  /* ==== THE ALIVENESS LAYER ====
+     One shared breath whose frequency itself wanders (the HRV principle:
+     perfect periodicity reads as machine); a slow Markov temperament per
+     visit (calm / breeze / gust — episodes, not stationary noise); and
+     living individuals — fish, heavy raindrops, fireflies — with interior
+     state: fatigue, mass, timidity, memory. All preallocated; the frame
+     loop still allocates nothing. */
+  let breathPh = 0, bWalk = 0, mood = .35, moodState = 1, moodTimer = 20;
+  let arrV = 0, echoV = 0, ovDim = 0;
+  window.__echoKick = () => { echoV = 1; };
+  const MOODV = [.12, .45, .88];
+  const AG = new Float32Array(96);
+  let agN = 0, agScene = -1;
+  const hK = k => {                       /* stable, decorrelated per-individual character */
+    const s = Math.sin(k*127.1 + 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  /* fish: position, heading, dart energy, startle latency */
+  const FN = 18, fpx = new Float32Array(FN), fpy = new Float32Array(FN),
+        fhd = new Float32Array(FN), fen = new Float32Array(FN), fsl = new Float32Array(FN);
+  /* heavy raindrops: position, mass, release point, run phase */
+  const DN = 10, dpx = new Float32Array(DN), dpy = new Float32Array(DN),
+        dms = new Float32Array(DN), dsy = new Float32Array(DN), drn = new Float32Array(DN);
+  /* fireflies: position, velocity, flash phase, personal rate, energy, size, rest */
+  const YN = 14, ypx = new Float32Array(YN), ypy = new Float32Array(YN),
+        yvx = new Float32Array(YN), yvy = new Float32Array(YN),
+        yph = new Float32Array(YN), yrt = new Float32Array(YN),
+        yen = new Float32Array(YN), yrs = new Float32Array(YN);
+
+  function fishStep(dt, tm, asp, n){
+    if(agScene !== 3){
+      agScene = 3;
+      for(let k = 0; k < FN; k++){
+        fpx[k] = asp*(.28 + .44*hK(k+3)); fpy[k] = .40 + .26*hK(k+31);
+        fhd[k] = hK(k+7)*6.283; fen[k] = 0; fsl[k] = 0;
+      }
+    }
+    let cx = 0, cy = 0;
+    for(let k = 0; k < n; k++){ cx += fpx[k]; cy += fpy[k]; }
+    cx /= n; cy /= n;
+    /* a rare startle — one fish decides, the others follow a heartbeat later */
+    if(Math.random() < dt*(.02 + .05*mood)){
+      const j = (Math.random()*n)|0;
+      fen[j] = 1; fhd[j] = Math.atan2(fpy[j]-cy, fpx[j]-cx) + (Math.random()-.5);
+      for(let k = 0; k < n; k++){
+        if(k === j) continue;
+        const dx = fpx[k]-fpx[j], dy = fpy[k]-fpy[j];
+        if(dx*dx + dy*dy < .02) fsl[k] = .08 + .18*Math.random();
+      }
+    }
+    for(let k = 0; k < n; k++){
+      if(fsl[k] > 0){ fsl[k] -= dt; if(fsl[k] <= 0){ fen[k] = .8; fhd[k] += (hK(k+13)-.5)*1.4; } }
+      /* wander + loose cohesion + personal space */
+      fhd[k] += Math.sin(tm*(.6 + .12*(k%5)) + k*2.39) * .8 * dt;
+      let want = Math.atan2(cy - fpy[k], cx - fpx[k]);
+      let dd = want - fhd[k];
+      dd -= Math.round(dd/6.283)*6.283;
+      fhd[k] += dd * .5 * dt;
+      for(let j2 = 0; j2 < n; j2++){
+        if(j2 === k) continue;
+        const dx = fpx[k]-fpx[j2], dy = fpy[k]-fpy[j2];
+        const d2 = dx*dx + dy*dy;
+        if(d2 < .0016){ fhd[k] += (Math.atan2(dy, dx) - fhd[k]) * 2.2 * dt; }
+      }
+      /* the school keeps a shy distance from the visitor's hand */
+      const dxp2 = fpx[k] - ptX*asp, dyp2 = fpy[k] - ptY;
+      const dp2 = dxp2*dxp2 + dyp2*dyp2;
+      if(dp2 < .045){
+        let ad = Math.atan2(dyp2, dxp2) - fhd[k];
+        ad -= Math.round(ad/6.283)*6.283;
+        fhd[k] += ad * 2.4 * dt;
+        fen[k] = Math.max(fen[k], .3*(1 - dp2/.045));
+      }
+      fen[k] *= Math.exp(-2.4*dt);
+      const sp = .045 + .035*mood + .42*fen[k];
+      fpx[k] += Math.cos(fhd[k])*sp*dt;
+      fpy[k] += Math.sin(fhd[k])*sp*dt;
+      if(fpy[k] < .36){ fpy[k] = .36; fhd[k] = -fhd[k]; }
+      if(fpy[k] > .72){ fpy[k] = .72; fhd[k] = -fhd[k]; }
+      if(fpx[k] < .06){ fpx[k] = .06; fhd[k] = 3.1416 - fhd[k]; }
+      if(fpx[k] > asp-.06){ fpx[k] = asp-.06; fhd[k] = 3.1416 - fhd[k]; }
+      AG[4*k] = fpx[k]; AG[4*k+1] = fpy[k]; AG[4*k+2] = fhd[k]; AG[4*k+3] = Math.min(fen[k], 1);
+    }
+    return n;
+  }
+
+  function dropStep(dt, tm, asp, n){
+    if(agScene !== 8){
+      agScene = 8;
+      for(let k = 0; k < DN; k++){
+        dpx[k] = .06 + (asp-.12)*hK(3*k+5); dpy[k] = .18 + .66*hK(5*k+17);
+        dms[k] = .1 + .5*hK(7*k+23); dsy[k] = dpy[k]; drn[k] = 0;
+      }
+    }
+    for(let k = 0; k < n; k++){
+      if(drn[k] === 0){
+        /* condensation gathers — logistic, each drop at its own pace */
+        dms[k] += dt*(.014 + .03*hK(k+41) + .05*mood)*(1.1 - dms[k]);
+        dsy[k] = dpy[k];
+        if(dms[k] >= 1) drn[k] = 1e-4;      /* the commitment */
+      } else {
+        drn[k] += dt;
+        const v = .22 * Math.min(drn[k]/.3, 1) * (.6 + .5*Math.min(dms[k], 1));
+        dpy[k] -= v*dt;
+        dms[k] = Math.min(dms[k] + dt*.15, 1.3);   /* it sweeps the glass as it goes */
+        if(dpy[k] < .07){
+          dpx[k] = .06 + (asp-.12)*Math.random(); dpy[k] = .3 + .54*Math.random();
+          dms[k] = .1 + .3*Math.random(); drn[k] = 0; dsy[k] = dpy[k];
+        }
+      }
+      AG[4*k] = dpx[k]; AG[4*k+1] = dpy[k]; AG[4*k+2] = dms[k]; AG[4*k+3] = dsy[k];
+    }
+    return n;
+  }
+
+  function flyStep(dt, tm, asp, n, rise, verified){
+    rise = rise || 0;   /* leaving the garden, the fireflies rise toward the sky */
+    verified = verified || 0;   /* replicated work: lights that barely rest */
+    if(agScene !== 11){
+      agScene = 11;
+      for(let k = 0; k < YN; k++){
+        ypx[k] = asp*hK(k+9); ypy[k] = .10 + .38*hK(k+19);
+        yvx[k] = 0; yvy[k] = 0; yph[k] = hK(k+29);
+        yrt[k] = .05 + .06*hK(k+37); yen[k] = 2 + 4*hK(k+43); yrs[k] = 0;
+      }
+    }
+    for(let k = 0; k < n; k++){
+      if(k < verified && yrs[k] > 1.2) yrs[k] = 1.2;   /* verified lights return quickly */
+      const resting = yrs[k] > 0;
+      if(resting){
+        yrs[k] -= dt;
+        yvx[k] *= Math.exp(-3*dt); yvy[k] *= Math.exp(-3*dt);
+        if(yrs[k] <= 0) yen[k] = 3 + 3*Math.random();
+      } else {
+        yvx[k] += Math.sin(tm*(.29 + .07*(k%7)) + k*1.7) * .028 * dt;
+        yvy[k] += Math.cos(tm*(.23 + .05*(k%5)) + k*2.9) * .022 * dt;
+        const vm = Math.hypot(yvx[k], yvy[k]);
+        if(vm > .03){ yvx[k] *= .03/vm; yvy[k] *= .03/vm; }
+      }
+      /* her own rhythm, itself wandering; flashing costs something */
+      yph[k] += dt * yrt[k] * (.6 + .8*mood) * (resting ? .25 : 1) * (1 + .25*Math.sin(tm*.11 + k));
+      if(yph[k] >= 1){
+        yph[k] -= 1;
+        if(!resting){ yen[k] -= 1; if(yen[k] <= 0) yrs[k] = 5 + 6*Math.random(); }
+      }
+      const ph = yph[k];
+      const env = ph < .07 ? ph/.07 : Math.exp(-(ph-.07)*5);
+      ypx[k] += yvx[k]*dt*8; ypy[k] += (yvy[k] + rise*.045)*dt*8;
+      if(ypy[k] < .07){ ypy[k] = .07; yvy[k] = Math.abs(yvy[k]); }
+      const yTop = .56 + .38*Math.min(rise, 1);
+      if(ypy[k] > yTop){ ypy[k] = yTop; yvy[k] = -Math.abs(yvy[k]); }
+      if(ypx[k] < 0) ypx[k] += asp; if(ypx[k] > asp) ypx[k] -= asp;
+      AG[4*k] = ypx[k]; AG[4*k+1] = ypy[k];
+      /* a faint ember persists between flashes — the population is felt */
+      AG[4*k+2] = Math.max(env * (resting ? .18 : 1), resting ? .02 : .06) * (1 + .8*rise);
+      AG[4*k+3] = .5 + hK(k+47);
+    }
+    return n;
+  }
+
+  /* the visitor's presence on the glass — eight remembered touches.
+     Revisited places accumulate strength and are remembered longer;
+     when the hand stops, the glass breathes closed over seconds. */
+  let ptX = .5, ptY = .5, ptMoved = false, lpX = -1, lpY = -1;
+  const T8x = new Float32Array(8), T8y = new Float32Array(8),
+        T8s = new Float32Array(8), T8a = new Float32Array(8);
+  const TOUCHU = new Float32Array(32);
+  function touchStep(dt, near){
+    let n = 0;
+    for(let k = 0; k < 8; k++){
+      T8a[k] += dt;
+      const eff = T8s[k]*Math.exp(-T8a[k]/(3.5 + T8s[k]*2.2));
+      TOUCHU[4*k] = T8x[k]; TOUCHU[4*k+1] = T8y[k];
+      TOUCHU[4*k+2] = eff;  TOUCHU[4*k+3] = T8a[k];
+      if(eff > .02) n = k + 1;
+    }
+    if(near && ptMoved){
+      const mv = lpX < 0 ? 1 : Math.hypot(ptX - lpX, ptY - lpY);
+      if(mv > .012){
+        lpX = ptX; lpY = ptY;
+        let best = -1, bd = 1e9, worst = 0, we = 1e9;
+        for(let k = 0; k < 8; k++){
+          const d2 = (T8x[k]-ptX)*(T8x[k]-ptX) + (T8y[k]-ptY)*(T8y[k]-ptY);
+          const eff = T8s[k]*Math.exp(-T8a[k]/(3.5 + T8s[k]*2.2));
+          if(d2 < bd){ bd = d2; best = k; }
+          if(eff < we){ we = eff; worst = k; }
+        }
+        if(bd < .005){          /* a place it knows — the memory deepens */
+          T8s[best] = Math.min(T8s[best] + .45, 2.6); T8a[best] = 0;
+          T8x[best] += (ptX - T8x[best])*.4; T8y[best] += (ptY - T8y[best])*.4;
+        } else {                /* a new touch takes the faintest memory's place */
+          T8x[worst] = ptX; T8y[worst] = ptY; T8s[worst] = 1; T8a[worst] = 0;
+        }
+      }
+      ptMoved = false;
+    }
+    return n;
+  }
+
+  /* THE TRAVELER — thirteen bodies, one life. Center, sway radii, tempo,
+     size per world; between worlds it glides, changing color on the way. */
+  const HEROD = [
+    ['#aef2ff', .635,.44, .015,.010, .13, .0045],   /* the second promise */
+    ['#d8f6ff', .50, .55, .05, .18,  .05, .0050],   /* a rising bubble */
+    ['#eafff7', .62, .72, .03, .02,  .08, .0042],   /* a knot of caustic light */
+    ['#ffe9b0', .52, .55, .12, .05,  .07, .0048],   /* a fleck above the sand */
+    ['#ffedb8', .62, .60, .08, .015, .06, .0045],   /* sun-glitter */
+    ['#c9f0e8', .47, .45, .03, .12,  .09, .0050],   /* a signal in the channel */
+    ['#d9ceae', .52, .50, .012,.14,  .06, .0048],   /* riding the seam */
+    ['#ffd9a8', .56, .40, .10, .03,  .05, .0050],   /* adrift on the flats */
+    ['#dff0fa', .60, .55, .015,.02,  .05, .0045],   /* a bead near the lantern */
+    ['#8ff2e8', .60, .42, .04, .03,  .07, .0045],   /* a pulse by the warm node */
+    ['#f4eecb', .60, .66, .04, .05,  .06, .0048],   /* light in a sun-hole */
+    ['#f5ffb8', .42, .30, .10, .08,  .08, .0045],   /* one more firefly */
+    ['#e8ecff', .66, .80, .004,.003, .03, .0050],   /* it becomes the star */
+  ];
+  const HEROK = HEROD.map(h => okOf(h[0]));
+  const HC = [0, 0, 0];
+  function heroStep(t, i, f, tm){
+    const A = HEROD[i], B = HEROD[Math.min(i+1, N_SCENES-1)];
+    const sf = ss(.12, .88, f);
+    const pax = A[1] + A[3]*Math.sin(tm*A[5]*6.28 + i*2.1);
+    const pay = A[2] + A[4]*Math.sin(tm*A[5]*4.9  + i*1.3);
+    const pbx = B[1] + B[3]*Math.sin(tm*B[5]*6.28 + (i+1)*2.1);
+    const pby = B[2] + B[4]*Math.sin(tm*B[5]*4.9  + (i+1)*1.3);
+    ST.heroX = pax + (pbx - pax)*sf;
+    ST.heroY = pay + (pby - pay)*sf;
+    ST.heroS = A[6] + (B[6] - A[6])*sf;
+    mixColInto(HC, HEROK[i], HEROK[Math.min(i+1, N_SCENES-1)], sf);
+    ST.heroC = HC;
+    /* while the cause runs, the drop IS the traveler */
+    ST.heroA = ST.cause > 0
+      ? Math.max(Math.max(0, 1 - ST.cause*4), Math.max(0, (ST.cause - .88))*8.3)
+      : 1;
+  }
+
+  /* THE PROMISE CONSTELLATION — positions trace the journey's rise from
+     the deep to the sky; brightness follows the eased MARKS; the 14th
+     star is the visitor's own question. */
+  const CSTXY = [
+    [.09,.66],[.16,.60],[.235,.57],[.31,.60],[.385,.66],[.45,.73],[.52,.78],
+    [.59,.815],[.66,.835],[.73,.84],[.80,.825],[.87,.79],[.93,.74],[.52,.92]
+  ];
+  const CSTU = new Float32Array(56);
+  let qGlow = 0;
+  function cstStep(dt, near){
+    if(!near){ ST.cstOn = 0; return; }
+    const qT = (window.__hasQ && window.__hasQ()) ? 1 : 0;
+    qGlow += (qT - qGlow)*(1 - Math.exp(-1.2*dt));
+    for(let k = 0; k < 14; k++){
+      CSTU[4*k] = CSTXY[k][0]; CSTU[4*k+1] = CSTXY[k][1];
+      CSTU[4*k+2] = k < 13 ? .12 + .88*MARKS[k] : qGlow;
+      CSTU[4*k+3] = k < 13 ? .0035 : .005;
+    }
+    ST.cstOn = 1; ST.cst = CSTU;
+  }
+
+  /* THE RARE EVENTS — a minute of true stillness, and the world offers
+     something it will not repeat soon */
+  let evK = -1, evPh = 0, evCool = 45, evDur = 1;
+  function evtStep(dt, t, now){
+    if(evK >= 0){
+      evPh += dt/evDur;
+      if(evPh >= 1){ evK = -1; evCool = 130 + Math.random()*160; }
+    } else if((evCool -= dt) <= 0 && (now - lastInput)/1000 > 58){
+      const sc = Math.round(t);
+      if(Math.abs(t - sc) < .3){
+        if(sc === 0){ evK = 0; evDur = 16; evPh = 0; }
+        else if(sc === 8){ evK = 1; evDur = 2.2; evPh = 0; if(sndOn && AC) sndEvent(false, 1.4); }
+        else if(sc === 11 || sc === 12){ evK = 2; evDur = 2.6; evPh = 0; }
+      }
+    }
+    ST.evt = evK >= 0 ? evPh : 0;
+    ST.evtK = evK < 0 ? 0 : evK;
+  }
+
+  function liveStep(t, dt, tm){
+    /* the breath: ~9s, frequency wandering (an Ornstein–Uhlenbeck walk) */
+    bWalk += (Math.random()-.5)*dt*.6; bWalk *= Math.exp(-dt*.15);
+    breathPh += dt*(1/8.7)*(1 + .35*Math.max(-0.8, Math.min(0.8, bWalk)));
+    ST.breath = .5 + .5*Math.sin(breathPh*6.2831853);
+    /* the temperament: calm / breeze / gust, dwelling 20–75s each */
+    moodTimer -= dt;
+    if(moodTimer < 0){
+      const r = Math.random();
+      moodState = moodState === 1 ? (r < .5 ? 0 : 2) : 1;   /* extremes pass through breeze */
+      moodTimer = 20 + Math.random()*55;
+    }
+    mood += (MOODV[moodState] - mood)*(1 - Math.exp(-dt/5.5));
+    ST.mood = mood;
+    /* the individuals — only ever one living scene at a time */
+    const asp = engine.W/Math.max(engine.H, 1);
+    const q = engine.qLevel;
+    if(Math.abs(t - 3) < 1.05) agN = fishStep(dt, tm, asp, [18,14,10][q]);
+    else if(Math.abs(t - 8) < 1.05) agN = dropStep(dt, tm, asp, [10,8,6][q]);
+    else if(Math.abs(t - 11) < 1.05){
+      const eco11 = window.__ECO ? window.__ECO[11] : 0;
+      const nF = Math.min(14, [14,11,8][q] + Math.round(eco11*4));
+      agN = flyStep(dt, tm, asp, nF, Math.max(0, t - 11)*1.15, Math.round(eco11*5));
+    }
+    else { agN = 0; agScene = -1; }
+    ST.agN = agN; ST.agents = AG;
+    ST.touchN = touchStep(dt, Math.abs(t - 8) < 1.25);
+    ST.touch = TOUCHU;
+  }
+  let time = 0, last = performance.now(), lastInput = last, lastRender = last;
+  let paused = false, lost = false, frameFlip = false;
+  let fpsEMA = 58, fpsFrames = 0, lowStreak = 0, hiStreak = 0;
+  let lastSwitch = 0, upPenalty = 1, lastWasUp = false;
+
+  /* pre-converted GL rows — no palette math during dwell or seam frames */
+  const RGL = SCENES.map(rowToGL);
+  const SEAMC = BRIDGES.map(b => mixCol(okOf(b.c), okOf(b.c), 0));
+  /* synthetic all-worlds-on row: exercises every shader branch at warm-up */
+  const ALLON = {...RGL[12], fx:[1,.5,.5,.1], fx2:[1,.5,1,1],
+    fx3:[1,1,1,1], fx4:[1,1,1,1], fx5:[1,1,1,1]};
+
+  /* debug: ?t=1.5 pins the journey position; ?q=0/1/2 pins the quality tier */
+  const QS = new URLSearchParams(location.search);
+  const FORCE_T = parseFloat(QS.get('t'));
+  const FORCE_Q = QS.get('q') === null ? NaN : parseInt(QS.get('q'), 10);
+  if(!isNaN(FORCE_Q)){
+    engine.qLevel = Math.min(Math.max(FORCE_Q, 0), engine.QT.length-1);
+    engine.buildRTs();
+  }
+  /* deep-link: #s7 seats the journey at that scene before the veil lifts */
+  let lastHashed = -1;
+  {
+    const HM = location.hash.match(/^#s(\d{1,2})$/);
+    if(HM && isNaN(FORCE_T)){
+      const si = Math.min(Math.max(parseInt(HM[1], 10), 0), N_SCENES-1);
+      scrollTo(0, Math.round(si*U*innerHeight));
+      p = si*U; lastHashed = si;
+      if(si > 0) arrV = 1;
+    } else if(isNaN(FORCE_T) && !location.hash){
+      /* the environment demonstrates that it remembers — reopen where
+         the visitor last worked, the traveler already waiting there */
+      try{
+        const st2 = JSON.parse(localStorage.getItem('faicc-progress-v1') || '{}');
+        if(st2._last && st2._last.s > 0 && st2._last.s < N_SCENES){
+          scrollTo(0, Math.round(st2._last.s*U*innerHeight));
+          p = st2._last.s*U; lastHashed = st2._last.s;
+          arrV = 1;                      /* returning — no overture */
+        }
+      }catch(e){}
+    }
+  }
+  function tOf(s){
+    if(!isNaN(FORCE_T)) return Math.min(Math.max(FORCE_T, 0), N_SCENES-1);
+    s = Math.min(Math.max(s, 0), maxS);
+    const i = Math.min(Math.floor(s/U), N_SCENES-2);
+    const f = Math.min((s - i*U)/U, 1);
+    /* proportional with gentle gravity: slope stays within [.45, 1.28] —
+       scene centers compose by moving SLOWER, never by stopping.
+       (a flat dwell + double-smoothstep read as dead zones then bursts) */
+    const sm = f*f*(3-2*f);
+    return i + f*.45 + sm*.55;
+  }
+
+  addEventListener('pointermove', e => {
+    lastInput = performance.now();
+    ptX = e.clientX/engine.W; ptY = 1 - e.clientY/engine.H; ptMoved = true;
+    if(PRM) return;                          /* no parallax under reduced motion */
+    const amp = .012;                        /* ≤1.5% of viewport, total */
+    parTX = (e.clientX/engine.W - .5) * amp;
+    parTY = (.5 - e.clientY/engine.H) * amp;
+  }, { passive:true });
+  addEventListener('scroll', () => { lastInput = performance.now(); }, { passive:true });
+
+  let running = false;
+  function start(){
+    if(running || paused || lost) return;
+    running = true; last = performance.now();
+    requestAnimationFrame(frame);
+  }
+  function frame(now){
+    if(paused || lost){ running = false; return; }
+    requestAnimationFrame(frame);
+    let dt = Math.min((now - last)/1000, .1); last = now;
+    time += dt;   /* the world always lives; PRM gates vestibular motion only */
+
+    /* pacing: LOW-POWER renders a stable 30fps; idle throttles to 30 after 25s */
+    const idle = now - lastInput > 25000;
+    frameFlip = !frameFlip;
+    const skipRender = (idle || engine.QT[engine.qLevel].half) && frameFlip;
+
+    /* tier governor — sustained pressure only, never mid-scroll, with hysteresis */
+    if(!skipRender){
+      const rdt = (now - lastRender)/1000; lastRender = now;
+      if(rdt > 0) fpsEMA += (Math.min(1/rdt, 120) - fpsEMA)*.06;
+    }
+    if(isNaN(FORCE_Q) && ++fpsFrames >= 30){
+      fpsFrames = 0;
+      const tier = engine.qLevel;
+      const atLow = engine.QT[tier].half;
+      const floor = atLow ? 26 : 45, ceil = atLow ? 29 : 57;
+      lowStreak = fpsEMA < floor ? lowStreak+1 : 0;
+      hiStreak  = fpsEMA > ceil  ? hiStreak+1  : 0;
+      const settled = Math.abs(vel) < .5;           /* never reallocate while scrolling */
+      if(lowStreak >= 3 && tier < engine.QT.length-1 && settled && now-lastSwitch > 4000){
+        engine.qLevel++; engine.buildRTs();
+        if(lastWasUp) upPenalty = Math.min(upPenalty*2, 8);
+        lastWasUp = false; lastSwitch = now; lowStreak = hiStreak = 0; fpsEMA = 50;
+      } else if(hiStreak >= 6*upPenalty && tier > 0 && settled && now-lastSwitch > 6000){
+        engine.qLevel--; engine.buildRTs();
+        lastWasUp = true; lastSwitch = now; lowStreak = hiStreak = 0; fpsEMA = 50;
+      }
+    }
+
+    /* scroll tracks nearly 1:1 (k≈12 kills jitter, not responsiveness);
+       the dwell/travel double-smoothstep supplies the cinematic easing spatially */
+    const target = scrollY / engine.H;
+    const kS = PRM ? 60 : 12;
+    const pPrev = p;
+    p += (target - p) * (1 - Math.exp(-kS*dt));
+    const rawV = dt > 0 ? (p - pPrev)/dt : 0;
+    vel += (rawV - vel) * (1 - Math.exp(-3*dt));
+    const kP = 1 - Math.exp(-2.5*dt);
+    const travelFreeze = Math.max(0, 1 - Math.abs(vel)*1.4);   /* parallax freezes in fast travel */
+    parX += (parTX*travelFreeze - parX) * kP;
+    parY += (parTY*travelFreeze - parY) * kP;
+    /* calm: secondary detail rests during rapid scroll, breathes back on settle */
+    const calmT = Math.abs(vel) > 1.1 ? 0 : 1;
+    calm += (calmT - calm) * (1 - Math.exp(-3.2*dt));
+
+    const t = tOf(p);
+    const i = Math.min(Math.floor(t), N_SCENES-1);
+    const f = t - i;
+
+    /* the world breathes, has a temperament, and its creatures live */
+    liveStep(t, dt, time);
+    sndStep(dt, t, i, f);
+    if(arrV < 1) arrV = Math.min(1, arrV + dt*(target > .04 ? 1.6 : .3));
+    echoV *= Math.exp(-dt/.7);
+    ovDim += ((document.body.classList.contains('ov-open') ? 1 : 0) - ovDim)*(1 - Math.exp(-4*dt));
+    ST.arr = !isNaN(FORCE_T) ? 1 : arrV;
+    ST.echo = echoV; ST.ovDim = ovDim;
+    const ECO = window.__ECO;
+    if(ECO){ ST.eco1 = ECO[2]; ST.eco2 = ECO[9]; ST.eco3 = ECO[12]; }
+
+    /* ---- continuous narrative presence ----
+       Text opacity is a living function: proximity to the scene center ×
+       how settled the hand is, exponentially smoothed (slow to dim, quicker
+       to return). It breathes with the scroll instead of blinking on and off. */
+    const cand = Math.round(t);
+    const prox = Math.max(0, 1 - Math.abs(t - cand)/.34);
+    const proxS = prox*prox*(3-2*prox);
+    const velN = Math.max(0, Math.abs(vel) - .2);        /* reading tolerates drift */
+    const velF = Math.max(0, 1 - velN);
+    const focus = !isNaN(FORCE_T) ? 1 : proxS * velF * Math.sqrt(velF);
+    let active = -1;
+    for(let j = 0; j < N_SCENES; j++){
+      const tgt = (j === cand) ? focus : 0;
+      const o0 = OPS[j];
+      if(tgt === 0 && o0 === 0) continue;
+      /* a dwell you have LEFT yields fast — no ghost may ride into the
+         next world; only the current scene's text dims gently */
+      const kT = PRM ? 60 : (tgt < o0 ? (j === cand ? 3.2 : 9) : 5.5);
+      let o = o0 + (tgt - o0) * (1 - Math.exp(-kT*dt));
+      if(tgt === 0 && o < .002) o = 0;
+      OPS[j] = o;
+      if(Math.abs(o - OWR[j]) > .004 || (o === 0 && OWR[j] !== 0)){
+        OWR[j] = o;
+        const el = dwells[j];
+        el.style.opacity = o.toFixed(3);
+        el.style.transform = 'translateY(calc(-50% + ' + ((1-o)*14).toFixed(1) + 'px))';
+      }
+      const on = ONS[j] ? OPS[j] > .45 : OPS[j] > .6;   /* hysteresis: no flapping */
+      if(on !== !!ONS[j]){ ONS[j] = on ? 1 : 0; dwells[j].classList.toggle('on', on); }
+      if(on) active = j;
+    }
+    /* the settled scene mirrors to the hash — replaceState only, never push */
+    if(active >= 0 && OPS[active] > .85 && active !== lastHashed && isNaN(FORCE_T)){
+      lastHashed = active;
+      history.replaceState(null, '', '#s' + active);
+      if(window.__setLast) window.__setLast(active);
+    }
+    const hintNow = t < .12 && now > 2600;
+    if(hintNow !== hintOn){ hint.classList.toggle('on', hintNow); hintOn = hintNow; }
+
+    /* the world makes room for the words — in step with their presence */
+    textDim += ((active >= 0 ? OPS[active] : 0) - textDim) * (1 - Math.exp(-6*dt));
+    if(active >= 0 && active !== rectFor){        /* measure once per activation, not per frame */
+      rectFor = active;
+      const r = dwells[active].getBoundingClientRect();
+      rect = [ (r.left + r.width/2)/engine.W,
+               1 - (r.top + r.height/2)/engine.H,
+               (r.width/2)/engine.W * 1.12,
+               (r.height/2)/engine.H * 1.12 ];
+    }
+    if(active < 0) rectFor = -1;
+
+    /* parameter rows: dwell/seam use precomputed rows; only travel interpolates.
+       Each travel zone runs its bridge spec — two-waters seam or staggered transform */
+    const br = i < BRIDGES.length ? BRIDGES[i] : null;
+    /* dual-eval only while the front is actually on screen (exact: the
+       fingered mask is fully one-sided outside f ∈ (.02, .985)) */
+    const seam = !!(br && br.m === 1 && f > .02 && f < .985);
+    const seamC = br ? SEAMC[i] : SEAMC[0];
+    const seamP = (br && br.p) ? br.p : [1, 1, 1, 0];
+    let rowA, rowB = null;
+    if(seam){
+      rowA = RGL[i];
+      rowB = RGL[i+1];
+    } else if(br && br.m === 1){
+      rowA = f <= .02 ? RGL[i] : RGL[i+1];
+    } else if(f < .0005){
+      rowA = RGL[i];
+    } else if(f > .9995){
+      rowA = RGL[Math.min(i+1, N_SCENES-1)];
+    } else {
+      rowA = blendRows(SCENES[i], SCENES[Math.min(i+1, N_SCENES-1)], f, br);
+    }
+
+    /* leaving the rain: the one drop that causes the roots */
+    ST.cause = (!seam && i === 8 && f > .02 && f < .98) ? f : 0;
+    ST.seamI = seam ? i : -1;
+    heroStep(t, i, f, time);
+    evtStep(dt, t, now);
+    cstStep(dt, t > 10.6);
+
+    /* progress marks ease in when a stage completes; they rest mid-travel */
+    for(let k = 0; k < N_SCENES; k++) MARKS[k] += (MARKT[k] - MARKS[k]) * (1 - Math.exp(-2.2*dt));
+    const markA = seam ? MARKS[i]
+      : MARKS[i]*(1 - ss(.08,.45,f)) + (i+1 < N_SCENES ? MARKS[i+1]*ss(.6,.95,f) : 0);
+    const markB = (seam && i+1 < N_SCENES) ? MARKS[i+1] : 0;
+
+    /* bloom breathes up in bridge bursts */
+    const bell = f > 0 ? Math.exp(-Math.pow((f-.5)/.16, 2)) : 0;
+    const bloom = .42 + .55*bell;
+
+    if(!skipRender){
+      ST.time = time;
+      ST.seam = seam; ST.f = f; ST.vel = vel*.5; ST.calm = calm;
+      ST.seamC = seamC; ST.seamP = seamP; ST.markA = markA; ST.markB = markB;
+      ST.par[0] = parX; ST.par[1] = parY;
+      ST.textDim = Math.min(textDim, 1);
+      ST.rect = rect; ST.rowA = rowA; ST.rowB = rowB; ST.bloom = bloom;
+      engine.renderFrame(ST);
+    }
+  }
+
+  /* ==== the sound of the water — pure nature, no machines ====
+     Nature holds almost no sustained pitched tones: constant detuned sines
+     beat like an idling engine. So: two BREATHING noise voices (deep body,
+     high air) whose gains swell on slow wandering cycles like sea and wind;
+     sparse events (droplets, glass, deep thuds) that never repeat; and one
+     distant resonance that occasionally swells for a few seconds and is
+     gone. Silence is part of the score. Scroll velocity muffles the world
+     the way water does. */
+  let AC = null, sndOn = false, sGain, sLP, sEvT = 1, sUpd = 0, sTnT = 6;
+  let sBodyF, sBodyG, sAirF, sAirG, sTone, sToneG;
+  let phA = 0, phB = 2.1;
+  const SND = [  /* bodyHz, bodyGain, airHz, airGain, swellHz, evRate, evGlass, tone(midi) */
+    [110, .22,    0, 0,   .05, .04, 0,  0],   /* abyss — deep pressure, nothing else */
+    [180, .18, 1200, .015,.07, .08, 0,  0],   /* ascent */
+    [240, .10, 1600, .02, .06, .50, 1, 64],   /* cathedral — glass, a rare far tone */
+    [300, .12, 2200, .03, .09, .70, 1, 69],   /* shallows */
+    [160, .26,  900, .06, .08, .15, 0,  0],   /* surface — real wave swells */
+    [260, .20, 1400, .05, .11, .20, 0,  0],   /* river — quicker water breath */
+    [200, .22, 1100, .04, .07, .20, 0, 55],   /* confluence */
+    [170, .16, 1000, .035,.06, .25, 0,  0],   /* estuary */
+    [220, .10, 3200, .06, .10, 2.8, 1,  0],   /* rain — hiss and droplets */
+    [ 70, .16,    0, 0,   .04, .30, 0, 38],   /* roots — subterranean */
+    [200, .08, 2600, .05, .10, .60, 1,  0],   /* canopy — leaves */
+    [140, .08, 1800, .02, .05, .35, 1,  0],   /* garden — near silence, small lights */
+    [120, .09, 2000, .025,.04, .25, 1, 62],   /* aurora — hush, a far shimmer */
+  ];
+  const mf = m => 440*Math.pow(2, (m - 69)/12);
+  function mkNoise(brown){
+    const len = 2*AC.sampleRate, buf = AC.createBuffer(1, len, AC.sampleRate);
+    const d = buf.getChannelData(0); let lastN = 0;
+    for(let i2 = 0; i2 < len; i2++){
+      const w = Math.random()*2 - 1;
+      if(brown){ lastN = (lastN + .02*w)/1.02; d[i2] = lastN*3.5; }
+      else d[i2] = w*.5;
+    }
+    const src = AC.createBufferSource(); src.buffer = buf; src.loop = true;
+    src.start(); return src;
+  }
+  function sndInit(){
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    sGain = AC.createGain(); sGain.gain.value = 0;
+    sLP = AC.createBiquadFilter(); sLP.type = 'lowpass'; sLP.frequency.value = 2600;
+    sLP.connect(sGain); sGain.connect(AC.destination);
+    sBodyF = AC.createBiquadFilter(); sBodyF.type = 'bandpass'; sBodyF.Q.value = .55;
+    sBodyG = AC.createGain(); sBodyG.gain.value = 0;
+    mkNoise(true).connect(sBodyF); sBodyF.connect(sBodyG); sBodyG.connect(sLP);
+    sAirF = AC.createBiquadFilter(); sAirF.type = 'bandpass'; sAirF.Q.value = .8;
+    sAirG = AC.createGain(); sAirG.gain.value = 0;
+    mkNoise(false).connect(sAirF); sAirF.connect(sAirG); sAirG.connect(sLP);
+    /* the distant resonance — silent until it chooses to swell */
+    sTone = AC.createOscillator(); sTone.type = 'sine';
+    sToneG = AC.createGain(); sToneG.gain.value = 0;
+    sTone.connect(sToneG); sToneG.connect(sLP); sTone.start();
+  }
+  function sndEvent(glass, lvl){
+    const o = AC.createOscillator(), g = AC.createGain();
+    const now = AC.currentTime;
+    if(glass){
+      o.type = 'sine'; o.frequency.value = 700 + Math.random()*1900;
+      o.frequency.setTargetAtTime(o.frequency.value*(.5 + Math.random()*.3), now, .07);
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(.04*lvl, now + .005);
+      g.gain.setTargetAtTime(0, now + .01, .09);
+    } else {
+      o.type = 'sine'; o.frequency.value = 48 + Math.random()*40;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(.07*lvl, now + .03);
+      g.gain.setTargetAtTime(0, now + .06, .35);
+    }
+    o.connect(g); g.connect(sLP); o.start(now); o.stop(now + 1.6);
+  }
+  function sndStep(dt, t2, i2, f2){
+    if(!sndOn || !AC) return;
+    sEvT -= dt; sUpd -= dt; sTnT -= dt;
+    const a = SND[i2], b = SND[Math.min(i2 + 1, N_SCENES - 1)];
+    const mixR = (x, y) => x + (y - x)*f2;
+    /* the two breaths of the place — slow, wandering, never in step */
+    const swHz = mixR(a[4], b[4]) * (1 + .3*(mood - .4));
+    phA += dt * swHz * 6.2832 * (1 + .2*Math.sin(time*.037));
+    phB += dt * swHz * 4.9 * (1 + .2*Math.sin(time*.051 + 2.));
+    if(sUpd <= 0){
+      sUpd = .12;
+      const now = AC.currentTime;
+      const swellA = Math.pow(.5 + .5*Math.sin(phA), 1.6);
+      const swellB = Math.pow(.5 + .5*Math.sin(phB), 1.4);
+      sLP.frequency.setTargetAtTime(400 + 4800*Math.exp(-Math.abs(vel)*.9), now, .25);
+      sGain.gain.setTargetAtTime(.42*(1 + .1*(ST.breath - .5)), now, .3);
+      sBodyF.frequency.setTargetAtTime(mixR(a[0], b[0]), now, .5);
+      sBodyG.gain.setTargetAtTime(mixR(a[1], b[1])*(.3 + .7*swellA)*(.75 + .5*mood), now, .35);
+      const airHz = mixR(a[2], b[2]);
+      if(airHz > 1){
+        sAirF.frequency.setTargetAtTime(airHz, now, .5);
+        sAirG.gain.setTargetAtTime(mixR(a[3], b[3])*(.25 + .75*swellB)*(.7 + .6*mood)
+                                   + Math.min(Math.abs(vel)*.03, .05), now, .35);
+      } else sAirG.gain.setTargetAtTime(0, now, .5);
+    }
+    /* once in a while, a far resonance swells and is gone */
+    if(sTnT <= 0){
+      sTnT = 9 + Math.random()*14;
+      const tn = mixR(a[7], b[7]);
+      if(tn > 20){
+        const now = AC.currentTime;
+        sTone.frequency.setValueAtTime(mf(tn)*(Math.random() < .5 ? 1 : 1.5), now);
+        sToneG.gain.setTargetAtTime(.016 + .01*Math.random(), now, 2.2);
+        sToneG.gain.setTargetAtTime(0, now + 3.5, 2.8);
+      }
+    }
+    if(sEvT <= 0){
+      const rate = mixR(a[5], b[5])*(.5 + mood);
+      sEvT = rate > .01 ? (0.4 + Math.random()*1.4)/rate : 3;
+      sndEvent(mixR(a[6], b[6]) > .5, .5 + .5*Math.random());
+    }
+  }
+  window.__sndToggle = () => {
+    const b = document.getElementById('sndBtn');
+    if(!sndOn){
+      if(!AC) sndInit();
+      AC.resume();
+      sndOn = true; b.textContent = '♪ on';
+    } else {
+      sndOn = false; b.textContent = '♪ sound';
+      if(AC){ sGain.gain.setTargetAtTime(0, AC.currentTime, .2); setTimeout(() => AC.suspend(), 700); }
+    }
+  };
+
+  /* warm EVERY shader branch before the veil lifts — no compile mid-scroll.
+     Quarter-res draws with every world amplitude lit cover all painter
+     branches (solo and dual-eval), then one full frame exercises the
+     brightpass, blurs and composite. */
+  engine.renderFrame({ warm:true, time:0, seam:false, f:0, vel:0, calm:1, par:[0,0],
+    textDim:0, rect:[.5,.5,0,0], rowA:ALLON, rowB:null, bloom:.4,
+    breath:.5, mood:.5, agN:8, agents:AG });
+  engine.renderFrame({ warm:true, time:0, seam:true, f:.5, vel:0, calm:1, par:[0,0],
+    textDim:0, rect:[.5,.5,0,0], rowA:ALLON, rowB:ALLON, bloom:.4,
+    breath:.5, mood:.5, agN:8, agents:AG, cause:.5, touchN:2, touch:TOUCHU, arr:.5 });
+  engine.renderFrame({ time:0, seam:false, f:0, vel:0, calm:1, par:[0,0],
+    textDim:0, rect:[.5,.5,0,0], rowA:RGL[0], rowB:null, bloom:.4,
+    breath:.5, mood:.35, agN:0, agents:AG });
+
+  start();
+  requestAnimationFrame(() => document.body.classList.add('ready'));
+
+  window.__curScene = () => lastHashed;   /* for hash restore when plates close */
+  /* scene jump for the ledger nav — under a brief veil, never a scroll storm */
+  window.__jump = si => {
+    veil.classList.add('cover');
+    setTimeout(() => {
+      scrollTo(0, Math.round(si*U*engine.H));
+      p = si*U; lastHashed = si;
+      history.replaceState(null, '', '#s' + si);
+      setTimeout(() => veil.classList.remove('cover'), 260);
+    }, 480);
+  };
+
+  /* lifecycle */
+  let rsT = 0;
+  addEventListener('resize', () => {
+    clearTimeout(rsT);
+    rsT = setTimeout(() => { engine.buildRTs(); rectFor = -1; }, 150);
+  });
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+    if(!paused) start();
+  });
+  canvas.addEventListener('webglcontextlost', e => {
+    e.preventDefault(); lost = true; fallback();
+  });
+
+  /* bfcache: never a black page on browser-back */
+  addEventListener('pageshow', e => {
+    if(e.persisted){
+      veil.classList.remove('cover');
+      document.body.style.opacity = '1';
+      document.body.classList.add('ready');
+      paused = false; start();
+    }
+  });
+  document.getElementById('return').addEventListener('click', e => {
+    e.preventDefault();
+    veil.classList.add('cover');
+    setTimeout(() => { location.href = 'atlas.html'; }, 650);
+  });
+}
+
+/* ============================================================
+   THE WORK LAYER — stage folios · library · ledger (step 3)
+   Curriculum data verbatim above; storage stays faicc-progress-v1,
+   pid scheme unchanged: m{n}_{i} c{n}_{i} stage{n} res{i} gate{i}
+   cap{i} pap{t}_{i} + _lane/_audit. Existing saves carry over intact.
+   ============================================================ */
+const KEY = "faicc-progress-v1";
+let state = {};
+try{ state = JSON.parse(localStorage.getItem(KEY) || "{}") }catch(e){ state = {} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)) }catch(e){} }
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;") }
+function cb(id){ return `<input type="checkbox" data-pid="${id}" ${state[id]?"checked":""}>` }
+
+/* ---- overlays: one open at a time, Esc closes, focus returns ---- */
+const OVS = ['folio','library','ledger','plates'].map(id => document.getElementById(id));
+let lastFocus = null;
+function openOv(el){
+  OVS.forEach(o => o.classList.toggle('on', o === el));
+  document.body.classList.add('ov-open');   /* the words step back for the work */
+  lastFocus = document.activeElement;
+  el.querySelector('.ovx').focus();
+}
+function closeOv(){
+  OVS.forEach(o => o.classList.remove('on'));
+  document.body.classList.remove('ov-open');
+  /* leaving a plate hands the hash back to the journey — replaceState only */
+  if(/^#(?!s\d)/.test(location.hash) && window.__curScene){
+    const s = window.__curScene();
+    history.replaceState(null, '', '#s' + (s >= 0 ? s : 0));
+  }
+  if(lastFocus && lastFocus.focus) lastFocus.focus();
+  lastFocus = null;
+}
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeOv));
+addEventListener('keydown', e => { if(e.key === 'Escape') closeOv(); });
+
+/* ---- the stage folio — one world's work, poured over the living scene ---- */
+const stagesEl = document.getElementById('stages');
+function stageFolio(n){
+  const s = STAGES.find(x => x.n === String(n));
+  if(!s) return;
+  const micro = (MICRO[s.n]||[]).map((m,mi) => { const id = "m"+s.n+"_"+mi;
+    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span class="t">${esc(m[0])}</span><span class="hrs">~${m[1]}h</span></label>`; }).join("");
+  const contract = CONTRACT.map((c,ci) => { const id = "c"+s.n+"_"+ci;
+    return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span class="t">${esc(c)}</span></label>`; }).join("");
+  const quest = s.n === "12" ? (state._question ? `
+    <div class="k" style="color:rgba(232,236,255,.6)">your question — burning above the aurora</div>
+    <p class="qshow">“${esc(state._question.q)}”</p>
+    <p class="mono">set ${new Date(state._question.ts).toLocaleDateString()} · it appears as the fourteenth star</p>` : `
+    <div class="k" style="color:rgba(232,236,255,.6)">the original act</div>
+    <p>Write the question you are willing to spend a year answering. When you set it, it becomes a star this sky did not have before. It stays on this machine, and it stays yours.</p>
+    <textarea id="qtext" rows="2" maxlength="220" placeholder="the question…"></textarea>
+    <div style="margin-top:12px"><button class="tbtn" type="button" id="qset">set it in the sky</button></div>`) : "";
+  const lane = s.n === "7" ? `
+    <div class="k" style="color:rgba(157,123,255,.6)">specialization lock — the week you pass gate h9</div>
+    <p>Pick ONE primary lane and commit for 6–12 months. Everything else drops to literacy-level. Without this, the curriculum stays broad but never sharp.</p>
+    <p id="lanestatus" class="mono"></p>
+    <div style="margin-top:6px"><select id="lanesel">${LANES.map(l=>`<option>${l}</option>`).join("")}</select></div>
+    <div style="margin-top:10px"><button class="tbtn" type="button" onclick="lockLane()">lock it in</button><button class="tbtn" type="button" onclick="unlockLane()">unlock</button></div>` : "";
+  stagesEl.innerHTML = `
+    <div class="k" style="margin-top:0">stage ${s.n} · ${esc(s.d)}</div>
+    <h3>${esc(s.t)}</h3>
+    <p>${esc(s.goal)}</p>
+    <div class="k">best resources</div>
+    <p>${s.res.map(r=>`<a href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])}</a>`).join(" · ")}</p>
+    <div class="k">session milestones — one checkbox ≈ one sitting</div>
+    <div class="mk">${micro}</div>
+    <div class="k">deliverables</div><p>${esc(s.del)}</p>
+    <div class="k" style="color:rgba(232,201,122,.6)">gate</div><p>${esc(s.gate)}</p>
+    <p style="color:rgba(224,103,122,.78)">⛔ ${esc(BLOCK[s.n])}</p>
+    <div class="k">traps</div><p>${esc(s.trap)}</p>
+    <div class="k" style="color:rgba(232,201,122,.6)">completion contract — all four must exist, publicly</div>
+    <div class="mk gold">${contract}</div>
+    <div class="mk gold" style="margin-top:.9rem"><label class="${state['stage'+s.n]?'checked':''}" data-mid="stage${s.n}">${cb("stage"+s.n)}<span class="t">Stage ${s.n} complete — this world keeps its mark <span style="opacity:.5">(locked behind the contract above)</span></span></label></div>
+    ${quest}${lane}`;
+  bindChecks(); laneStatus();
+  const qBtn = document.getElementById('qset');
+  if(qBtn) qBtn.addEventListener('click', () => {
+    const v = (document.getElementById('qtext').value || '').trim();
+    if(v.length < 8){ alert('A year deserves more than a few words.'); return; }
+    state._question = { q: v, ts: Date.now() };
+    save(); stageFolio(12);
+  });
+}
+window.__hasQ = () => !!state._question;
+window.__setLast = si => {
+  if(!state._last || state._last.s !== si){ state._last = { s: si, ts: Date.now() }; save(); }
+};
+
+/* ---- quiet affordances inside each dwell ---- */
+const MNAME = ['the abyss','the ascent','the cathedral','the shallows','the surface','the river',
+               'the confluence','the estuary','the rain','the roots','the canopy','the garden','the aurora'];
+const AFF = [];
+document.querySelectorAll('.dwell').forEach((el, j) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'openwork';
+  b.addEventListener('click', () => { stageFolio(j); openOv(document.getElementById('folio')); });
+  el.appendChild(b); AFF.push(b);
+});
+function updateAffordances(){
+  STAGES.forEach((s, j) => {
+    const b = AFF[j]; if(!b) return;
+    const items = MICRO[s.n] || [];
+    const done = items.filter((_, mi) => state["m"+s.n+"_"+mi]).length;
+    if(state["stage"+s.n]){ b.textContent = 'stage complete — revisit'; b.classList.add('done'); }
+    else { b.textContent = `open the work · ${done}/${items.length}`; b.classList.remove('done'); }
+  });
+}
+
+/* ---- checkbox binding: contract-locked stage completion (verbatim rule) ---- */
+function bindChecks(){
+  document.querySelectorAll("input[data-pid]").forEach(el => {
+    el.onchange = () => {
+      if(el.checked && el.dataset.pid.startsWith("stage")){
+        const n = el.dataset.pid.slice(5);
+        const missing = CONTRACT.filter((_, ci) => !state["c"+n+"_"+ci]);
+        if(missing.length){
+          alert("Stage "+n+" contract not met. Still missing:\n\n• "+missing.join("\n• ")+"\n\nProgress means externally legible artifacts, not completed resources.");
+          el.checked = false; return;
+        }
+      }
+      if(el.checked) state[el.dataset.pid] = Date.now(); else delete state[el.dataset.pid];
       save();
-      const lab=el.closest("label[data-mid]");
-      if(lab)lab.classList.toggle("checked",el.checked);
-      updateBar(); updateStageBars();
+      if(el.checked && window.__echoKick) window.__echoKick();   /* the world acknowledges */
+      const lab = el.closest("label[data-mid]");
+      if(lab) lab.classList.toggle("checked", el.checked);
+      updateBar(); updateAffordances(); refreshMarks();
     };
   });
 }
+function refreshMarks(){ STAGES.forEach((s, j) => { MARKT[j] = state["stage"+s.n] ? 1 : 0; }); }
 
-/* Specialization lock */
+/* ---- the library ---- */
+const tierName = {core:"core", rec:"recommended", opt:"optional", spec:"specialization"};
+const tsel = document.getElementById("ftopic");
+[...new Set(RES.map(r => r[0]))].forEach(t => { const o = document.createElement("option"); o.textContent = t; tsel.appendChild(o); });
+function renderRes(){
+  const q = document.getElementById("q").value.toLowerCase();
+  const ft = tsel.value, fl = document.getElementById("flevel").value,
+        fr = document.getElementById("ftier").value, fc = document.getElementById("fcost").value;
+  let rows = "", n = 0;
+  RES.forEach((r, i) => {
+    const [topic,name,url,type,level,tier,cost,prim,why] = r;
+    if(ft && topic !== ft) return; if(fl && level !== fl && level !== "all") return;
+    if(fr && tier !== fr) return; if(fc !== "" && String(cost) !== fc) return;
+    if(q && !(name+" "+why+" "+topic+" "+type).toLowerCase().includes(q)) return;
+    n++;
+    rows += `<tr><td class="cbc">${cb("res"+i)}</td><td>
+      <div class="rname"><a href="${url}" target="_blank" rel="noopener" ${prim?'style="color:#64CEFB;border-color:rgba(100,206,251,.35)"':""}>${esc(name)}</a></div>
+      <div class="rwhy">${esc(why)}</div>
+      <div class="rmeta"><span class="chip">${topic}</span><span class="chip">${type}</span><span class="chip">${level}</span><span class="chip t-${tier}">${tierName[tier]}</span>${cost?'<span class="chip cost">💰 paid</span>':""}${prim?'<span class="chip prim">primary</span>':""}</div>
+    </td></tr>`;
+  });
+  document.getElementById("rbody").innerHTML = rows;
+  document.getElementById("rcount").textContent = `${n} resources shown (of ${RES.length}) · cyan = primary choice for its topic`;
+  bindChecks();
+}
+["q","ftopic","flevel","ftier","fcost"].forEach(id => document.getElementById(id).addEventListener("input", renderRes));
+
+/* ---- specialization lock + quarterly audit (verbatim semantics) ---- */
 function laneStatus(){
-  const el=document.getElementById("lanestatus"); if(!el)return;
-  const L=state["_lane"];
-  el.innerHTML = L ? `🔒 <b style="color:var(--purple)">${L.lane}</b> — locked ${new Date(L.ts).toLocaleDateString()} (commit 6–12 months; review at your quarterly audit)`
+  const el = document.getElementById("lanestatus"); if(!el) return;
+  const L = state["_lane"];
+  el.innerHTML = L ? `🔒 <b style="color:#9d7bff">${esc(L.lane)}</b> — locked ${new Date(L.ts).toLocaleDateString()} (commit 6–12 months; review at your quarterly audit)`
                    : "No lane locked yet. Do this the week you pass Gate H9.";
 }
 function lockLane(){
-  const lane=document.getElementById("lanesel").value;
-  if(state["_lane"]&&!confirm("A lane is already locked ("+state["_lane"].lane+"). Replace it?"))return;
-  state["_lane"]={lane,ts:Date.now()}; save(); laneStatus();
+  const lane = document.getElementById("lanesel").value;
+  if(state["_lane"] && !confirm("A lane is already locked ("+state["_lane"].lane+"). Replace it?")) return;
+  state["_lane"] = {lane, ts:Date.now()}; save(); laneStatus();
 }
 function unlockLane(){
-  if(!state["_lane"])return;
-  if(confirm("Unlocking before 6 months usually means lane-hopping, not learning. Unlock anyway?")){delete state["_lane"];save();laneStatus();}
+  if(!state["_lane"]) return;
+  if(confirm("Unlocking before 6 months usually means lane-hopping, not learning. Unlock anyway?")){ delete state["_lane"]; save(); laneStatus(); }
 }
-
-/* Quarterly audit */
 function auditStatus(){
-  const el=document.getElementById("auditstatus"); if(!el)return;
-  const t=state["_audit"];
-  if(!t){el.innerHTML="No audit logged yet.";return;}
-  const days=Math.floor((Date.now()-t)/864e5);
-  el.innerHTML = days>90 ? `<span style="color:var(--red)"><b>⚠ Audit overdue</b> — last audit ${days} days ago (${new Date(t).toLocaleDateString()})</span>`
-                         : `Last audit: ${new Date(t).toLocaleDateString()} (${days} days ago — next due in ${90-days} days)`;
+  const el = document.getElementById("auditstatus"); if(!el) return;
+  const t = state["_audit"];
+  if(!t){ el.innerHTML = "No audit logged yet."; return; }
+  const days = Math.floor((Date.now()-t)/864e5);
+  el.innerHTML = days > 90 ? `<span style="color:#e0677a"><b>⚠ Audit overdue</b> — last audit ${days} days ago (${new Date(t).toLocaleDateString()})</span>`
+                           : `Last audit: ${new Date(t).toLocaleDateString()} (${days} days ago — next due in ${90-days} days)`;
 }
-function logAudit(){ state["_audit"]=Date.now(); save(); auditStatus(); }
+function logAudit(){ state["_audit"] = Date.now(); save(); auditStatus(); }
+
+/* ---- the ledger: totals + pace (verbatim math over the same id space) ---- */
 function updateBar(){
-  // count unique ids across the whole app (resources may be filtered out of DOM)
-  const totalIds=new Set();
-  STAGES.forEach(s=>totalIds.add("stage"+s.n));
-  STAGES.forEach(s=>CONTRACT.forEach((_,ci)=>totalIds.add("c"+s.n+"_"+ci)));
-  Object.keys(MICRO).forEach(k=>MICRO[k].forEach((_,mi)=>totalIds.add("m"+k+"_"+mi)));
-  RES.forEach((r,i)=>totalIds.add("res"+i));
-  GATES.forEach((g,i)=>totalIds.add("gate"+i));
-  CAPS.forEach((c,i)=>totalIds.add("cap"+i));
-  TIERS.forEach((t,ti)=>t[1].forEach((p,pi)=>totalIds.add("pap"+ti+"_"+pi)));
-  const total=totalIds.size;
-  const done=Object.keys(state).filter(k=>totalIds.has(k)).length;
-  document.getElementById("pfill").style.width=(100*done/total)+"%";
-  document.getElementById("ptext").textContent=`${done} / ${total} items complete (milestones, stages, resources, gates, capstones, papers)`;
-  // pace: check-offs are timestamped (older saves count as done but not toward pace)
-  const now=Date.now(), wk=now-7*864e5, mo=now-30*864e5;
-  let w=0,m=0;
-  Object.entries(state).forEach(([k,v])=>{ if(totalIds.has(k)&&typeof v==="number"&&v>1e12){ if(v>=wk)w++; if(v>=mo)m++; } });
-  const hrs=Object.entries(state).reduce((a,[k,v])=>{
-    const mm=k.match(/^m(\d+)_(\d+)$/);
-    return (mm&&MICRO[mm[1]]&&MICRO[mm[1]][+mm[2]]&&typeof v==="number"&&v>1e12&&v>=wk)?a+MICRO[mm[1]][+mm[2]][1]:a;
-  },0);
+  const totalIds = new Set();
+  STAGES.forEach(s => totalIds.add("stage"+s.n));
+  STAGES.forEach(s => CONTRACT.forEach((_, ci) => totalIds.add("c"+s.n+"_"+ci)));
+  Object.keys(MICRO).forEach(k => MICRO[k].forEach((_, mi) => totalIds.add("m"+k+"_"+mi)));
+  RES.forEach((r, i) => totalIds.add("res"+i));
+  GATES.forEach((g, i) => totalIds.add("gate"+i));
+  CAPS.forEach((c, i) => totalIds.add("cap"+i));
+  TIERS.forEach((t, ti) => t[1].forEach((p, pi) => totalIds.add("pap"+ti+"_"+pi)));
+  const total = totalIds.size;
+  const done = Object.keys(state).filter(k => totalIds.has(k)).length;
+  document.getElementById("pfill").style.width = (100*done/total) + "%";
+  document.getElementById("ptext").textContent = `${done} / ${total} items complete (milestones, stages, resources, gates, capstones, papers)`;
+  const now = Date.now(), wk = now-7*864e5, mo = now-30*864e5;
+  let w = 0, m = 0;
+  Object.entries(state).forEach(([k, v]) => { if(totalIds.has(k) && typeof v === "number" && v > 1e12){ if(v >= wk) w++; if(v >= mo) m++; } });
+  const hrs = Object.entries(state).reduce((a, [k, v]) => {
+    const mm = k.match(/^m(\d+)_(\d+)$/);
+    return (mm && MICRO[mm[1]] && MICRO[mm[1]][+mm[2]] && typeof v === "number" && v > 1e12 && v >= wk) ? a + MICRO[mm[1]][+mm[2]][1] : a;
+  }, 0);
   document.getElementById("pace").textContent =
-    done===0 ? "Check off session milestones as you go — pace shows up here." :
+    done === 0 ? "Check off session milestones as you go — pace shows up here." :
     `Pace: ${w} check-off${w!==1?"s":""} this week (~${hrs}h of milestone work) · ${m} in the last 30 days`;
+  const ql = document.getElementById("qline");
+  if(ql) ql.textContent = state._question ? `your question: “${state._question.q}”` : "";
+  /* ecology: how much of each stage is genuinely done feeds the worlds */
+  const eco = window.__ECO || (window.__ECO = new Float32Array(13));
+  STAGES.forEach((st2, j) => {
+    const items = MICRO[st2.n] || [];
+    let d2 = 0;
+    items.forEach((_, mi) => { if(state["m"+st2.n+"_"+mi]) d2++; });
+    eco[j] = items.length ? d2/items.length : 0;
+  });
 }
 function exportProgress(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="faicc-progress.json";a.click();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "faicc-progress.json"; a.click();
 }
 function importProgress(){
-  const inp=document.createElement("input");inp.type="file";inp.accept=".json";
-  inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();
-    r.onload=()=>{try{state=JSON.parse(r.result);save();location.reload()}catch(e){alert("Invalid file")}};r.readAsText(f)};
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
+  inp.onchange = () => { const f = inp.files[0]; if(!f) return; const r = new FileReader();
+    r.onload = () => { try{ state = JSON.parse(r.result); save(); location.reload() }catch(e){ alert("Invalid file") } }; r.readAsText(f); };
   inp.click();
 }
-function resetProgress(){ if(confirm("Reset all progress?")){state={};save();location.reload();} }
+function resetProgress(){ if(confirm("Reset all progress?")){ state = {}; save(); location.reload(); } }
 
-renderRes(); bindChecks(); updateBar(); updateStageBars(); laneStatus(); auditStatus();
-
-/* ---------------- THRESHOLD — arrival, return, doors, sane history ---------------- */
-(function(){
-  const veil=document.getElementById("veil");
-  const leave=(go)=>{ if(!veil){go();return;} veil.classList.add("on"); setTimeout(go,560); };
-
-  // deep-link a plate via hash — replaceState only, so back/forward stays sane
-  const sections=[...document.querySelectorAll("main section")].map(s=>s.id);
-  const h=location.hash.replace("#","");
-  if(h&&sections.includes(h)){
-    document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.s===h));
-    document.querySelectorAll("main section").forEach(s=>s.classList.toggle("active",s.id===h));
-  }
-  document.getElementById("nav").addEventListener("click",e=>{
-    if(e.target.tagName==="BUTTON") history.replaceState(null,"","#"+e.target.dataset.s);
+/* ---- the reference plates — gates · capstones · papers · insights ·
+        traps · compute · bibliography · drift (drift stays untracked) ---- */
+const PLATES = [
+  ['gatelist',  'gates',     'The fourteen gates',       'Hard, checkable thresholds. A gate is passed cold, or it is not passed.'],
+  ['caplist',   'capstones', 'Twelve capstones',         'One flagship artifact per stage — the spine of the portfolio.'],
+  ['tierlist',  'papers',    'The paper ladder',         'Six tiers; every paper carries a reproduce-this action.'],
+  ['inslist',   'insights',  'Practitioner instruments', 'Twenty-four field notes from people who do the work — each with an action.'],
+  ['traplist',  'traps',     'The traps',                'The fifteen ways this journey quietly fails.'],
+  ['complist',  'compute',   'Compute',                  'The whole journey on free and near-free compute.'],
+  ['biblist',   'bib',       'The bibliography',         'Everything on the journey, in one place.'],
+  ['driftlist', 'drift',     'The drift',                'A passive watch queue for tired evenings — watched, never counted.'],
+];
+function renderPlates(){
+  document.getElementById('gatelist').innerHTML = GATES.map((g,i) => `
+    <div class="row">${cb("gate"+i)}<span class="gid">${g[0]}</span>
+      <span><b>${esc(g[1])}</b> <span class="chip cat">${esc(g[3])}</span><span class="sub">${esc(g[2])}</span></span></div>`).join("");
+  document.getElementById('caplist').innerHTML = CAPS.map((c,i) => `
+    <div class="row">${cb("cap"+i)}<span><b>${esc(c[0])}</b><span class="sub">${esc(c[1])}</span></span></div>`).join("");
+  document.getElementById('tierlist').innerHTML = TIERS.map((t,ti) =>
+    `<div class="k">${esc(t[0])}</div>` + t[1].map((p,pi) => `
+    <div class="row">${cb("pap"+ti+"_"+pi)}<span><a href="${p[1]}" target="_blank" rel="noopener"><b>${esc(p[0])}</b></a> — ${esc(p[2])}<span class="sub">Reproduce: ${esc(p[3])}</span></span></div>`).join("")).join("");
+  document.getElementById('inslist').innerHTML = INS.map(x => `
+    <div class="row"><span><a href="${x[1]}" target="_blank" rel="noopener"><b>${esc(x[0])}</b></a> <span class="chip cat">${esc(x[2])}</span><span class="sub">${esc(x[3])}</span><span class="sub" style="color:rgba(159,220,255,.55)">Action: ${esc(x[4])}</span></span></div>`).join("");
+  document.getElementById('traplist').innerHTML = TRAPS.map(t => `
+    <div class="row"><span><b>${esc(t[0])}.</b> ${esc(t[1])}</span></div>`).join("");
+  document.getElementById('complist').innerHTML = COMPUTE.map(c => `
+    <div class="row"><span><b>${esc(c[0])}</b><span class="sub">${esc(c[1])}</span></span></div>`).join("");
+  document.getElementById('biblist').innerHTML = BIB.map(b => `
+    <div class="k">${esc(b[0])}</div><p class="sub" style="margin-bottom:1.1rem">${esc(b[1])}</p>`).join("");
+  document.getElementById('driftlist').innerHTML =
+    `<p class="dnote">Nothing here feeds the ledger — no checkboxes, no counts. Watch when the day's real work is done. The ⌨ chip means a keyboard pass is owed later; only that pass touches gates.</p>` +
+    DRIFT.map((L, li) => `<div class="dlayer d${li}"><div class="k">${esc(L[0])}</div>` + L[1].map(v => `
+      <div class="row"><span><a href="${v[1]}" target="_blank" rel="noopener"><b>${esc(v[0])}</b></a> <span class="chip cat">${esc(v[2])}</span>${v[3]?' <span class="chip kb">⌨ keyboard pass later</span>':''}<span class="sub">${esc(v[4])}</span></span></div>`).join("") + `</div>`).join("");
+  bindChecks();
+}
+function openPlate(pi){
+  const [id, hash, title, sub] = PLATES[pi];
+  document.getElementById('platesTitle').textContent = title;
+  document.getElementById('platesSub').textContent = sub;
+  document.querySelectorAll('#plates .plate').forEach(el => el.classList.toggle('on', el.id === id));
+  document.querySelectorAll('#prail .tbtn').forEach((b, i) => b.classList.toggle('act', i === pi));
+  openOv(document.getElementById('plates'));
+  document.getElementById('plates').scrollTop = 0;
+  history.replaceState(null, '', '#' + hash);
+}
+const prail = document.getElementById('prail'), refnav = document.getElementById('refnav');
+PLATES.forEach((p, i) => {
+  [prail, refnav].forEach(host => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.style.marginRight = '0';
+    b.textContent = p[1];
+    b.addEventListener('click', () => openPlate(i));
+    host.appendChild(b);
   });
+});
 
-  // quiet return: step back through the layers if we came from within; otherwise, the surface
-  const ret=document.getElementById("return");
-  if(ret){
-    ret.addEventListener("click",e=>{
-      e.preventDefault();
-      let sameSite=false;
-      try{ sameSite=document.referrer&&new URL(document.referrer).origin===location.origin; }catch(_){}
-      leave(()=>{ if(sameSite&&history.length>1) history.back(); else location.href="index.html"; });
-    });
-  }
-  // the two doors in the footer
-  document.querySelectorAll("a[data-door]").forEach(a=>{
-    a.addEventListener("click",e=>{ e.preventDefault(); leave(()=>location.href=a.getAttribute("href")); });
+/* ---- wiring ---- */
+document.getElementById('ledgerBtn').addEventListener('click', () => { auditStatus(); openOv(document.getElementById('ledger')); });
+document.getElementById('sndBtn').addEventListener('click', () => { if(window.__sndToggle) window.__sndToggle(); });
+document.getElementById('libBtn').addEventListener('click', () => {
+  openOv(document.getElementById('library'));
+  history.replaceState(null, '', '#resources');
+});
+document.getElementById('expBtn').addEventListener('click', exportProgress);
+document.getElementById('impBtn').addEventListener('click', importProgress);
+document.getElementById('rstBtn').addEventListener('click', resetProgress);
+document.getElementById('auditBtn').addEventListener('click', logAudit);
+const navEl = document.getElementById('nav');
+MNAME.forEach((nm, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'tbtn'; b.style.marginRight = '0';
+  b.textContent = String(i).padStart(2, '0') + ' · ' + nm;
+  b.addEventListener('click', () => {
+    closeOv();
+    if(window.__jump) window.__jump(i);
+    else { const d = document.getElementById('d' + i); if(d) d.scrollIntoView({ block:'center' }); }
   });
-  // bfcache: returning via the browser should never leave the veil down
-  window.addEventListener("pageshow",e=>{ if(e.persisted&&veil) veil.classList.remove("on"); });
-})();
+  navEl.appendChild(b);
+});
+
+renderRes(); renderPlates(); updateBar(); updateAffordances(); auditStatus();
+refreshMarks(); MARKS.set(MARKT);   /* completed marks are lit from first paint */
+
+/* deep-link parity with the old atlas engine: #gates #capstones #papers
+   #insights #traps #compute #bib #drift #resources (#roadmap → the journey) */
+{
+  const h = location.hash.slice(1);
+  const pi = PLATES.findIndex(p => p[1] === h);
+  if(pi >= 0) openPlate(pi);
+  else if(h === 'resources'){ openOv(document.getElementById('library')); }
+  else if(h === 'roadmap'){ history.replaceState(null, '', '#s0'); }
+}
 
 </script>
 </body>
