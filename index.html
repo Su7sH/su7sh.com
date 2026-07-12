@@ -566,26 +566,156 @@ body::before {
 .seam:hover::after,
 .seam:focus::after { opacity: .6; height: 1px; }
 
-.atlas-gate {
+/* ───── the drop — one liquid holding both metals, hanging above the robot.
+        it is the door now; the coordinates are only coordinates again. ───── */
+.hero-drop {
+  --drop: clamp(99px, 11.5vw, 140px);
+  position: fixed;
+  left: 0; top: 0;
+  width: var(--drop);
+  height: var(--drop);
+  z-index: 30;
   cursor: pointer;
-  transition: filter .9s ease, text-shadow .9s ease;
-}
-.atlas-gate:hover,
-.atlas-gate:focus {
-  filter: brightness(1.18);
-  text-shadow: 0 0 26px rgba(100,206,251,.3);
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 1.2s ease;
 }
-/* the coordinate resolves — a brief flare as the map opens */
-.atlas-gate.firing {
-  animation: gateFire .95s ease both;
+.hero-drop.live { opacity: 1; }
+.hero-drop canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
 }
-@keyframes gateFire {
-  0%   { filter: brightness(1); }
-  30%  { filter: brightness(1.7); text-shadow: 0 0 46px rgba(100,206,251,.75), 0 0 12px rgba(100,206,251,.5); letter-spacing: .04em; }
-  100% { filter: brightness(1.25); text-shadow: 0 0 30px rgba(100,206,251,.4); letter-spacing: .06em; }
+/* sparks a departing bead dissolves into — they sail off and fade */
+.drop-motes {
+  position: fixed; inset: 0;
+  z-index: 30;
+  pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) { .atlas-gate.firing { animation: none; } }
+.drop-mote {
+  position: absolute;
+  width: 9px; height: 9px;
+  margin: -4.5px;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: moteFly var(--dur, 3s) cubic-bezier(.2,.5,.3,1) forwards;
+}
+.drop-mote.cy {
+  background: radial-gradient(circle, rgba(210,240,255,.95), rgba(100,206,251,.5) 45%, transparent 70%);
+  box-shadow: 0 0 14px 3px rgba(100,206,251,.5);
+}
+.drop-mote.au {
+  background: radial-gradient(circle, rgba(255,240,214,.95), rgba(212,160,70,.5) 45%, transparent 70%);
+  box-shadow: 0 0 14px 3px rgba(212,160,70,.45);
+}
+/* touching distance: the cursor becomes a quiet instrument — a ring, a gold point, one word */
+html.drop-near, html.drop-near * { cursor: none !important; }
+.drop-cursor {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 130;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity .28s ease;
+}
+html.drop-near .drop-cursor { opacity: 1; }
+.drop-cursor::before {
+  content: '';
+  position: absolute;
+  left: -19px; top: -19px;
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(212,160,70,.9) 0 2px, transparent 3px),
+    radial-gradient(circle, transparent 0 58%, rgba(120,190,255,.10) 66%, rgba(190,222,255,.75) 74%, rgba(238,246,255,.9) 77%, rgba(190,222,255,.35) 82%, transparent 90%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+}
+.drop-cursor span {
+  position: absolute;
+  left: 24px; top: 14px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: lowercase;
+  color: rgba(200,228,255,.85);
+  text-shadow: 0 0 8px rgba(100,206,251,.45);
+  white-space: nowrap;
+  transition: color .3s ease;
+}
+.drop-cursor.press::before { transform: scale(.72); }
+.drop-cursor.press span { color: rgba(232,196,120,.95); }
+@keyframes moteFly {
+  0%   { opacity: 0; transform: translate(0,0) scale(.6); }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, -90px)) scale(.25); }
+}
+.hero-drop:focus-visible::after {
+  content: '';
+  position: absolute; inset: 7%;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(100,206,251,.35), 0 0 30px rgba(100,206,251,.18);
+}
+.hero-drop.firing { pointer-events: none; }
+/* no-WebGL fallback: a still drop, painted instead of computed */
+.hero-drop-fallback {
+  display: none;
+  position: absolute; inset: 10%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 63% 67%, rgba(212,160,70,.75) 0%, rgba(212,160,70,0) 24%),
+    radial-gradient(circle at 32% 28%, #eef2f6 0%, #b3bcc6 22%, #5a636e 50%, #171b20 82%, #0b0d10 100%);
+  box-shadow:
+    inset -10px -14px 26px rgba(0,0,0,.55),
+    inset 7px 9px 20px rgba(255,255,255,.14),
+    0 0 36px rgba(100,206,251,.10);
+}
+.hero-drop.flat canvas { display: none; }
+.hero-drop.flat .hero-drop-fallback { display: block; }
+@media (max-width: 719px)  { .hero-drop { --drop: 81px; } }
+@media (max-height: 780px) { .hero-drop { --drop: 92px; } }
+
+/* the liquid swallows the screen — expands from the drop, lands on the threshold */
+.drop-veil {
+  position: fixed; inset: 0;
+  z-index: 120;
+  background: #05060a;
+  visibility: hidden;
+  pointer-events: none;
+}
+.drop-veil.on { visibility: visible; pointer-events: auto; }
+.drop-veil.rm { opacity: 0; transition: opacity .38s ease; clip-path: none !important; }
+/* a ring of light leads the liquid outward — light announces, the dark follows.
+   painted as a gradient annulus fully inside its own bounds: nothing to clip, no square. */
+.drop-ring {
+  position: fixed;
+  z-index: 121;
+  border-radius: 999px;
+  transform: scale(0);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  background: radial-gradient(circle,
+    transparent 0 44%,
+    rgba(120,190,255,.06) 46.5%,
+    rgba(190,222,255,.5) 49%,
+    rgba(240,248,255,.85) 50%,
+    rgba(212,160,70,.4) 51.5%,
+    rgba(212,160,70,.1) 54%,
+    transparent 57.5%);
+}
+.drop-ring.on {
+  visibility: visible;
+  animation: ringOut 950ms cubic-bezier(.66,.02,.26,1) forwards;
+}
+@keyframes ringOut {
+  0%   { opacity: 0; }
+  10%  { opacity: .95; }
+  60%  { opacity: .55; }
+  100% { opacity: 0; }
+}
 
 /* ───── generic long-form section ───── */
 .long-sec {
@@ -1117,7 +1247,7 @@ body::before {
       </div>
       <h1 class="hero-title">
         <span class="line">Suyash.</span>
-        <span class="line hero-coords"><span class="shiny-text atlas-gate" id="heroCoords" tabindex="0" role="link" aria-label="open the atlas">18°40′56″ N · 73°55′11″ E</span></span>
+        <span class="line hero-coords"><span class="shiny-text" id="heroCoords">18°40′56″ N · 73°55′11″ E</span></span>
       </h1>
       <div class="hero-ctas">
         <a href="#experience" class="btn btn-primary">See experience
@@ -1139,6 +1269,15 @@ body::before {
     </div>
   </div>
 </section>
+
+<div class="drop-veil" id="dropVeil" aria-hidden="true"></div>
+<div class="drop-ring" id="dropRing" aria-hidden="true"></div>
+<div class="drop-motes" id="dropMotes" aria-hidden="true"></div>
+<div class="drop-cursor" id="dropCursor" aria-hidden="true"><span>enter</span></div>
+<div class="hero-drop" id="heroDrop" tabindex="0" role="link" aria-label="open the atlas">
+  <canvas id="dropGl" aria-hidden="true"></canvas>
+  <div class="hero-drop-fallback" aria-hidden="true"></div>
+</div>
 
 <!-- ─────────────── ABOUT (seam lives here) ─────────────── -->
 <section class="about reveal" id="about">
@@ -1635,31 +1774,495 @@ if (seam) {
   });
 }
 
-/* ─── the atlas — the map behind the work ─── */
-const atlasGate = document.getElementById('heroCoords');
-if (atlasGate) {
-  const enterAtlas = () => {
-    atlasGate.classList.add('firing');
-    document.body.style.transition = 'opacity 1s cubic-bezier(.4,0,.2,1)';
-    document.body.style.opacity = '0';
-    setTimeout(() => { window.location.href = 'atlas.html'; }, 900);
+/* ─── the drop — the atlas condensed into one bead of liquid metal.
+       mercury and gold, not yet separated; the threshold is where they split.
+       same studio, same physics as the Two Forms, so the rhyme is exact. ─── */
+(function initHeroDrop() {
+  const drop = document.getElementById('heroDrop');
+  const dveil = document.getElementById('dropVeil');
+  const dring = document.getElementById('dropRing');
+  const motesEl = document.getElementById('dropMotes');
+  const dcur = document.getElementById('dropCursor');
+  if (!drop || !dveil || !dring) return;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('dropGl');
+
+  const VERT = [
+    '#version 300 es',
+    'void main(){',
+    '  vec2 p = vec2((gl_VertexID<<1 & 2), (gl_VertexID & 2));',
+    '  gl_Position = vec4(p*2.-1., 0., 1.);',
+    '}'
+  ].join('\n');
+
+  const FRAG = [
+    '#version 300 es',
+    'precision highp float;',
+    'out vec4 O;',
+    'uniform vec2 uRes;',
+    'uniform float uTime;',
+    'uniform float uHover;',
+    'uniform float uFire;',
+    'uniform vec2 uMouse;',
+    'uniform float uMotion;',
+    'uniform float uTravel;',
+    'uniform float uNear;',
+    'uniform float uIntro;',
+    'uniform vec4 uB0;',
+    'uniform vec4 uB1;',
+    'uniform vec4 uB2;',
+
+    'float smin(float a, float b, float k){',
+    '  float h = clamp(.5 + .5*(b-a)/k, 0., 1.);',
+    '  return mix(b, a, h) - k*h*(1.-h);',
+    '}',
+
+    'float mapD(vec3 p0){',
+    '  float t = uTime*.55*uMotion + 11.;',
+    /* the whole body turns, slowly — reflections travel instead of sitting still */
+    '  float rc = cos(t*.12), rs = sin(t*.12);',
+    '  vec3 p = p0;',
+    '  p.xz = mat2(rc, -rs, rs, rc) * p.xz;',
+    '  float sw = (1. + uHover*.09 + uNear*.05 + uFire*uFire*.85) * max(uIntro, .001);',
+    '  vec3 o1 = vec3(sin(t*.62),     cos(t*.81),     sin(t*.44))     * .09;',
+    '  vec3 o2 = vec3(cos(t*.53+2.1), sin(t*.71+1.0), cos(t*.90+3.1)) * .19;',
+    '  vec3 o3 = vec3(sin(t*.85+4.2), sin(t*.62+2.2), cos(t*.57+1.3)) * .28;',
+    '  float d = length(p-o1) - .52*sw;',
+    '  d = smin(d, length(p-o2) - .28*sw, .30);',
+    '  d = smin(d, length(p-o3) - .20*sw, .26);',
+    /* beads the creature sheds — their lives are scripted in JS so a departing
+       bead can hand itself to a DOM spark the moment it dissolves */
+    '  d = smin(d, length(p0 - uB0.xyz) - uB0.w, .20);',
+    '  d = smin(d, length(p0 - uB1.xyz) - uB1.w, .20);',
+    '  d = smin(d, length(p0 - uB2.xyz) - uB2.w, .20);',
+    /* a small lobe of the liquid leans toward the cursor — curiosity */
+    '  vec3 mb = vec3(uMouse*.75, .35);',
+    '  d = smin(d, length(p0-mb) - (.02 + .17*uHover), .32);',
+    '  return d;',
+    '}',
+
+    'vec3 normalAt(vec3 p){',
+    '  const vec2 e = vec2(.0018, -.0018);',
+    '  return normalize(',
+    '    e.xyy*mapD(p+e.xyy) + e.yyx*mapD(p+e.yyx) +',
+    '    e.yxy*mapD(p+e.yxy) + e.xxx*mapD(p+e.xxx));',
+    '}',
+
+    /* the same studio the threshold metals reflect — w=1 mercury (cool), w=0 gold (warm) */
+    'vec3 env(vec3 rd, float w){',
+    '  float up = rd.y*.5 + .5;',
+    '  vec3 col = mix(vec3(.012,.014,.020), vec3(.05,.06,.085), pow(up, 2.));',
+    '  float key = exp(-pow((rd.y - .55)*4.5, 2.));',
+    '  col += vec3(1.2,1.28,1.42) * key * 1.35;',
+    '  float strip = exp(-pow((rd.y + .02)*18., 2.));',
+    '  col += vec3(.9,.95,1.05) * strip * 1.1;',
+    '  float fill = exp(-pow((rd.y + .55)*4., 2.));',
+    '  col += mix(vec3(.30,.26,.20), vec3(.20,.23,.28), w) * fill * .35;',
+    '  float l1 = pow(max(dot(rd, normalize(vec3(-.55,.45,.42))), 0.), 14.);',
+    '  col += vec3(.45,.75,1.15) * l1 * mix(.35, 1.35, w);',
+    '  float l2 = pow(max(dot(rd, normalize(vec3(.62,-.16,.40))), 0.), 16.);',
+    '  col += vec3(1.25,.58,.18) * l2 * mix(1.5, .12, w);',
+    '  col *= mix(.3, 1., smoothstep(-.95,-.05, rd.y));',
+    '  return col;',
+    '}',
+
+    'void main(){',
+    '  vec2 px = (2.*gl_FragCoord.xy - uRes) / uRes.y;',
+    '  vec3 ro = vec3(0., 0., 3.2);',
+    '  vec3 rd = normalize(vec3(px, -2.35));',
+    '  float t = 0.; float d; bool hit = false; float md = 1e3;',
+    '  for (int i = 0; i < 96; i++){',
+    '    d = mapD(ro + rd*t);',
+    '    md = min(md, d);',
+    '    if (d < .0016*max(t, 1.)) { hit = true; break; }',
+    '    t += d*.95;',
+    '    if (t > 7.) break;',
+    '  }',
+    '  vec3 col = vec3(0.); float a = 0.;',
+    '  if (hit){',
+    '    vec3 pos = ro + rd*t;',
+    '    vec3 n = normalAt(pos);',
+    /* a vein of gold swims through the mercury — the two forms, not yet separated */
+    '    float tt = uTime*.5*uMotion;',
+    '    float vn = sin(pos.x*2.1 + pos.y*1.6 + tt*.7) + sin(pos.y*2.9 - pos.z*2.3 + tt*.53)*.7;',
+    '    float gold = smoothstep(.12, 1.0, vn);',
+    '    float w = 1. - gold;',
+    '    float cosT = clamp(dot(-rd, n), 0., 1.);',
+    '    vec3 F0 = mix(vec3(.68,.71,.74), vec3(1.0,.70,.29), gold);',
+    '    vec3 F = F0 + (1. - F0) * pow(1. - cosT, 5.);',
+    '    vec3 R = reflect(rd, n);',
+    '    vec3 eG = env(normalize(R + n*.013), w);',
+    '    vec3 eB = env(normalize(R + n*.026), w);',
+    '    col = vec3(env(R, w).r, eG.g, eB.b) * F;',
+    '    vec3 L1 = normalize(vec3(-.55,.45,.42));',
+    '    vec3 L2 = normalize(vec3(.62,-.16,.40));',
+    '    col += vec3(1.3,1.45,1.7) * pow(max(dot(R, L1), 0.), 120.) * F * mix(.5, 1.3, w);',
+    '    col += vec3(1.6,.9,.45)   * pow(max(dot(R, L2), 0.),  90.) * F * mix(1.1, .12, w);',
+    /* the gold vein breathes — molten, lit from within */
+    '    float seam = exp(-pow((vn - .56)*3.2, 2.));',
+    '    float pulse = .55 + .45*sin(uTime*.8*uMotion + vn*2.3);',
+    '    col += vec3(1.12,.72,.32) * seam * (.10 + .38*pulse);',
+    /* thin-film shimmer at grazing angles — the not-quite-of-this-world tell */
+    '    vec3 irid = .5 + .5*cos(6.28318*(pow(1.-cosT, 1.4)*1.6 + vn*.13 + vec3(0., .33, .67)));',
+    '    col += irid * pow(1.-cosT, 3.) * .12;',
+    '    col += vec3(.82,.75,.71) * uFire*uFire * .35;',
+    '    col *= 1. + .18*uTravel + .16*uNear;',
+    '    a = 1.;',
+    '  } else {',
+    /* near-miss rays leave a faint cool halo — soft edge and quiet presence */
+    '    a = exp(-max(md, 0.)*7.) * (.10 + .10*uHover + .30*uFire + .22*uTravel + .30*uNear);',
+    '    col = vec3(.45,.72,1.);',
+    '  }',
+    /* motes — fireflies of cyan and gold circling the drop, occluded by it */
+    '  float mtt = uTime*.5*uMotion;',
+    '  for (int i = 0; i < 3; i++){',
+    '    float fi = float(i);',
+    '    vec3 mp = vec3(cos(mtt*(.7+fi*.13)+fi*2.1)*1.12, sin(mtt*(.5+fi*.11)+fi*1.4)*.78, .5*sin(mtt*.4+fi*2.6));',
+    '    vec3 wv = mp - ro;',
+    '    float proj = dot(wv, rd);',
+    '    if (hit && proj > t) continue;',
+    '    float dd = length(wv - rd*max(proj, 0.));',
+    '    float tw = .5 + .5*sin(uTime*2.3*uMotion + fi*2.7);',
+    '    float g = exp(-dd*dd*1200.) * (.35 + .5*tw);',
+    '    col += mix(vec3(.55,.8,1.1), vec3(1.05,.75,.42), mod(fi, 2.)) * g;',
+    '    a = max(a, min(g*1.4, 1.));',
+    '  }',
+    /* the halo dissolves well before the canvas edge — no square is ever seen */
+    '  a *= 1. - smoothstep(1.12, 1.34, length(px));',
+    '  col = clamp((col*(2.51*col + .03))/(col*(2.43*col + .59) + .14), 0., 1.);',
+    '  col = pow(col, vec3(1./2.2));',
+    '  O = vec4(col*a, a);',
+    '}'
+  ].join('\n');
+
+  let gl = null, ok = false;
+  const uni = {};
+  try {
+    gl = canvas.getContext('webgl2', { alpha: true, antialias: true });
+    if (gl) {
+      const sh = (type, src) => {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src); gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+        return s;
+      };
+      const pr = gl.createProgram();
+      gl.attachShader(pr, sh(gl.VERTEX_SHADER, VERT));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FRAG));
+      gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('link');
+      gl.useProgram(pr);
+      ['uRes','uTime','uHover','uFire','uMouse','uMotion','uTravel','uNear','uIntro','uB0','uB1','uB2'].forEach(n => { uni[n] = gl.getUniformLocation(pr, n); });
+      ok = true;
+    }
+  } catch (err) { ok = false; }
+  if (!ok) drop.classList.add('flat');
+
+  const size = () => {
+    const r = drop.getBoundingClientRect();
+    const dpr = Math.min((window.devicePixelRatio || 1) * 1.5, 3);
+    canvas.width  = Math.max(2, Math.round(r.width  * dpr));
+    canvas.height = Math.max(2, Math.round(r.height * dpr));
   };
-  atlasGate.addEventListener('click', e => { e.preventDefault(); enterAtlas(); });
-  atlasGate.addEventListener('keydown', e => {
+
+  /* ---------- the creature's mind ----------
+     a viewport being: it drifts anywhere on screen, stays with the reader
+     through every scroll, comes to a resting cursor, and glows to be touched.
+     it never darts and it never flees. */
+
+  let raf = 0, last = 0, onscreen = true, visible = !document.hidden;
+  let hover = 0, hoverT = 0, fire = 0, firing = false, hoverOn = false;
+  let mx = 0, my = 0, tmx = 0, tmy = 0, travel = 0;
+  let near = 0, nearT = 0, nearOn = false, intro = 0, introE = 0;
+  let ccx = 0, ccy = 0;
+
+  let hw = 0, hh = 0, dsz = 0;
+  const measure = () => { hw = window.innerWidth; hh = window.innerHeight; dsz = drop.offsetWidth || 1; };
+  measure();
+  const pos = {
+    x: dsz + Math.random() * Math.max(hw - dsz * 2, 1),
+    y: dsz + Math.random() * Math.max(hh * .7 - dsz, 1)
+  };
+  const vel = { x: 0, y: 0 };
+  let anchor = [pos.x, pos.y], nextPick = performance.now() + 6000;
+  const cursor = { x: 0, y: 0, tm: -1e9, in: false };
+
+  const place = () => {
+    drop.style.transform = 'translate3d(' + (pos.x - dsz / 2).toFixed(1) + 'px,' + (pos.y - dsz / 2).toFixed(1) + 'px,0)';
+  };
+  place();
+
+  window.addEventListener('pointermove', e => {
+    if (!cursor.in) { ccx = e.clientX; ccy = e.clientY; }
+    cursor.x = e.clientX; cursor.y = e.clientY;
+    cursor.tm = performance.now(); cursor.in = true;
+  }, { passive: true });
+  document.addEventListener('mouseleave', () => { cursor.in = false; });
+
+  /* scrolling is a current it swims against, briefly */
+  let lastScroll = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const sy = window.scrollY, dscr = sy - lastScroll; lastScroll = sy;
+    vel.y -= Math.max(-1, Math.min(1, dscr * .01)) * .05;
+  }, { passive: true });
+
+  const behave = (now, dt) => {
+    const focused = document.activeElement === drop;
+    if (now >= nextPick && !focused) {
+      const pd = dsz * .7 + 16;
+      anchor = [pd + Math.random() * (hw - pd * 2), pd + Math.random() * (hh - pd * 2)];
+      nextPick = now + 12000 + Math.random() * 12000;
+    }
+    let tx = anchor[0], ty = anchor[1];
+    /* a nearby or resting cursor draws it close — near enough to touch */
+    const ddx = pos.x - cursor.x, ddy = pos.y - cursor.y;
+    const distC = Math.hypot(ddx, ddy) || 1;
+    const idle = now - cursor.tm;
+    const resting = idle > 350 && idle < 22000;
+    if (cursor.in && !focused && (distC < 340 || resting)) {
+      const keep = dsz * .55 + 26;
+      tx = cursor.x + (ddx / distC) * keep;
+      ty = cursor.y + (ddy / distC) * keep - 14;
+    }
+    /* it drifts — never darts — and it breathes while it rests */
+    const s = now * .001;
+    tx += Math.sin(s * .13) * 24 + Math.sin(s * .07 + 2.) * 16;
+    ty += Math.cos(s * .11) * 18 + Math.sin(s * .17 + 1.) * 11 + Math.sin(s * .55) * 5;
+    const pad = dsz * .6 + 8;
+    tx = Math.max(pad, Math.min(hw - pad, tx));
+    ty = Math.max(pad, Math.min(hh - pad, ty));
+    const k = .0000007, c = .005;
+    vel.x += (tx - pos.x) * k * dt - vel.x * c * dt;
+    vel.y += (ty - pos.y) * k * dt - vel.y * c * dt;
+    pos.x += vel.x * dt;
+    pos.y += vel.y * dt;
+    travel = Math.min(1, Math.hypot(vel.x, vel.y) / .16);
+    place();
+    /* the glow leads; the cursor transforms only at touching distance */
+    nearT = Math.max(0, Math.min(1, 1 - distC / 260));
+    const isNear = cursor.in && distC < dsz * .5 + 80;
+    if (isNear !== nearOn) {
+      nearOn = isNear;
+      document.documentElement.classList.toggle('drop-near', nearOn);
+    }
+    /* it watches you, wherever you are; alone, it looks around, dreaming */
+    if (cursor.in) {
+      tmx = Math.max(-1, Math.min(1, (cursor.x - pos.x) / 340)) * .8;
+      tmy = Math.max(-1, Math.min(1, -(cursor.y - pos.y) / 340)) * .8;
+    } else {
+      tmx = Math.sin(now * .00037) * .5;
+      tmy = Math.sin(now * .00023 + 1.) * .35;
+    }
+  };
+
+  /* ---------- shedding: beads leave, fall, and become sparks ---------- */
+  const beads = [0, 1, 2].map(i => ({
+    phase: 'gone',
+    until: performance.now() + 2000 + i * 3200,
+    a0: Math.random() * 6.283, spin: .00028 + Math.random() * .0002,
+    x: 0, y: 0, z: 0, r: -.3,
+    dx0: 0, dy0: 0, dz0: 0, dirx: 0, diry: 0, spawned: false
+  }));
+
+  const spawnSparks = b => {
+    if (!motesEl) return;
+    const cr = canvas.getBoundingClientRect();
+    const u = b.x * 2.35 / (3.2 - b.z);
+    const v = b.y * 2.35 / (3.2 - b.z);
+    const sx = cr.left + cr.width / 2 + u * cr.height / 2;
+    const sy = cr.top + cr.height / 2 - v * cr.height / 2;
+    const n = 1 + (Math.random() < .5 ? 1 : 0);
+    for (let i = 0; i < n; i++) {
+      const sp = document.createElement('span');
+      sp.className = 'drop-mote ' + (Math.random() < .55 ? 'cy' : 'au');
+      const ang = -Math.PI / 2 + (Math.random() - .5) * 2.4;
+      const fly = 90 + Math.random() * 150;
+      sp.style.left = sx.toFixed(1) + 'px';
+      sp.style.top = sy.toFixed(1) + 'px';
+      sp.style.setProperty('--dx', (Math.cos(ang) * fly).toFixed(0) + 'px');
+      sp.style.setProperty('--dy', (Math.sin(ang) * fly).toFixed(0) + 'px');
+      sp.style.setProperty('--dur', (2800 + Math.random() * 1800).toFixed(0) + 'ms');
+      sp.addEventListener('animationend', () => sp.remove());
+      motesEl.appendChild(sp);
+    }
+  };
+
+  const beadTick = now => {
+    for (const b of beads) {
+      const ang = b.a0 + now * b.spin;
+      const orad = .74 + .16 * Math.sin(now * .0004 + b.a0);
+      const ox = Math.cos(ang) * orad;
+      const oy = Math.sin(ang * 1.27 + b.a0) * orad * .6;
+      const oz = Math.sin(ang * .83 + b.a0 * 2.) * orad * .45;
+      if (b.phase === 'gone') {
+        b.r = -.3;
+        if (now > b.until) { b.phase = 'in'; b.until = now + 1200; }
+      } else if (b.phase === 'in') {
+        const g = Math.max(0, Math.min((1200 - (b.until - now)) / 1200, 1));
+        b.x = ox; b.y = oy; b.z = oz;
+        b.r = .092 * g * g;
+        if (now > b.until) { b.phase = 'orbit'; b.until = now + 6000 + Math.random() * 7000; }
+      } else if (b.phase === 'orbit') {
+        b.x = ox; b.y = oy; b.z = oz;
+        b.r = .088 + .016 * Math.sin(now * .003 + b.a0);
+        if (now > b.until) {
+          b.phase = 'leave'; b.until = now + 1500;
+          const m = Math.hypot(ox, oy) || 1;
+          b.dx0 = ox; b.dy0 = oy; b.dz0 = oz;
+          b.dirx = ox / m; b.diry = oy / m;
+          b.spawned = false;
+        }
+      } else {
+        /* leave: it drifts off, droops, dissolves — and hands itself to a spark */
+        const g = Math.max(0, Math.min((1500 - (b.until - now)) / 1500, 1));
+        const e = g * g * (3 - 2 * g);
+        b.x = b.dx0 + b.dirx * e * .38;
+        b.y = b.dy0 + b.diry * e * .38 - g * g * .34;
+        b.z = b.dz0;
+        b.r = .092 * (1 - Math.pow(Math.max(g - .62, 0) / .38, 2));
+        if (!b.spawned && g > .8) { b.spawned = true; spawnSparks(b); }
+        if (now > b.until) { b.phase = 'gone'; b.until = now + 2500 + Math.random() * 6000; b.r = -.3; }
+      }
+    }
+    const rE = r => (r > 0 ? r * introE : r);
+    gl.uniform4f(uni.uB0, beads[0].x, beads[0].y, beads[0].z, rE(beads[0].r));
+    gl.uniform4f(uni.uB1, beads[1].x, beads[1].y, beads[1].z, rE(beads[1].r));
+    gl.uniform4f(uni.uB2, beads[2].x, beads[2].y, beads[2].z, rE(beads[2].r));
+  };
+
+  const beadStatic = () => {
+    gl.uniform4f(uni.uB0, -.62, .35, .2, .085);
+    gl.uniform4f(uni.uB1, .55, -.42, .25, .075);
+    gl.uniform4f(uni.uB2, .15, .68, -.3, .08);
+  };
+
+  const frame = now => {
+    raf = 0;
+    if (!ok || !onscreen || !visible) { last = 0; return; }
+    const dt = last ? Math.min(now - last, 50) : 16;
+    last = now;
+    intro = RM ? 1 : Math.min(1, intro + dt * .00055);
+    introE = intro * intro * (3 - 2 * intro);
+    if (RM) beadStatic();
+    else { if (!firing) behave(now, dt); beadTick(now); }
+    hover += (hoverT - hover) * Math.min(1, dt * .006);
+    near += ((cursor.in && !RM ? nearT : 0) - near) * Math.min(1, dt * .004);
+    if (dcur && cursor.in) {
+      ccx += (cursor.x - ccx) * Math.min(1, dt * .022);
+      ccy += (cursor.y - ccy) * Math.min(1, dt * .022);
+      dcur.style.transform = 'translate3d(' + ccx.toFixed(1) + 'px,' + ccy.toFixed(1) + 'px,0)';
+    }
+    mx += (tmx - mx) * Math.min(1, dt * .005);
+    my += (tmy - my) * Math.min(1, dt * .005);
+    if (firing) fire = Math.min(1, fire + dt * .0024);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(uni.uRes, canvas.width, canvas.height);
+    gl.uniform1f(uni.uTime, now / 1000);
+    gl.uniform1f(uni.uHover, hover);
+    gl.uniform1f(uni.uFire, fire);
+    gl.uniform2f(uni.uMouse, mx, my);
+    gl.uniform1f(uni.uMotion, RM ? 0 : 1);
+    gl.uniform1f(uni.uTravel, RM ? 0 : travel);
+    gl.uniform1f(uni.uNear, near);
+    gl.uniform1f(uni.uIntro, RM ? 1 : introE);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    raf = requestAnimationFrame(frame);
+  };
+  const kick = () => { if (ok && onscreen && visible && !raf) raf = requestAnimationFrame(frame); };
+
+  if (ok) {
+    size();
+    window.addEventListener('resize', () => { measure(); size(); });
+    document.addEventListener('visibilitychange', () => { visible = !document.hidden; kick(); });
+    drop.classList.add('live');
+    kick();
+  } else {
+    drop.classList.add('live');
+  }
+
+  drop.addEventListener('pointerenter', () => {
+    hoverOn = true; hoverT = 1;
+    if (dcur) dcur.classList.add('press');
+  });
+  drop.addEventListener('pointerleave', () => {
+    hoverOn = false; hoverT = 0;
+    if (dcur) dcur.classList.remove('press');
+  });
+
+  /* click, in three beats: the drop gathers itself; a ring of light bursts
+     outward announcing the liquid; the dark follows and swallows the screen */
+  const enterAtlas = () => {
+    if (firing) return;
+    firing = true;
+    drop.classList.add('firing');
+    document.documentElement.classList.remove('drop-near');
+    const cx = pos.x.toFixed(1);
+    const cy = pos.y.toFixed(1);
+    if (RM || !ok) {
+      dveil.classList.add('on', 'rm');
+      requestAnimationFrame(() => { dveil.style.opacity = '1'; });
+      setTimeout(() => { window.location.href = 'atlas.html'; }, 430);
+      return;
+    }
+    /* beat one — it gathers itself, wherever it happens to be */
+    drop.style.transition = 'transform .52s cubic-bezier(.34,.9,.36,1.12)';
+    drop.style.transform = 'translate3d(' + (pos.x - dsz / 2).toFixed(1) + 'px,' + (pos.y - dsz / 2).toFixed(1) + 'px,0) scale(1.5)';
+    dveil.style.background = 'radial-gradient(circle at ' + cx + 'px ' + cy + 'px, #101722 0%, #070a10 34%, #05060a 62%, #010204 100%)';
+    dveil.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)';
+    dveil.classList.add('on');
+    /* the ring is laid out at full size and scaled up from near-zero:
+       painted entirely inside its bounds, it can never clip to a square */
+    const D = Math.ceil(Math.max(window.innerWidth, window.innerHeight) * 3.1);
+    dring.style.width = D + 'px';
+    dring.style.height = D + 'px';
+    dring.style.marginLeft = (-D / 2) + 'px';
+    dring.style.marginTop = (-D / 2) + 'px';
+    dring.style.left = cx + 'px';
+    dring.style.top = cy + 'px';
+    dring.style.transition = 'none';
+    dring.style.transform = 'scale(.015)';
+    /* beat two — light announces it; beat three — the dark follows */
+    setTimeout(() => {
+      dring.classList.add('on');
+      dring.style.transition = 'transform 950ms cubic-bezier(.66,.02,.26,1)';
+      dring.style.transform = 'scale(1)';
+      dveil.style.transition = 'clip-path 950ms cubic-bezier(.66,.02,.26,1)';
+      dveil.style.clipPath = 'circle(142vmax at ' + cx + 'px ' + cy + 'px)';
+    }, 480);
+    setTimeout(() => { window.location.href = 'atlas.html'; }, 1500);
+  };
+  drop.addEventListener('click', e => { e.preventDefault(); enterAtlas(); });
+  drop.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       enterAtlas();
     }
   });
-}
+
+  window.__dropReset = () => {
+    firing = false; fire = 0;
+    drop.classList.remove('firing');
+    drop.style.transition = 'none';
+    place();
+    dveil.classList.remove('on', 'rm');
+    dveil.style.transition = 'none';
+    dveil.style.clipPath = '';
+    dveil.style.opacity = '';
+    dring.classList.remove('on');
+    dring.style.transition = 'none';
+    dring.style.transform = 'scale(0)';
+    kick();
+  };
+})();
 
 /* ─── bfcache sanity: coming back from a deeper layer must never leave the face dark ─── */
 window.addEventListener('pageshow', e => {
   if (e.persisted) {
     document.body.style.transition = 'none';
     document.body.style.opacity = '1';
-    const g = document.getElementById('heroCoords');
-    if (g) g.classList.remove('firing');
+    if (window.__dropReset) window.__dropReset();
   }
 });
 
