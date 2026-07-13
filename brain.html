@@ -197,6 +197,42 @@
     font-size:2.15rem; line-height:1.1; margin:0 0 .6rem; color:#e8f2fa; }
   .ov p{ font-size:14.5px; line-height:1.7; color:rgba(230,241,250,.88); max-width:58ch; margin:0 0 .6rem; }
   .ov a{ color:#a5ddf7; text-decoration:none; border-bottom:1px solid rgba(143,210,242,.22); }
+
+  /* ---- thirteen entrances: the folio arrives wearing the world it was
+     opened from — its accent on the kickers and links, its deep color
+     washed into the panel, and the one grammar (the flowing filament)
+     alive at its shoreline, dressed in this world's clothes ---- */
+  #folio{ background-image:
+      linear-gradient(to right, transparent 0, var(--wTint, rgba(0,0,0,0)) 55%),
+      linear-gradient(to right, transparent 0, rgba(3,7,12,.7) 4%, rgba(3,7,12,.93) 15%, rgba(4,8,14,.97) 32%); }
+  #folio .k{ color:var(--wK, rgba(159,220,255,.68)); }
+  #folio a{ color:var(--wLnk, #a5ddf7); border-bottom-color:var(--wBrd, rgba(143,210,242,.22)); }
+  #folio .fil{ position:fixed; top:0; bottom:0; right:calc(min(620px, 96vw) - 2px);
+    width:2px; pointer-events:none; opacity:0; transition:opacity 1.1s ease .25s;
+    background-color:rgba(255,255,255,.03);
+    background-image:var(--filG, none); background-size:100% 1200px;
+    animation:filFlow var(--filDur, 6s) linear infinite; }
+  #folio.on .fil{ opacity:.8; }
+  #folio.filup .fil{ animation-direction:reverse; }
+  #folio.filalt .fil{ animation-direction:alternate; animation-timing-function:ease-in-out; }
+  @keyframes filFlow{ to{ background-position:0 1200px; } }
+  /* the work rises into place, each block a beat behind the last —
+     deep worlds rise from below, sky worlds settle from above */
+  #folio.on #stages > *{ animation:folioIn .8s cubic-bezier(.16,1,.3,1) both; }
+  #folio.on #stages > :nth-child(2){ animation-delay:.06s }
+  #folio.on #stages > :nth-child(3){ animation-delay:.11s }
+  #folio.on #stages > :nth-child(4){ animation-delay:.16s }
+  #folio.on #stages > :nth-child(5){ animation-delay:.20s }
+  #folio.on #stages > :nth-child(6){ animation-delay:.24s }
+  #folio.on #stages > :nth-child(7){ animation-delay:.27s }
+  #folio.on #stages > :nth-child(8){ animation-delay:.30s }
+  #folio.on #stages > :nth-child(n+9){ animation-delay:.33s }
+  @keyframes folioIn{ from{ opacity:0; transform:translateY(var(--enYr, var(--enY, 10px))); } }
+  @media (prefers-reduced-motion: reduce){
+    /* PRM gates the vestibular part only — the fade stays, the filament lives */
+    #folio{ --enYr:0px !important; }
+    #folio.on #stages > *{ animation-duration:.45s; animation-delay:0s !important; }
+  }
   .ov a:hover{ border-color:rgba(143,210,242,.6); }
   .mono{ font-family:'JetBrains Mono',monospace; font-weight:300; font-size:11.5px; letter-spacing:.06em;
     color:rgba(205,225,240,.75); line-height:1.8; }
@@ -374,6 +410,7 @@
 <button id="sndBtn" type="button">♪ sound</button>
 
 <aside id="folio" class="ov" role="dialog" aria-label="stage work">
+  <span class="fil" aria-hidden="true"></span>
   <button class="ovx tbtn" type="button" data-close>close</button>
   <div id="stages"></div>
 </aside>
@@ -955,7 +992,10 @@ uniform float uCstOn;
 /* uArr: the arrival — one drop falls, and where it lands the world rings
    into existence. uEco: milestones leave evidence (math strengthens a
    caustic branch, systems quickens the pulses, research raises a curtain).
-   uEcho: a checked box breathes once through the world.
+   uEco.w: inheritance — every world is fed by the one before it; work
+   finished upstream arrives downstream as light.
+   uEcho: a checked box breathes once through the world — and each world
+   answers in its own material.
    uOvDim: the world steps back while you read. */
 uniform vec4  uEco;
 uniform float uArr, uEcho, uOvDim;
@@ -1132,12 +1172,14 @@ void riverP(inout vec3 c, vec2 uv, float asp, float t, float amp,
     float ch = pow(clamp(1. - abs(2.*n - 1.)*2.4, 0., 1.), 2.4);
     if(k == 0){
       float flow = .78 + .22*vnoise(vec2(rp.x*9., rp.y*22. - t*(1. + .7*uMood)));
+      flow *= 1. + .18*uEcho;                    /* the live channel answers */
       vec3 wc = mix(jade, milk, smoothstep(.25, .9, ch));
       c = mix(c, wc*flow, smoothstep(.12, .55, ch)*amp);
       float edge = smoothstep(.05,.22,ch)*(1.-smoothstep(.22,.5,ch));
       c = mix(c, silt, edge*.45*amp);
     } else {
-      float a = amp * (k==1 ? .30 : k==2 ? .18 : k==3 ? .10 : .05);
+      /* the more was learned upstream, the more of itself the river remembers */
+      float a = amp * (k==1 ? .30 : k==2 ? .18 : k==3 ? .10 : .05) * (1. + .6*uEco.w);
       c = mix(c, chan, smoothstep(.2, .6, ch)*a);
     }
   }
@@ -1164,13 +1206,15 @@ void confP(inout vec3 c, vec2 uv, float asp, float t, float amp,
   wc = mix(wc, mixC, exp(-sd*sd/.003) * .35);
   float line = exp(-sd*sd/(.00009 + .00025*abs(fing)));
   line *= .45 + .55*vnoise(vec2(w.y*30., t*.7));
-  wc += seamC * line * .85;
+  wc += seamC * line * (.85 + .5*uEcho);     /* the seam answers a checked box */
   float ph = w.y*22. + t*.4;
   float th1 = exp(-pow(sd - .011*sin(ph), 2.)/9e-6);
   float th2 = exp(-pow(sd + .011*sin(ph), 2.)/9e-6);
   float over = step(0., sin(ph));
-  wc += vec3(.128,.618,.965) * th1 * (1.3 + over*.8);       /* the cyan thread */
-  wc += vec3(.790,.585,.200) * th2 * (1.3 + (1.-over)*.8);  /* the gold thread */
+  /* everything finished upstream braids brighter through the keystone */
+  float inh6 = 1. + .35*uEco.w;
+  wc += vec3(.128,.618,.965) * th1 * (1.3 + over*.8) * inh6;       /* the cyan thread */
+  wc += vec3(.790,.585,.200) * th2 * (1.3 + (1.-over)*.8) * inh6;  /* the gold thread */
   c = mix(c, wc, amp);
 }
 
@@ -1193,7 +1237,7 @@ void estuaryP(inout vec3 c, vec2 uv, float asp, float t, float amp,
   flats = mix(flats, tannC, tb*ch*.7);
   float streak = exp(-pow((uv.x - disc.x)/.05, 2.)) * (1.-ch);
   streak *= .55 + .45*vnoise(vec2(uv.y*60., t*.8));
-  flats += wetHi * streak * smoothstep(0., .3, d) * 1.3;
+  flats += wetHi * streak * smoothstep(0., .3, d) * (1.3 + .65*uEco.w + .6*uEcho);
   c = mix(c, flats, m*amp);
 }
 
@@ -1219,7 +1263,7 @@ void rootsP(inout vec3 c, vec2 uv, float asp, float t, float amp,
   c += wl * filC * .30 * amp;
   c += wl * filF * (.38 + .45*jn) * amp;     /* dim halo around the core */
   c += wl * coreF * (.75 + .9*jn) * amp;     /* the fine bright thread itself */
-  c += pulseC * ((coreF*1.3 + filF*.4)*puF*(1. + .9*uEco.y) + filC*puC*.5) * amp;
+  c += pulseC * ((coreF*1.3 + filF*.4)*puF*(1. + .9*uEco.y + .8*uEcho) + filC*puC*(.5 + .4*uEco.w)) * amp;
   /* a few thick roots cross in front — sparse, directional, occluding */
   float rv = vein(vec2(w.x*.8, w.y*.45) + 7.3, .85);
   float sil = smoothstep(.78, .93, rv);
@@ -1269,7 +1313,7 @@ void canopyP(inout vec3 c, vec2 uv, float asp, float t, float amp,
     c = mix(c, shadowC*.5, br2*.8*amp);
   }
   /* sky holes — small, brilliant, and the light actually comes THROUGH */
-  c += holeC * pow(openAll, 6.) * amp * 3.0;
+  c += holeC * pow(openAll, 6.) * amp * (3.0 + 1.2*uEco.w);   /* what the roots feed, the canopy opens */
   /* moss floor with trembling light-coins where the holes allow */
   float fm = 1. - smoothstep(.18, .26, uv.y);
   if(fm > .001){
@@ -1278,7 +1322,7 @@ void canopyP(inout vec3 c, vec2 uv, float asp, float t, float amp,
     vec3 cp2 = cellPt(vec2(w.x*11., w.y*34.), .9);
     float coin = exp(-dot(cp2.xy*vec2(1.,2.6), cp2.xy*vec2(1.,2.6))*140.) * step(.55, cp2.z);
     coin *= .3 + .7*smoothstep(.25, .85, vnoise(vec2(cp2.z*40., t*1.1) + wind*3.));
-    floorC += coinC * coin * mossLit * 2.0;
+    floorC += coinC * coin * mossLit * (2.0 + 1.4*uEcho);   /* the coins answer */
     c = mix(c, floorC, fm * amp);
   }
 }
@@ -1326,7 +1370,7 @@ void gardenP(inout vec3 c, vec2 uv, float asp, float t, float amp,
       float env = smoothstep(0., .05, ph) * exp(-(ph-.05)*5.5);
       vec2 dd = fract(base) - (vec2(.5) + .3*vec2(sin(t*.2 + fz*40.), sin(t*.27 + fz*17.)));
       float g = exp(-dot(dd,dd)*900.);
-      c += (coreC*1.2 + haloC*.5) * g * env * smoothstep(.58, .30, uv.y) * amp * .35;
+      c += (coreC*1.2 + haloC*.5) * g * env * smoothstep(.58, .30, uv.y) * amp * (.35 + .2*uEco.w);
     }
   }
   /* the near fireflies — living individuals. Each has her own rhythm and
@@ -1342,7 +1386,7 @@ void gardenP(inout vec3 c, vec2 uv, float asp, float t, float amp,
       float hue = h1(vec2(float(k), 11.));
       vec3 fc = mix(coreC, haloC, .25 + .5*hue);
       float g = exp(-d2/(sz*sz)) * 2.2 + exp(-d2/pow(sz*3.4, 2.)) * .3;
-      c += fc * g * A.z * amp;
+      c += fc * g * A.z * amp * (1. + .5*uEcho);   /* they swell when the work moves */
     }
   }
 }
@@ -1380,8 +1424,9 @@ void rainP(inout vec3 c, vec2 uv, float asp, float t, float amp,
   /* the lantern breathes, and once in a while something passes in front */
   float flick = 1. - .35*pow(vnoise(vec2(t*.9, 17.)), 8.);
   flick *= 1. + .04*(uBreath - .5);
+  flick *= 1. + .28*uEcho;                  /* the lantern answers a finished task */
   /* the atmospheric cone itself — warm, soft, unmistakable */
-  c += lantC * lant*lant * .55 * amp * flick;
+  c += lantC * lant*lant * (.55 + .19*uEco.w) * amp * flick;   /* the estuary's measure earns a warmer light */
   /* falling rain — it lives where the light is; the gusts slant it */
   vec2 rr = vec2(uv.x*asp*90. + (uv.y - .5)*(uMood - .3)*26., uv.y*7. + t*(6.5 + 2.5*uMood));
   rr.x += floor(rr.y)*.31;
@@ -1463,7 +1508,7 @@ vec3 world(vec2 uv, float asp, float t,
   /* idle breathing (slow, unnameable) + the one shared breath */
   c *= 1. + .05*(fbm(uv*1.7 + t*.021) - .5);
   c *= 1. + .022*(uBreath - .5);
-  c *= (1. + .05*uEcho) * (1. - .22*uOvDim);   /* acknowledgement · reading hush */
+  c *= (1. + .02*uEcho) * (1. - .22*uOvDim);   /* a whisper of acknowledgement (each world answers louder in its own material) · reading hush */
 
   /* stratification — color returning in physical order (ascent) */
   if(fx2.y > .003){
@@ -1476,7 +1521,7 @@ vec3 world(vec2 uv, float asp, float t,
   vec4 aur = vec4(0.);
   if(fx5.x > .003) aur = aurora(uv + uPar*.35, asp, t, a1, a2, a3, a4);
   if(fx5.y > .003) c += snC * stars(uv + uPar*.15, asp, t) * fx5.y * (1. - .65*aur.a);
-  c += aur.rgb * fx5.x;
+  c += aur.rgb * fx5.x * (1. + .22*uEco.w + .3*uEcho);   /* the whole journey feeds the sky */
 
   /* the constellation — your journey, written in the sky */
   if(uCstOn > .5 && fx5.x > .25){
@@ -1505,12 +1550,13 @@ vec3 world(vec2 uv, float asp, float t,
   /* god rays */
   if(fx.y > .003){
     float r = rays(uv + uPar*.25, asp, t);
-    c += rayC * r * fx.y * .55;
-    c += rayC * r*r * fx.y * .35;     /* hot core, still never white */
+    float rl = 1. + .3*uEco.w + .3*uEcho;   /* the ascent's tools let more light in */
+    c += rayC * r * fx.y * .55 * rl;
+    c += rayC * r*r * fx.y * .35 * rl;     /* hot core, still never white */
   }
 
   /* the open-water and river worlds (full-frame painters, journey order) */
-  if(fx3.x > .003) wavesP(c, uv, asp, t, fx3.x, fx5.z, cD, a4, a1, a2, a3, disc);
+  if(fx3.x > .003) wavesP(c, uv, asp, t, fx3.x, fx5.z*(1. + .5*uEco.w + .6*uEcho), cD, a4, a1, a2, a3, disc);
   if(fx3.z > .003) riverP(c, uv + uPar*.4, asp, t, fx3.z, a1, a2, a3, a4);
   if(fx5.w > .003) confP(c, uv + uPar*.4, asp, t, fx5.w, a1, a2, a3, a4);
   if(fx3.w > .003) estuaryP(c, uv, asp, t, fx3.w, cD, cM, cH, cA, a2, a3, a4, disc);
@@ -1522,7 +1568,7 @@ vec3 world(vec2 uv, float asp, float t,
     cp += .32*vec2(fbm(cp*1.8 + t*.05), fbm(cp*1.8 - t*.043));  /* strong swell warp — filaments, not polygons */
     float dm = .30 + .55*smoothstep(.15,.95,y);                 /* stronger near light */
     float ca = caustic(cp, t*(.8 + .5*uMood)) * dm;             /* agitation follows the weather */
-    c += caC * ca * fx.x;
+    c += caC * ca * fx.x * (1. + .45*uEcho);   /* the net surges once for a checked box */
     if(uEco.x > .01){          /* mathematics strengthened one branch of the net */
       float bnd = exp(-pow(uv.y - .25 - .28*uv.x*asp, 2.)*60.);
       c += caC * ca * bnd * uEco.x * .8 * fx.x;
@@ -1548,7 +1594,7 @@ vec3 world(vec2 uv, float asp, float t,
       vec2 scp = vec2(uv.x*asp, uv.y*2.6)*4.2 + uPar*.5;
       scp += .3*vec2(fbm(scp*1.6 + t*.06), fbm(scp*1.6 - t*.05));
       float sca = caustic(scp, t*1.1);
-      sand += a2 * sca * 1.1;
+      sand += a2 * sca * (1.1 + .55*uEco.w + .5*uEcho);   /* the cathedral's work lands here */
       sand += a3 * sca*sca * .5;              /* gold blooms in the hottest knots */
       c = mix(c, sand, sm2 * fx3.y);
     }
@@ -1588,7 +1634,7 @@ vec3 world(vec2 uv, float asp, float t,
     float rr = disc.z*wob;
     float core = exp(-pow(d/max(rr,1e-4), 2.)*2.6);
     float halo = rr*rr*2.2/(d*d + rr*rr*.55);      /* inverse-square falloff */
-    c += disc.w * (1. + .06*(uBreath - .5)) * (core*dC + .15*halo*dH);
+    c += disc.w * (1. + .06*(uBreath - .5)) * (1. + .25*uEco.w + .2*uEcho) * (core*dC + .15*halo*dH);
   }
 
   /* the land worlds — roots, canopy, garden (light source sits behind them) */
@@ -1693,7 +1739,7 @@ vec3 world(vec2 uv, float asp, float t,
     /* its pulse wanders like a heartbeat, never metronomic */
     float twm = t + 2.4*(vnoise(vec2(t*.031, 5.1)) - .5);
     float pulse = .72 + .18*sin(twm*.44) + .10*sin(twm*1.31+2.1);
-    c += vec3(.392,.808,.984) * (2.4e-4/(md + 2.0e-4)) * .34 * pulse * fx2.w;
+    c += vec3(.392,.808,.984) * (2.4e-4/(md + 2.0e-4)) * (.34 + .2*uEcho) * pulse * fx2.w;
   }
 
   /* near-black foreground silhouette layer — amplitude is a scene param
@@ -2347,7 +2393,7 @@ if(gl){
     if(u.uArr)  gl.uniform1f(u.uArr,  st.arr ?? 1);
     if(u.uEcho) gl.uniform1f(u.uEcho, st.echo || 0);
     if(u.uOvDim) gl.uniform1f(u.uOvDim, st.ovDim || 0);
-    if(u.uEco) gl.uniform4f(u.uEco, st.eco1 || 0, st.eco2 || 0, st.eco3 || 0, 0);
+    if(u.uEco) gl.uniform4f(u.uEco, st.eco1 || 0, st.eco2 || 0, st.eco3 || 0, st.eco4 || 0);
     setRowU(u, '', st.rowA);
     if(st.seam) setRowU(u, 'B', st.rowB);
     if(st.warm){                 /* warm-up: force both shader paths at quarter res */
@@ -2858,7 +2904,18 @@ if(engine){
     ST.arr = !isNaN(FORCE_T) ? 1 : arrV;
     ST.echo = echoV; ST.ovDim = ovDim;
     const ECO = window.__ECO;
-    if(ECO){ ST.eco1 = ECO[2]; ST.eco2 = ECO[9]; ST.eco3 = ECO[12]; }
+    if(ECO){
+      ST.eco1 = ECO[2]; ST.eco2 = ECO[9]; ST.eco3 = ECO[12];
+      /* inheritance — every world is fed by the one before it; the
+         confluence gathers all six upstream, the aurora the whole journey */
+      const inh = n => {
+        if(n <= 0) return 0;
+        if(n !== 6 && n !== 12) return ECO[n-1];
+        let s2 = 0; for(let k2 = 0; k2 < n; k2++) s2 += ECO[k2];
+        return s2/n;
+      };
+      ST.eco4 = inh(i)*(1 - f) + inh(Math.min(i + 1, 12))*f;
+    }
 
     /* ---- continuous narrative presence ----
        Text opacity is a living function: proximity to the scene center ×
@@ -3183,10 +3240,52 @@ document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click
 addEventListener('keydown', e => { if(e.key === 'Escape') closeOv(); });
 
 /* ---- the stage folio — one world's work, poured over the living scene ---- */
+/* thirteen voices for one door: each world hands the folio its accent, its
+   deep tint, the direction its work arrives from, and a filament recipe —
+   currents, caustics, braids, pulses, fireflies, aurora: one form, thirteen
+   clothes. Gradient periods divide 1200 so the flow loops without a seam. */
+const FOLW = [
+ {a:'168,214,240', b:'10,37,64',   dur:'11s',  up:1, enY:'16px',   /* abyss — one slow mote rising */
+  g:'repeating-linear-gradient(180deg, transparent 0 132px, rgba(168,214,240,.85) 148px, transparent 164px 300px)'},
+ {a:'169,231,245', b:'21,94,138',  dur:'5.5s', up:1, enY:'12px',   /* ascent — bubbles keep rising */
+  g:'repeating-linear-gradient(180deg, transparent 0 52px, rgba(169,231,245,.8) 60px, transparent 68px 120px)'},
+ {a:'201,243,236', b:'14,76,110',  dur:'4.5s', up:0, enY:'10px',   /* cathedral — light descends in pairs */
+  g:'repeating-linear-gradient(180deg, transparent 0 22px, rgba(201,243,236,.75) 27px, transparent 32px 44px, rgba(127,224,255,.5) 50px, transparent 56px 100px)'},
+ {a:'253,246,216', b:'20,90,105',  dur:'7s',   up:0, enY:'8px',    /* shallows — cream light lands */
+  g:'repeating-linear-gradient(180deg, transparent 0 78px, rgba(253,246,216,.8) 92px, transparent 106px 200px)'},
+ {a:'255,237,184', b:'10,49,64',   dur:'2.4s', up:0, enY:'10px',   /* surface — quick glitter chop */
+  g:'repeating-linear-gradient(180deg, transparent 0 18px, rgba(255,237,184,.85) 22px, transparent 26px 60px)'},
+ {a:'143,214,207', b:'28,110,120', dur:'3.2s', up:0, enY:'8px',    /* river — the braid runs */
+  g:'repeating-linear-gradient(180deg, rgba(143,214,207,.25) 0 34px, rgba(143,214,207,.8) 44px, rgba(63,168,160,.3) 54px 76px, rgba(183,160,107,.5) 86px, rgba(143,214,207,.25) 96px 120px)'},
+ {a:'100,206,251', b:'58,44,30',   dur:'5s',   up:0, enY:'8px',    /* confluence — cyan and gold refuse to mix */
+  g:'repeating-linear-gradient(180deg, rgba(100,206,251,.8) 0 96px, rgba(217,206,174,.9) 112px 128px, rgba(201,154,51,.8) 144px 240px)'},
+ {a:'242,201,160', b:'38,55,79',   dur:'8s',   alt:1, enY:'6px',   /* estuary — the tide breathes in and out */
+  g:'repeating-linear-gradient(180deg, transparent 0 60px, rgba(242,201,160,.6) 150px, transparent 240px 300px)'},
+ {a:'224,179,112', b:'50,58,74',   dur:'1.5s', up:0, enY:'-10px',  /* rain — streaks falling past the lantern */
+  g:'repeating-linear-gradient(180deg, transparent 0 26px, rgba(224,179,112,.7) 30px, transparent 34px 40px, rgba(174,182,178,.35) 62px, transparent 66px 80px)'},
+ {a:'87,230,224',  b:'18,14,20',   dur:'3s',   up:0, enY:'12px',   /* roots — signal pulses travel the thread */
+  g:'repeating-linear-gradient(180deg, rgba(87,230,224,.12) 0 44px, rgba(87,230,224,.9) 50px, rgba(157,123,255,.35) 58px, rgba(87,230,224,.12) 66px 150px)'},
+ {a:'244,238,203', b:'46,74,60',   dur:'9s',   alt:1, enY:'-8px',  /* canopy — komorebi sways with the wind */
+  g:'repeating-linear-gradient(180deg, transparent 0 40px, rgba(244,238,203,.7) 74px, rgba(168,181,88,.3) 96px, transparent 130px 200px)'},
+ {a:'201,232,106', b:'22,41,77',   dur:'5s',   up:1, enY:'6px',    /* garden — fireflies drift up */
+  g:'repeating-linear-gradient(180deg, transparent 0 56px, rgba(245,255,184,.9) 60px, transparent 64px 96px, rgba(201,232,106,.55) 100px, transparent 104px 150px)'},
+ {a:'125,255,184', b:'4,8,22',     dur:'13s',  up:1, enY:'-12px',  /* aurora — one broad sheet, green to violet */
+  g:'repeating-linear-gradient(180deg, transparent 0 120px, rgba(125,255,184,.55) 240px, rgba(224,103,154,.35) 330px, rgba(106,82,201,.3) 420px, transparent 600px)'},
+];
 const stagesEl = document.getElementById('stages');
 function stageFolio(n){
   const s = STAGES.find(x => x.n === String(n));
   if(!s) return;
+  const fol = document.getElementById('folio'), W = FOLW[+s.n] || FOLW[0];
+  fol.style.setProperty('--wK',   `rgba(${W.a},.7)`);
+  fol.style.setProperty('--wLnk', `rgba(${W.a},.95)`);
+  fol.style.setProperty('--wBrd', `rgba(${W.a},.3)`);
+  fol.style.setProperty('--wTint',`rgba(${W.b},.42)`);
+  fol.style.setProperty('--filG', W.g);
+  fol.style.setProperty('--filDur', W.dur);
+  fol.style.setProperty('--enY', W.enY);
+  fol.classList.toggle('filup', !!W.up);
+  fol.classList.toggle('filalt', !!W.alt);
   const micro = (MICRO[s.n]||[]).map((m,mi) => { const id = "m"+s.n+"_"+mi;
     return `<label class="${state[id]?'checked':''}" data-mid="${id}">${cb(id)}<span class="t">${esc(m[0])}</span><span class="hrs">~${m[1]}h</span></label>`; }).join("");
   const contract = CONTRACT.map((c,ci) => { const id = "c"+s.n+"_"+ci;
