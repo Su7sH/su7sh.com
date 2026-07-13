@@ -261,6 +261,48 @@ main{position:relative;z-index:2}
   margin-top:.4rem;
 }
 
+/* the visitor's question — quiet, optional, asked once */
+.visit{
+  margin-top:3.4rem;
+  opacity:0;
+  transition:opacity 2.2s ease;
+}
+.visit.shown{opacity:1}
+.visit-line{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-weight:300;
+  font-size:1.15rem;
+  color:#2a2a2899;
+}
+.visit-actions{margin-top:1rem;display:flex;gap:1.2rem;align-items:baseline}
+.visit button{
+  background:none;border:none;cursor:pointer;padding:0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;font-weight:300;
+  letter-spacing:.22em;text-transform:lowercase;
+  color:#2a2a28cc;
+  border-bottom:1px solid transparent;
+  transition:color .4s ease,border-color .4s ease;
+}
+.visit button:hover,.visit button:focus-visible{color:#6b7a5a;border-color:#6b7a5a66;outline:none}
+.visit-word{margin-top:1.2rem;display:flex;gap:1.2rem;align-items:baseline;flex-wrap:wrap}
+.visit-word input{
+  background:transparent;border:none;border-bottom:1px solid #2a2a2833;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:1.05rem;color:#2a2a28;padding:.15rem 0;width:min(340px,70vw);
+  outline:none;transition:border-color .4s ease;
+}
+.visit-word input:focus{border-color:#6b7a5a99}
+.visit-word input::placeholder{color:#2a2a2855}
+.visit-done{
+  margin-top:1.2rem;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1.05rem;color:#6b7a5a;
+}
+.visit [hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.visit{transition:none}}
+
 /* scroll hint — a faint mark at the bottom of each early page */
 .scroll-hint{
   position:absolute;
@@ -386,6 +428,19 @@ main{position:relative;z-index:2}
     <h2 class="h-mid">stay as long as you like.</h2>
     <h2 class="h-mid" style="color:#2a2a28b3">the door's open either way.</h2>
     <span class="rule long"></span>
+    <div class="visit" id="visit" aria-live="polite">
+      <p class="visit-line" id="visitLine">before you go — do you want to tell suyash you were here?</p>
+      <div class="visit-actions" id="visitActions">
+        <button id="visitYes" type="button">yes, quietly</button>
+        <span class="small" style="color:#2a2a2855">·</span>
+        <button id="visitNo" type="button">no, just passing</button>
+      </div>
+      <div class="visit-word" id="visitWord" hidden>
+        <input id="visitInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="a word to leave, if you like — or none">
+        <button id="visitSend" type="button">leave it</button>
+      </div>
+      <p class="visit-done" id="visitDone" hidden></p>
+    </div>
     <div class="footer">
       <div class="sig">— suyash · alephata, pune</div>
       <div class="row">
@@ -429,6 +484,70 @@ if (seam) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
   });
 }
+
+/* ─── the visitor's question ─── */
+(() => {
+  const KEY = 'letter-visit-answered';
+  const box = document.getElementById('visit');
+  if (!box) return;
+  const remember = (v) => { try { localStorage.setItem(KEY, v); } catch (e) {} };
+  let answered = null;
+  try { answered = localStorage.getItem(KEY); } catch (e) {}
+  if (answered) { box.remove(); return; }
+
+  // fade in, unhurried, once the closing page is reached
+  const vio = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        setTimeout(() => box.classList.add('shown'), 1800);
+        vio.disconnect();
+      }
+    });
+  }, { threshold: 0.35 });
+  vio.observe(document.querySelector('.p6'));
+
+  const line = document.getElementById('visitLine');
+  const actions = document.getElementById('visitActions');
+  const word = document.getElementById('visitWord');
+  const input = document.getElementById('visitInput');
+  const done = document.getElementById('visitDone');
+
+  const finish = (msg) => {
+    line.hidden = true; actions.hidden = true; word.hidden = true;
+    done.textContent = msg; done.hidden = false;
+  };
+
+  document.getElementById('visitNo').addEventListener('click', () => {
+    remember('no');
+    finish('then let it stay yours. safe travels.');
+  });
+
+  document.getElementById('visitYes').addEventListener('click', () => {
+    actions.hidden = true;
+    word.hidden = false;
+    input.focus();
+  });
+
+  const send = () => {
+    const w = input.value.trim().slice(0, 80);
+    const t = new Date();
+    const hm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+    const body = 'someone was here · the letter · ' + hm +
+      (w ? ' · they left a word: “' + w + '”' : ' · they left no word, only presence');
+    remember('yes');
+    finish('he’ll know. thank you for pausing.');
+    fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
+      method: 'POST',
+      headers: {
+        'X-Title': 'the letter',
+        'X-Tags': 'love_letter'
+      },
+      body
+    }).catch(() => {});
+  };
+  document.getElementById('visitSend').addEventListener('click', send);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+})();
 
 /* ─── hidden console whisper for the source-viewer ─── */
 console.log(
