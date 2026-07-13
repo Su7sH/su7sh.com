@@ -29,7 +29,9 @@ The site is quiet, layered, and slightly secret. Four layers, each hidden behind
 3. `room.html` — a 3D room (Three.js, models in `/models`). Opened from the letter. Unlocked via the phone; the monitor is a door.
 4. `atlas.html` — the Atlas: a private frontier-AI self-education map/workbench. Opened from the hero drop on `index.html` and from the room's monitor.
 
-Never make hidden layers loud, public, or salesy. No marketing language. `atlas.html` stays `noindex,nofollow` with title `·` (matching letter/room).
+Never make hidden layers loud, public, or salesy. No marketing language. `atlas.html` stays `noindex,nofollow`.
+
+**Tab titles (owner decision, 2026-07-14 — supersedes the old `·` doctrine):** the hidden pages now carry real lowercase titles — `the atlas · su7sh`, `intelligence · su7sh` (brain), `robotics · su7sh` (body), `a letter · su7sh`, `the room · su7sh`. Do NOT revert them to `·`. The dot motif lives on as the site-wide favicon (inline SVG data-URI: cyan dot on ink, added to all six pages). `index.html` also gained `og:image`/`twitter:image` pointing at `/og.png` (1200×630 card) — keep these. These head-tag changes are owner-approved exceptions to the frozen-file rules; the rules still apply to everything else in those files.
 
 ## Design system
 
