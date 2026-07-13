@@ -15,7 +15,7 @@ The user runs sessions on Fable 5 (powerful, token-hungry) and switches to Sonne
 
 ## Frozen files & current rules (2026-07)
 
-- `brain.html` is being reworked (approved 2026-07-10) into **"The Confluence"** — a scroll journey through 13 merging nature scenes (water → land → sky) with volumetric depth. Design mandates: NO growth-as-progress mechanic; formless (nothing square/predictable); real screen depth (parallax planes, god rays, fog); scenes merge, never cut; colorful saturated bases, never plain black; per-scene unique progress marks. All curriculum content and the functional contract below carry over intact.
+- `brain.html` is **"The Confluence"** (shipped 2026-07-12, commit f1fe679): a scroll journey through 13 merging nature scenes (water → land → sky), one parameterized WebGL2 world. It and `body/index.html` remain exempt from the site's restraint rules — maximal ambition, self-contained, no build step. A certified byte-exact backup lives at `.claude/brain-new.certified-122217ba.html`.
 - Do not touch `letter.html`, `room.html`, `models/`, `CNAME`. `index.html` is frozen EXCEPT its hero drop (added 2026-07-12, see below) — no other changes to it.
 - `atlas.html` is now a threshold page where the visitor chooses **Brain** (→ `brain.html`) or **Body** (→ `body/index.html`, frontier robotics curriculum). These two pages are exempt from the site's restraint rules — the mandate is maximal visual/technical ambition, self-contained files, no build step, working links, good laptop performance, graceful mobile degradation.
 - The atlas entrance on `index.html` is the **hero drop** (2026-07-12): a raymarched liquid-metal *creature* (`#heroDrop`, WebGL2, `position: fixed`, z-index 30) — mercury with a breathing vein of gold (the Two Forms not yet separated), iridescent rim. It is a VIEWPORT being: materializes on load, wanders to fully random points across the whole screen (slow, spring-damped, never darts, NEVER flees), accompanies the reader through every scroll section, swims briefly against scroll, always leans toward the cursor, and comes to rest beside a nearby or resting cursor. Within ~300px it glows (uNear) and the page cursor becomes a four-pointed spark (`html.drop-near` rule) to signal clickability. It sheds beads that drift off, dissolve, and hand over to DOM sparks (`#dropMotes`, fixed) that fly away and fade. Click/Enter/Space fires a three-beat exit: elastic swell → `#dropRing` (ring of light) bursts outward → `#dropVeil` (clip-path circle) swallows the screen → `atlas.html`. The hero coordinates (`#heroCoords`) are display-only: live-updated by the gist fetcher, NOT clickable. `atlas.html` must keep serving under that filename.
@@ -37,17 +37,15 @@ Never make hidden layers loud, public, or salesy. No marketing language. `atlas.
 - Gold/amber is a restrained secondary "paper/light" accent only (letter warmth; atlas contracts/gates).
 - Grain: fixed SVG feTurbulence overlay, opacity ~.035, mix-blend overlay — on every dark page.
 - Type: Inter (body) + Instrument Serif italic (display) on index/atlas; Cormorant Garamond on letter/room; JetBrains Mono for metadata/hidden-layer UI (return links, nav rails, counts).
-- Transitions between layers: slow body fades / ink veils, 700–1200ms, `cubic-bezier(.16,1,.3,1)` or ease. Respect `prefers-reduced-motion`.
+- Transitions between layers: slow body fades / ink veils, 700–1200ms, `cubic-bezier(.16,1,.3,1)` or ease.
+- `prefers-reduced-motion`: the worlds ALWAYS live (time, agents, ambient motion keep running — Assembly precedent; the owner's macOS runs Reduce Motion). PRM gates only vestibular motion: pointer parallax, scroll smoothing (snaps), CSS transitions. Never ship a frozen world under PRM.
 - Return affordances are quiet: lowercase mono, letter-spaced, low opacity, delayed fade-in, top-right.
 - No loud dashboards, no card clutter, no bright filled chips — etched outlines, hairlines, w-alpha borders (`rgba(255,255,255,.02–.10)`).
 
-## Atlas engine (brain.html) — functional contract (survives the rework)
+## The Confluence engine (brain.html) — functional contract
 
-All data lives in JS consts: `STAGES`, `MICRO`, `BLOCK`, `CONTRACT`, `LANES`, `RES`, `GATES`, `CAPS`, `TIERS`, `INS`, `DRIFT`, `TRAPS`, `COMPUTE`, `BIB`.
-The `drift` plate (passive watch queue, 3 dimness layers) is DELIBERATELY untracked: no checkboxes, no ids, no progress/ledger integration — keep it that way. Its ⌨ chip means "keyboard pass required later"; only that later pass touches gates.
-Progress persists in `localStorage` key `faicc-progress-v1` (checkbox ids in `data-pid`; values are timestamps; `_lane` and `_audit` are special keys). Export/import/reset buttons must keep working.
-Preserve these element ids: `pfill ptext pace nav stages q ftopic flevel ftier fcost rcount rbody gatelist caplist tierlist inslist traplist complist biblist veil return`.
-Stage completion is locked behind the 4-item completion contract (alert + revert). Tabs mirror to `location.hash` via `replaceState` only — never `pushState`.
+Data consts verbatim from the old engine: `STAGES MICRO BLOCK CONTRACT LANES RES GATES CAPS TIERS INS DRIFT TRAPS COMPUTE BIB` (quality tiers are `QT` to avoid the TIERS name). Progress persists in localStorage `faicc-progress-v1` (pids `m{n}_{i}` `c{n}_{i}` `stage{n}` `res{i}` `gate{i}` `cap{i}` `pap{t}_{i}`; special keys `_lane` `_audit` `_question` `_last`). Export/import/reset must keep working. Stage completion stays locked behind the 4-item contract (alert + revert). Drift stays deliberately untracked. Hash uses `replaceState` only: `#s{n}` per scene, plus `#gates #capstones #papers #insights #traps #compute #bib #drift #resources`.
+Preserved ids: `pfill ptext pace nav stages q ftopic flevel ftier fcost rcount rbody gatelist caplist tierlist inslist traplist complist biblist veil return` (+ `sndBtn ledgerBtn plates folio library ledger`). Debug pins: `?t=N` (0–12, fractions = bridges) and `?q=0/1/2` (quality tiers). Scene interval U = 1.1 viewport-heights; the scroll mapping must never have dead zones or bursts (slope bounded ≈ [.45, 1.28]).
 
 ## Known invariants / past bugs
 
