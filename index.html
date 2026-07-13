@@ -1737,9 +1737,10 @@ html.drop-near .drop-cursor { opacity: 1; }
     </div>
 
     <div class="doornote" id="doornote">
-      <div class="dn-line">no agenda? the guestbook is one line long.</div>
+      <div class="dn-line">most visitors pass in silence — you don’t have to. one line reaches him.</div>
       <div class="dn-row" id="dnRow">
-        <input id="dnInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="a hello, a thought, a word" aria-label="leave a short note">
+        <input id="dnName" maxlength="60" autocomplete="off" spellcheck="false" placeholder="your name — or how he knows you" aria-label="your name or how he knows you">
+        <input id="dnInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="what should he know?" aria-label="leave a short note">
         <button id="dnSend" type="button">leave it</button>
       </div>
       <div class="dn-done" id="dnDone" aria-live="polite"></div>
@@ -2416,32 +2417,28 @@ console.log(
   const done = document.getElementById('dnDone');
   if (!input || !btn) return;
 
-  const REPLIES = [
-    'received. he reads every one.',
-    'kept. thank you for stopping by.',
-    'noted — the door remembers a friendly knock.',
-  ];
+  const nameInput = document.getElementById('dnName');
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
   const send = () => {
     const w = input.value.trim().slice(0, 80);
-    if (!w) { input.placeholder = 'even one word counts'; input.focus(); return; }
+    const n = nameInput.value.trim().slice(0, 60);
+    if (!w && !n) { input.placeholder = 'even one word counts'; input.focus(); return; }
     const t = new Date();
     const hm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
     row.style.display = 'none';
-    done.textContent = REPLIES[Math.floor(Math.random() * REPLIES.length)];
+    done.textContent = n
+      ? pick(['kept, ' + n + '. he reads every one.', 'noted, ' + n + ' — the door remembers who knocked.'])
+      : pick(['received. he reads every one.', 'kept. thank you for stopping by.']);
     done.style.display = 'block';
-    fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
-      method: 'POST',
-      headers: { 'X-Title': 'the door', 'X-Tags': 'wave' },
-      body: 'someone spoke · the door · ' + hm + ' · “' + w + '”'
-    }).catch(() => {});
     fetch('https://script.google.com/macros/s/AKfycbyzhRHbKmYXsxENo_uCZTbXAXIp4y_5K-iXWVutgCKIFZcNVlmIHgGNcRaDtUtOX_8/exec', {
       method: 'POST',
       mode: 'no-cors',
-      body: JSON.stringify({ word: w, when: hm, page: 'the door' })
+      body: JSON.stringify({ word: w, when: hm, name: n })
     }).catch(() => {});
   };
   btn.addEventListener('click', send);
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); input.focus(); } });
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
 })();
 </script>

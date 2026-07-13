@@ -286,7 +286,7 @@ main{position:relative;z-index:2}
   transition:color .4s ease,border-color .4s ease;
 }
 .visit button:hover,.visit button:focus-visible{color:#6b7a5a;border-color:#6b7a5a66;outline:none}
-.visit-word{margin-top:1.2rem;display:flex;gap:1.2rem;align-items:baseline;flex-wrap:wrap}
+.visit-word{margin-top:1.2rem;display:flex;flex-direction:column;gap:.9rem;align-items:flex-start}
 .visit-word input{
   background:transparent;border:none;border-bottom:1px solid #2a2a2833;
   font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
@@ -437,6 +437,7 @@ main{position:relative;z-index:2}
       </div>
       <div class="visit-word" id="visitWord" hidden>
         <input id="visitInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="a word to leave, if you like — or none">
+        <input id="visitName" maxlength="60" autocomplete="off" spellcheck="false" placeholder="signed — a name, or how he knows you">
         <button id="visitSend" type="button">leave it</button>
       </div>
       <p class="visit-done" id="visitDone" hidden></p>
@@ -510,6 +511,7 @@ if (seam) {
   const actions = document.getElementById('visitActions');
   const word = document.getElementById('visitWord');
   const input = document.getElementById('visitInput');
+  const nameInput = document.getElementById('visitName');
   const done = document.getElementById('visitDone');
 
   const finish = (msg) => {
@@ -573,37 +575,44 @@ if (seam) {
     'no word — but the floorboard creaked. he’ll know.',
   ];
 
-  // where the words are kept (Apps Script → private sheet); empty = ntfy only
+  // where the words are kept (Apps Script → private sheet)
   const KEEPSAKE = 'https://script.google.com/macros/s/AKfycbyzhRHbKmYXsxENo_uCZTbXAXIp4y_5K-iXWVutgCKIFZcNVlmIHgGNcRaDtUtOX_8/exec';
 
   const send = () => {
     if (hintTimer) clearInterval(hintTimer);
     const w = input.value.trim().slice(0, 80);
+    const n = nameInput.value.trim().slice(0, 60);
     const t = new Date();
     const hm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
-    const body = 'someone was here · the letter · ' + hm +
-      (w ? ' · they left a word: “' + w + '”' : ' · they left no word, only presence');
     remember('yes');
     const key = w.toLowerCase();
-    finish(SPECIAL[key] || (w ? pick(KEPT)(w) : pick(SILENT)));
-    fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
-      method: 'POST',
-      headers: {
-        'X-Title': 'the letter',
-        'X-Tags': 'love_letter'
-      },
-      body
-    }).catch(() => {});
+    let reply;
+    if (SPECIAL[key]) {
+      reply = SPECIAL[key] + (n ? ' — signed, ' + n + '.' : '');
+    } else if (w && n) {
+      reply = pick([
+        '“' + w + '” — signed, ' + n + '. he’ll know exactly who paused.',
+        'kept, ' + n + '. your word travels under your name now.',
+      ]);
+    } else if (w) {
+      reply = pick(KEPT)(w);
+    } else if (n) {
+      reply = 'no word — but a name is plenty, ' + n + '. he’ll know.';
+    } else {
+      reply = pick(SILENT);
+    }
+    finish(reply);
     if (KEEPSAKE) {
       fetch(KEEPSAKE, {
         method: 'POST',
         mode: 'no-cors',
-        body: JSON.stringify({ word: w, when: hm, page: 'the letter' })
+        body: JSON.stringify({ word: w, when: hm, name: n })
       }).catch(() => {});
     }
   };
   document.getElementById('visitSend').addEventListener('click', send);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nameInput.focus(); } });
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
 })();
 
 /* ─── hidden console whisper for the source-viewer ─── */
