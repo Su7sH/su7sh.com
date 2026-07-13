@@ -598,7 +598,7 @@ if (seam) {
       fetch(KEEPSAKE, {
         method: 'POST',
         mode: 'no-cors',
-        body: JSON.stringify({ word: w, when: hm })
+        body: JSON.stringify({ word: w, when: hm, page: 'the letter' })
       }).catch(() => {});
     }
   };

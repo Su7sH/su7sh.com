@@ -136,6 +136,59 @@
   body.loaded #return { color: rgba(232,230,223,.22); transition: color 900ms ease 1800ms; }
   body.loaded #return:hover, body.loaded #return:focus-visible { color: rgba(232,230,223,.8); transition: color 400ms ease; }
 
+  /* ---- margin note — a word for the maker ---- */
+  #marginNote {
+    position: fixed;
+    left: 34px;
+    bottom: 28px;
+    z-index: 30;
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .24em;
+    text-transform: lowercase;
+  }
+  #marginNote .mn-ask {
+    background: none; border: none; cursor: pointer; padding: 8px 0;
+    font: inherit; letter-spacing: inherit; text-transform: inherit;
+    color: rgba(232,230,223,0);
+    transition: color 900ms ease 2400ms;
+  }
+  body.loaded #marginNote .mn-ask { color: rgba(232,230,223,.22); }
+  body.loaded #marginNote .mn-ask:hover, body.loaded #marginNote .mn-ask:focus-visible {
+    color: rgba(232,230,223,.8);
+    transition: color 400ms ease;
+  }
+  #marginNote .mn-form { display: none; gap: .8rem; align-items: baseline; }
+  #marginNote.open .mn-ask { display: none; }
+  #marginNote.open .mn-form { display: flex; }
+  #marginNote input {
+    background: transparent; border: none;
+    border-bottom: 1px solid rgba(232,230,223,.25);
+    color: var(--text);
+    font-family: var(--serif); font-style: italic; font-size: 1rem;
+    letter-spacing: .02em; padding: 2px 0;
+    width: min(260px, 50vw); outline: none;
+    transition: border-color 400ms ease;
+  }
+  #marginNote input:focus { border-color: rgba(232,230,223,.55); }
+  #marginNote input::placeholder { color: rgba(138,133,120,.6); }
+  #marginNote .mn-send {
+    background: none; border: none; cursor: pointer; padding: 4px 0;
+    font: inherit; letter-spacing: inherit; text-transform: inherit;
+    color: rgba(232,230,223,.35);
+    transition: color 400ms ease;
+  }
+  #marginNote .mn-send:hover, #marginNote .mn-send:focus-visible { color: rgba(232,230,223,.85); }
+  #marginNote .mn-done {
+    display: none;
+    font-family: var(--serif); font-style: italic; font-size: .95rem;
+    letter-spacing: .02em; text-transform: none;
+    color: rgba(232,230,223,.55);
+  }
+  #marginNote.sent .mn-form { display: none; }
+  #marginNote.sent .mn-done { display: block; }
+  @media (orientation: portrait) { #marginNote { display: none; } }
+
   /* ---- grain (site-wide ritual) ---- */
   #grain {
     position: fixed;
@@ -217,6 +270,15 @@
 </div>
 
 <a id="return" href="index.html">&larr; return</a>
+
+<div id="marginNote">
+  <button class="mn-ask" id="mnAsk" type="button">you stand close to the maker now · leave him a word</button>
+  <div class="mn-form">
+    <input id="mnInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="what should he know?" aria-label="a word for the maker">
+    <button class="mn-send" id="mnSend" type="button">leave it</button>
+  </div>
+  <div class="mn-done" id="mnDone" aria-live="polite"></div>
+</div>
 
 <div id="grain" aria-hidden="true"></div>
 <div id="veil" aria-hidden="true"></div>
@@ -643,6 +705,52 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   raf = requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+/* the margin note — second-deepest of the three doors */
+(function () {
+  'use strict';
+  var box = document.getElementById('marginNote');
+  var ask = document.getElementById('mnAsk');
+  var input = document.getElementById('mnInput');
+  var sendBtn = document.getElementById('mnSend');
+  var done = document.getElementById('mnDone');
+  if (!box || !ask) return;
+
+  var REPLIES = [
+    'written in the margin. he’ll find it.',
+    'the map remembers you now.',
+    'folded into the atlas. safe passage.',
+  ];
+
+  ask.addEventListener('click', function () {
+    box.classList.add('open');
+    input.focus();
+  });
+
+  function send() {
+    var w = input.value.trim().slice(0, 80);
+    if (!w) { input.placeholder = 'even a single word'; input.focus(); return; }
+    var t = new Date();
+    var hm = ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2);
+    box.classList.remove('open');
+    box.classList.add('sent');
+    done.textContent = REPLIES[Math.floor(Math.random() * REPLIES.length)];
+    fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
+      method: 'POST',
+      headers: { 'X-Title': 'the threshold', 'X-Tags': 'compass' },
+      body: 'someone spoke · the threshold · ' + hm + ' · “' + w + '”'
+    }).catch(function () {});
+    fetch('https://script.google.com/macros/s/AKfycbyzhRHbKmYXsxENo_uCZTbXAXIp4y_5K-iXWVutgCKIFZcNVlmIHgGNcRaDtUtOX_8/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ word: w, when: hm, page: 'the threshold' })
+    }).catch(function () {});
+  }
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
 })();
 </script>
 

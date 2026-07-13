@@ -1191,6 +1191,32 @@ html.drop-near .drop-cursor { opacity: 1; }
 }
 .contact-footer .loc svg { width: 16px; height: 16px; }
 
+/* the doorstep note — a one-line guestbook */
+.doornote { margin: 64px auto 0; max-width: 560px; text-align: center; }
+.doornote .dn-line { font-size: 14px; color: var(--w-50); letter-spacing: .02em; }
+.doornote .dn-row {
+  margin-top: 16px; display: flex; gap: 10px;
+  justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.doornote input {
+  background: var(--w-02); border: 1px solid var(--w-10); border-radius: 999px;
+  color: var(--w); font: inherit; font-size: 14px; padding: 10px 18px;
+  width: min(300px, 70vw); outline: none;
+  transition: border-color .3s ease, background .3s ease;
+}
+.doornote input:focus { border-color: var(--cyan-40); background: var(--cyan-04); }
+.doornote input::placeholder { color: var(--w-30); }
+.doornote .dn-row button {
+  border: 1px solid var(--w-15); border-radius: 999px; padding: 10px 20px;
+  font-size: 13px; color: var(--w-70); background: transparent; cursor: pointer;
+  transition: color .3s ease, border-color .3s ease;
+}
+.doornote .dn-row button:hover, .doornote .dn-row button:focus-visible { color: var(--w); border-color: var(--cyan-40); }
+.doornote .dn-done {
+  margin-top: 16px; font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic; font-size: 17px; color: var(--cyan); display: none;
+}
+
 /* ───── reveal on scroll ───── */
 .reveal {
   opacity: 0;
@@ -1708,6 +1734,15 @@ html.drop-near .drop-cursor { opacity: 1; }
       <a href="https://www.instagram.com/su7sh" target="_blank" rel="noopener" aria-label="Instagram">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
       </a>
+    </div>
+
+    <div class="doornote" id="doornote">
+      <div class="dn-line">no agenda? the guestbook is one line long.</div>
+      <div class="dn-row" id="dnRow">
+        <input id="dnInput" maxlength="80" autocomplete="off" spellcheck="false" placeholder="a hello, a thought, a word" aria-label="leave a short note">
+        <button id="dnSend" type="button">leave it</button>
+      </div>
+      <div class="dn-done" id="dnDone" aria-live="polite"></div>
     </div>
 
     <div class="contact-footer">
@@ -2371,5 +2406,44 @@ console.log(
 // The map is higher up, resting in the coordinates.
 </script>
 
+<script>
+/* the doorstep note — least hidden of the three doors */
+(() => {
+  'use strict';
+  const input = document.getElementById('dnInput');
+  const btn = document.getElementById('dnSend');
+  const row = document.getElementById('dnRow');
+  const done = document.getElementById('dnDone');
+  if (!input || !btn) return;
+
+  const REPLIES = [
+    'received. he reads every one.',
+    'kept. thank you for stopping by.',
+    'noted — the door remembers a friendly knock.',
+  ];
+
+  const send = () => {
+    const w = input.value.trim().slice(0, 80);
+    if (!w) { input.placeholder = 'even one word counts'; input.focus(); return; }
+    const t = new Date();
+    const hm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+    row.style.display = 'none';
+    done.textContent = REPLIES[Math.floor(Math.random() * REPLIES.length)];
+    done.style.display = 'block';
+    fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
+      method: 'POST',
+      headers: { 'X-Title': 'the door', 'X-Tags': 'wave' },
+      body: 'someone spoke · the door · ' + hm + ' · “' + w + '”'
+    }).catch(() => {});
+    fetch('https://script.google.com/macros/s/AKfycbyzhRHbKmYXsxENo_uCZTbXAXIp4y_5K-iXWVutgCKIFZcNVlmIHgGNcRaDtUtOX_8/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ word: w, when: hm, page: 'the door' })
+    }).catch(() => {});
+  };
+  btn.addEventListener('click', send);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+})();
+</script>
 </body>
 </html>

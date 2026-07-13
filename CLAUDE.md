@@ -33,6 +33,13 @@ Never make hidden layers loud, public, or salesy. No marketing language. `atlas.
 
 **Tab titles (owner decision, 2026-07-14 — supersedes the old `·` doctrine):** the hidden pages now carry real lowercase titles — `the atlas · su7sh`, `intelligence · su7sh` (brain), `robotics · su7sh` (body), `a letter · su7sh`, `the room · su7sh`. Do NOT revert them to `·`. The dot motif lives on as the site-wide favicon (inline SVG data-URI: cyan dot on ink, added to all six pages). `index.html` also gained `og:image`/`twitter:image` pointing at `/og.png` (1200×630 card) — keep these. These head-tag changes are owner-approved exceptions to the frozen-file rules; the rules still apply to everything else in those files.
 
+## The three doors (visitor messages, owner-approved 2026-07-14)
+
+Graduated presence prompts, one per layer, all feeding the same two endpoints (ntfy topic + KEEPSAKE sheet, payload `{word, when, page}`):
+1. `index.html` contact section — "the door": plainest ask ("no agenda? the guestbook is one line long."), pill input, design-system styling.
+2. `atlas.html` bottom-left — "the threshold": mono whisper ("you stand close to the maker now · leave him a word"), expands to serif input; hidden in portrait.
+3. `letter.html` page vi — "the letter": the original question (below). Deepest, warmest; do not flatten the gradient — outer copy stays plainer than inner.
+
 ## The visitor's question (letter.html, owner-approved 2026-07-14)
 
 On the closing page (vi), a quiet prompt fades in ~1.8s after the page reveals: "before you go — do you want to tell suyash you were here?" — *yes, quietly* / *no, just passing*. Yes reveals an optional 80-char word input; sending fires ONE fetch to `https://ntfy.sh/su7sh-letter-45761abc79e1` (POST, X-Title "the letter"). No other network calls, no tracking; the question is asked once per browser (localStorage `letter-visit-answered`). The owner receives pings by subscribing to that topic in the ntfy app/web. On send the page also POSTs to the KEEPSAKE endpoint (Google Apps Script `/exec`, no-cors fire-and-forget) which appends a row to the owner's private Google Sheet and emails him — that's the permanent record. Playful layer (2026-07-14): rotating input placeholders (HINTS), varied kept/silent replies, SPECIAL recognised words with bespoke answers. Both endpoints are visible in page source (semi-public by design — rotate if spammed; long-term upgrade is a Cloudflare Worker). Do not add analytics to this; consent-only presence is the point.
