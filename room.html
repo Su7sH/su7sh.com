@@ -387,7 +387,6 @@ const MODELS={
 
 let scene,camera,renderer,controls,clock=new THREE.Clock();
 let composer=null;
-let idleTimer=null;
 let lampLight=null,iphoneGlow=null,motes=null;
 let flyInActive=false,flyInT=0;
 const flyInDuration=4.8;
@@ -814,7 +813,7 @@ function buildScene(woodTex){
   controls=new THREE.OrbitControls(camera,renderer.domElement);
   controls.target.copy(baseCamLook);
   controls.enableDamping=true;
-  controls.dampingFactor=0.08;
+  controls.dampingFactor=0.12;
   controls.enablePan=false;
   controls.minDistance=2.0;
   controls.maxDistance=55;
@@ -822,15 +821,10 @@ function buildScene(woodTex){
   controls.maxPolarAngle=Math.PI*0.93;       // almost underneath allowed
   controls.rotateSpeed=0.65;
   controls.zoomSpeed=0.75;
-  controls.autoRotate=true;
+  controls.autoRotate=true;                  // attract mode only — off for good once the user takes control
   controls.autoRotateSpeed=0.12;             // slow drift when idle (was 0.35, was chaotic)
   controls.addEventListener('start',()=>{
-    controls.autoRotate=false;
-    if(idleTimer){clearTimeout(idleTimer);idleTimer=null}
-  });
-  controls.addEventListener('end',()=>{
-    if(idleTimer)clearTimeout(idleTimer);
-    idleTimer=setTimeout(()=>{controls.autoRotate=true},5000);
+    controls.autoRotate=false;               // first drag ends attract mode permanently; nothing re-enables it
   });
 
   /* ─── BLOOM POST-PROCESSING — the cinematic lift ─── */
@@ -1317,7 +1311,6 @@ function tick(){
       controls.target.copy(baseCamLook);
       controls.update();
       controls.enabled=true;
-      setTimeout(()=>{if(!flyInActive)controls.autoRotate=true},5000);
     }
   } else if(presetActive){
     // ── preset camera tween (1–5 keys, or unlock pullback) ──
@@ -1334,10 +1327,7 @@ function tick(){
       controls.enabled=true;
       controls.update();
       currentTweenDuration=PRESET_DURATION;   // reset for future preset jumps
-      // after unlock pullback completes, let auto-rotate resume after a breath
-      if(isUnlocked){
-        setTimeout(()=>{if(!presetActive)controls.autoRotate=true;},2500);
-      }
+      // attract mode is over once unlocked — camera rests where the user (or preset) leaves it
     }
   } else if(controls){
     controls.update();
@@ -1345,10 +1335,10 @@ function tick(){
     if(isUnlocked){
       parallaxAmp+=(isDragging?-0.04:0.04);
       parallaxAmp=Math.max(0,Math.min(1,parallaxAmp));
-      const tPX=cursorNX*0.28;         // horizontal sway
-      const tPY=-cursorNY*0.18;        // vertical sway (inverted)
-      parallaxX+=(tPX-parallaxX)*0.05;
-      parallaxY+=(tPY-parallaxY)*0.05;
+      const tPX=cursorNX*0.10;         // horizontal sway (gentled from 0.28)
+      const tPY=-cursorNY*0.07;        // vertical sway, inverted (gentled from 0.18)
+      parallaxX+=(tPX-parallaxX)*0.03;
+      parallaxY+=(tPY-parallaxY)*0.03;
       // apply offset in camera's local right/up frame, cleared next frame by controls.update()
       const right=new THREE.Vector3(),up=new THREE.Vector3();
       camera.matrix.extractBasis(right,up,new THREE.Vector3());
