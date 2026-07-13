@@ -517,25 +517,75 @@ if (seam) {
     done.textContent = msg; done.hidden = false;
   };
 
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
   document.getElementById('visitNo').addEventListener('click', () => {
     remember('no');
-    finish('then let it stay yours. safe travels.');
+    finish(pick([
+      'then it never happened. the lamp saw nothing.',
+      'fair. the best visitors are rumours.',
+      'understood. the door won’t mention it either.',
+    ]));
   });
+
+  // the input murmurs suggestions while it waits
+  const HINTS = [
+    'a word to leave, if you like — or none',
+    'one word is plenty',
+    'even “hello” counts',
+    'the lamp accepts poems too',
+    'initials are acceptable. so is silence.',
+  ];
+  let hintIdx = 0, hintTimer = null;
+  const startHints = () => {
+    hintTimer = setInterval(() => {
+      if (document.activeElement === input && input.value) return;
+      hintIdx = (hintIdx + 1) % HINTS.length;
+      input.placeholder = HINTS[hintIdx];
+    }, 4200);
+  };
 
   document.getElementById('visitYes').addEventListener('click', () => {
     actions.hidden = true;
     word.hidden = false;
     input.focus();
+    startHints();
   });
 
+  // certain words are recognised at the door
+  const SPECIAL = {
+    'hello':     'hello back. that was easy, wasn’t it.',
+    'hi':        'hello back. that was easy, wasn’t it.',
+    'lamp':      'the lamp is beside itself. it will be insufferable for days.',
+    'suyash':    'that’s him, yes. he answers to it.',
+    'thank you': 'no — thank you. you read all six pages.',
+    'thanks':    'no — thank you. you read all six pages.',
+    'temporary': 'so was this question. and yet.',
+    'seam':      'careful. that word opens things.',
+  };
+  const KEPT = [
+    (w) => 'he’ll find “' + w + '” on the doormat in the morning.',
+    (w) => '“' + w + '” — folded twice, pocketed, kept.',
+    (w) => 'delivered. the kettle heard “' + w + '” first.',
+  ];
+  const SILENT = [
+    'presence noted. it was enough.',
+    'no word — but the floorboard creaked. he’ll know.',
+  ];
+
+  // where the words are kept (Apps Script → private sheet); empty = ntfy only
+  const KEEPSAKE = '';
+
   const send = () => {
+    if (hintTimer) clearInterval(hintTimer);
     const w = input.value.trim().slice(0, 80);
     const t = new Date();
     const hm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
     const body = 'someone was here · the letter · ' + hm +
       (w ? ' · they left a word: “' + w + '”' : ' · they left no word, only presence');
     remember('yes');
-    finish('he’ll know. thank you for pausing.');
+    const key = w.toLowerCase();
+    finish(SPECIAL[key] || (w ? pick(KEPT)(w) : pick(SILENT)));
     fetch('https://ntfy.sh/su7sh-letter-45761abc79e1', {
       method: 'POST',
       headers: {
@@ -544,6 +594,13 @@ if (seam) {
       },
       body
     }).catch(() => {});
+    if (KEEPSAKE) {
+      fetch(KEEPSAKE, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ word: w, when: hm })
+      }).catch(() => {});
+    }
   };
   document.getElementById('visitSend').addEventListener('click', send);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
