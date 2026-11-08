@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://su7sh.com/#website",
+      "url": "https://su7sh.com/",
+      "name": "Suyash Gunjal",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://su7sh.com/#profilepage",
+      "url": "https://su7sh.com/",
+      "name": "Suyash Gunjal — physician, operator and clinical AI lead",
+      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI. Work, research and an open space for writing.",
+      "isPartOf": {
+        "@id": "https://su7sh.com/#website"
+      },
+      "mainEntity": {
+        "@id": "https://su7sh.com/#person"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://su7sh.com/#person",
+      "name": "Suyash Gunjal",
+      "alternateName": "Dr. Suyash P. Gunjal",
+      "url": "https://su7sh.com/",
+      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI. Work, research and an open space for writing.",
+      "jobTitle": "Expert Team Lead",
+      "worksFor": {
+        "@id": "https://su7sh.com/#org-xai"
+      },
+      "email": "mailto:su7sh@protonmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Maharashtra",
+        "addressCountry": "IN"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/su7sh",
+        "https://www.x.com/Su7sH",
+        "https://www.instagram.com/su7sh"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://su7sh.com/#org-xai",
+      "name": "SpaceXSI",
+      "alternateName": "xAI"
+    }
+  ]
+}

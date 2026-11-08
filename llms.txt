@@ -1,0 +1,19 @@
+# Suyash Gunjal
+
+> Radiologist with experience in rural healthcare, institutional leadership and clinical AI.
+
+## Profile
+
+- [Homepage](https://su7sh.com/): Work, approach, research, background and contact.
+- [Public factual profile](https://su7sh.com/cv.md): Work, approach, interests, roles, education and affiliations.
+- [Structured profile](https://su7sh.com/profile.json): JSON-LD for the person and website.
+
+## Published work
+
+- [Echoes of eco-radiology](https://academic.oup.com/radadv/article/2/1/umae033/7979000): Radiology Advances, Oxford University Press.
+- [CheXthought](https://arxiv.org/abs/2604.26288): arXiv preprint.
+- [Radiology's Last Exam](https://arxiv.org/abs/2509.25559): arXiv preprint.
+
+## Contact
+
+- [Email](mailto:su7sh@protonmail.com)
