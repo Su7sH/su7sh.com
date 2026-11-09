@@ -69,7 +69,7 @@
   /* ── state ── */
   let W = 0, H = 0, dpr = 1, mobile = false;
   let L = null;                       // layout
-  let marks = [], etchings = [], contours = [], currents = [], arrivals = [];                     // the lattice
+  let marks = [], etchings = [], contours = [], currents = [], arrivals = [], energySpine = [];
   let handImg = null, handLum = null, handSoft = null, HL_W = 0, HL_H = 0;
   let pinned = null, elapsed = 0, lastFrame = 0, frameId = 0, onscreen = true, live = false, paused = false;
 
@@ -170,6 +170,21 @@
   function buildMarks() {
     const X = handXform();
     const spine = HAND.path.map(p => X.toScene(...p));
+    energySpine = [];
+    for (let i = 0; i < spine.length - 1; i++) {
+      const p0 = spine[Math.max(0, i - 1)], p1 = spine[i];
+      const p2 = spine[i + 1], p3 = spine[Math.min(spine.length - 1, i + 2)];
+      for (let step = 0; step < 12; step++) {
+        const t = step / 12, t2 = t * t, t3 = t2 * t;
+        const point = [0, 1].map(axis => 0.5 * (
+          2 * p1[axis] + (-p0[axis] + p2[axis]) * t
+          + (2 * p0[axis] - 5 * p1[axis] + 4 * p2[axis] - p3[axis]) * t2
+          + (-p0[axis] + 3 * p1[axis] - 3 * p2[axis] + p3[axis]) * t3
+        ));
+        energySpine.push(point);
+      }
+    }
+    energySpine.push(spine[spine.length - 1]);
     const lengths = [0];
     for (let i = 1; i < spine.length; i++) {
       lengths.push(lengths[i - 1] + Math.hypot(spine[i][0] - spine[i - 1][0], spine[i][1] - spine[i - 1][1]));
@@ -188,6 +203,7 @@
       }
       return value;
     }
+    for (const point of energySpine) point.push(progress(point[0], point[1]));
     function sample(x, y) {
       const [u, v] = X.toImage(x, y);
       return lumAt(handLum, u, v);
@@ -223,7 +239,7 @@
           x: px, y: py, u: L.uOf(px, py), r,
           phase: hash(seed + 0.8) * Math.PI * 2,
           hand: sample(px, py),
-          size: 0.6 + r * 1.3
+          size: 1.0 + r * 1.9
         });
       }
     }
@@ -272,8 +288,11 @@
         occupied[occupiedIndex(...points[i])] = 1;
       }
       etchings.push({
-        path, lum: start.lum, u: L.uOf(start.x, start.y),
-        v: progress(start.x, start.y), rank: start.rank
+        path, lum: start.lum,
+        v: progress(start.x, start.y), rank: start.rank,
+        x: start.x, y: start.y,
+        sourceX: hash(start.x * 1.7 + start.y) * L.cx * 0.95,
+        sourceY: hash(start.y * 2.3 + start.x) * H
       });
     }
 
@@ -301,9 +320,8 @@
           const [px, py] = crossings[0];
           if (px < 0 || px > W || py < 0 || py > H) continue;
           const v = Math.floor(progress(px, py) * 28) / 28;
-          const u = Math.round(L.uOf(px, py) * 50) / 50;
-          const key = v + '/' + u;
-          if (!grouped.has(key)) grouped.set(key, {path: new Path2D(), v, u, level});
+          const key = v;
+          if (!grouped.has(key)) grouped.set(key, {path: new Path2D(), v, level});
           const group = grouped.get(key);
           group.path.moveTo(...crossings[0]);
           group.path.lineTo(...crossings[1]);
@@ -352,7 +370,8 @@
     const front = L.uTip + lerp(lerp(far, near, reach), far, release);
     const spark = Math.exp(-Math.pow((t - 4.62) / 0.25, 2)) * 0.8
       + ease(seg(t, 4.5, 4.8)) * (1 - ease(seg(t, 7.8, 9.1))) * 0.22;
-    return {front, spark, reach, release, pulse: seg(t, T.pulse[0], T.pulse[1])};
+    const assembly = ease(seg(t, 0.6, 4.5)) * (1 - release);
+    return {front, spark, reach, release, assembly, pulse: seg(t, T.pulse[0], T.pulse[1])};
   }
 
   const palettes = [];
@@ -376,8 +395,8 @@
 
     const atmosphere = ctx.createRadialGradient(L.cx + L.handLen * 0.4, L.cy, 1,
       L.cx + L.handLen * 0.4, L.cy, L.handLen * 0.85);
-    atmosphere.addColorStop(0, 'rgba(90,60,38,0.10)');
-    atmosphere.addColorStop(0.55, 'rgba(25,44,51,0.055)');
+    atmosphere.addColorStop(0, 'rgba(90,107,126,0.22)');
+    atmosphere.addColorStop(0.55, 'rgba(25,69,87,0.12)');
     atmosphere.addColorStop(1, 'rgba(7,8,10,0)');
     ctx.fillStyle = atmosphere;
     ctx.fillRect(0, 0, W, H);
@@ -385,20 +404,20 @@
 
     // The drawn current becomes visible as it approaches the point of touch.
     const flowLight = ctx.createLinearGradient(0, 0, W, mobile ? H : 0);
-    flowLight.addColorStop(0, 'rgba(70,139,166,0.015)');
-    flowLight.addColorStop(0.40, 'rgba(88,157,181,0.06)');
-    flowLight.addColorStop(0.65, 'rgba(119,188,205,0.22)');
-    flowLight.addColorStop(1, 'rgba(113,143,157,0.055)');
+    flowLight.addColorStop(0, 'rgba(70,139,166,0.10)');
+    flowLight.addColorStop(0.40, 'rgba(88,157,181,0.22)');
+    flowLight.addColorStop(0.65, 'rgba(119,188,205,0.42)');
+    flowLight.addColorStop(1, 'rgba(113,143,157,0.14)');
     ctx.strokeStyle = flowLight;
     for (const current of currents) {
       ctx.globalAlpha = 0.6 + current.rank * 0.6;
-      ctx.lineWidth = current.rank > 0.92 ? 0.8 : 0.4;
+      ctx.lineWidth = current.rank > 0.92 ? 1.1 : 0.6;
       ctx.stroke(current.path);
     }
     ctx.globalAlpha = 1;
 
-    // Rare numerals become grains. Their positions are periodic at the seam.
-    ctx.font = '8px "JetBrains Mono", monospace';
+    // A legible numerical field supplies the material of the drawing.
+    ctx.font = '11px "JetBrains Mono", monospace';
     for (const m of marks) {
       const order = ease(seg(m.u, k.front - 0.06, k.front + 0.06));
       if (m.hand > 0.04 && order > 0.98) continue;
@@ -406,16 +425,16 @@
       const x = m.x + Math.cos(phase + m.phase) * motion;
       const y = m.y + Math.sin(phase + m.phase) * motion * 0.6;
       const edge = 1 - ease(seg(Math.hypot(x - L.cx, y - L.cy), 8, L.handLen * 0.33));
-      const alpha = (0.025 + m.r * m.r * 0.14) * (1 - order * 0.9) + edge * (1 - order) * 0.06;
-      ctx.fillStyle = color('102,172,197', alpha);
-      if (m.r > 0.981 && order < 0.5 && x < L.cx - 35) {
+      const alpha = (0.12 + m.r * m.r * 0.32) * (1 - order * 0.9) + edge * (1 - order) * 0.12;
+      ctx.fillStyle = color('113,190,220', alpha);
+      if (m.r > 0.89 && order < 0.6 && x < L.cx - 35) {
         ctx.fillText(String(Math.floor(m.phase * 1.5)), x, y);
       } else {
         ctx.fillRect(x, y, m.size, m.size);
       }
     }
 
-    // Signals physically arrive at the fingertip. Their convergence is quiet.
+    // The incoming signals converge before the hand carries their energy.
     const arrival = ease(seg(t, 2.1, 4.5));
     const arrivalFade = 1 - ease(seg(t, 4.5, 5.0));
     for (const line of arrivals) {
@@ -423,8 +442,8 @@
       path.moveTo(line.startX, line.startY);
       path.bezierCurveTo(L.cx - L.handLen * 0.55, line.startY + line.offset,
         L.cx - L.handLen * 0.18, L.cy + line.offset, L.cx, L.cy);
-      ctx.strokeStyle = color('116,195,213', 0.035 + arrival * arrivalFade * 0.12);
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = color('116,195,213', 0.08 + arrival * arrivalFade * 0.35);
+      ctx.lineWidth = 0.8;
       ctx.stroke(path);
       if (arrival > 0 && arrivalFade > 0) {
         const a = clamp(arrival * 1.07 - line.rank * 0.07, 0, 1);
@@ -434,50 +453,90 @@
         const y = inv ** 3 * line.startY + 3 * inv ** 2 * a * (line.startY + line.offset)
           + 3 * inv * a ** 2 * (L.cy + line.offset) + a ** 3 * L.cy;
         ctx.fillStyle = color('170,223,231', arrivalFade * (0.3 + arrival * 0.5));
-        ctx.fillRect(x, y, 1.5, 1.5);
+        ctx.fillRect(x, y, 3, 3);
       }
     }
 
-    function illumination(v, u) {
-      const ordered = ease(seg(u, k.front - 0.045, k.front + 0.045));
+    function illumination(v) {
+      const formed = ease(seg(k.assembly, 0.10 + v * 0.23, 0.62 + v * 0.30));
+      const ordered = 0.18 + formed * 0.82;
       const distance = v - k.pulse;
       const pulse = t >= T.pulse[0] && t <= T.pulse[1]
-        ? Math.exp(-(distance * distance) / 0.009) * (1 - ease(seg(v, 0.87, 1))) : 0;
+        ? Math.exp(-(distance * distance) / 0.016) * (1 - ease(seg(v, 0.90, 1))) : 0;
       const arrivedAt = T.pulse[0] + v * (T.pulse[1] - T.pulse[0]);
       const memory = t > arrivedAt
         ? Math.exp(-(t - arrivedAt) / 2.5) * (1 - k.release) : 0;
-      return {ordered, pulse, memory};
+      return {ordered, formed, pulse, memory};
+    }
+    // Selected marks travel out of the data field and settle into anatomy.
+    for (const stroke of etchings) {
+      if (stroke.rank < 0.76) continue;
+      const light = illumination(stroke.v);
+      if (light.formed > 0.995) continue;
+      const amount = light.formed;
+      const arc = Math.sin(amount * Math.PI);
+      const x = lerp(stroke.sourceX, stroke.x, amount);
+      const y = lerp(stroke.sourceY, stroke.y, amount)
+        + arc * (stroke.rank - 0.85) * H * 0.7;
+      ctx.fillStyle = color('143,216,239', (0.34 + amount * 0.40) * (1 - amount));
+      if (stroke.rank > 0.94 && amount < 0.68) {
+        ctx.fillText(String(Math.floor(stroke.rank * 100)), x, y);
+      } else {
+        const size = 2 + amount * 2;
+        ctx.fillRect(x, y, size, size);
+      }
     }
     for (const stroke of etchings) {
-      const light = illumination(stroke.v, stroke.u);
+      const light = illumination(stroke.v);
       if (light.ordered < 0.005) continue;
       const shade = clamp((stroke.lum - 0.035) / 0.65, 0, 1);
       const rgb = palettes[Math.round(shade * 23)];
-      ctx.lineWidth = 0.55 + stroke.rank * 0.38;
-      ctx.strokeStyle = color(rgb, light.ordered * (0.24 + shade * 0.66 + light.memory * 0.18));
+      ctx.lineWidth = 0.75 + stroke.rank * 0.40;
+      ctx.strokeStyle = color(rgb, light.ordered * (0.48 + shade * 0.80 + light.memory * 0.26));
       ctx.stroke(stroke.path);
       if (light.pulse > 0.015) {
-        ctx.strokeStyle = color('255,191,128', light.pulse * light.ordered * 0.6);
-        ctx.lineWidth = 0.85;
+        ctx.strokeStyle = color('255,207,146', light.pulse * light.ordered * 0.95);
+        ctx.lineWidth = 1.3;
         ctx.stroke(stroke.path);
       }
     }
     for (const contour of contours) {
-      const light = illumination(contour.v, contour.u);
+      const light = illumination(contour.v);
       if (light.ordered < 0.005) continue;
       const copper = contour.level > 0.19;
-      ctx.lineWidth = contour.level < 0.1 ? 0.8 : 0.65;
+      ctx.lineWidth = contour.level < 0.1 ? 1.0 : 0.85;
       ctx.strokeStyle = color(copper ? '221,170,124' : '110,169,183',
-        light.ordered * (0.30 + contour.level * 0.40 + light.memory * 0.22 + light.pulse * 0.45));
+        light.ordered * (0.55 + contour.level * 0.50 + light.memory * 0.30 + light.pulse * 0.65));
       ctx.stroke(contour.path);
+    }
+
+    // A broad glow and a fine core make the travelling energy readable.
+    if (t >= T.pulse[0] && t < T.pulse[1]) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (const pass of [0, 1]) {
+        ctx.lineWidth = pass === 0 ? L.handLen * 0.033 : Math.max(1.4, L.handLen * 0.0045);
+        for (let i = 1; i < energySpine.length; i++) {
+          const v = energySpine[i][2];
+          const envelope = Math.exp(-Math.pow((v - k.pulse) / 0.12, 2))
+            * ease(seg(t, T.pulse[0], T.pulse[0] + 0.3))
+            * (1 - ease(seg(k.pulse, 0.86, 1)));
+          if (envelope < 0.01) continue;
+          ctx.strokeStyle = color(pass === 0 ? '255,160,70' : '255,235,192', envelope * (pass === 0 ? 0.13 : 0.9));
+          ctx.beginPath();
+          ctx.moveTo(energySpine[i - 1][0], energySpine[i - 1][1]);
+          ctx.lineTo(energySpine[i][0], energySpine[i][1]);
+          ctx.stroke();
+        }
+      }
+      ctx.globalCompositeOperation = 'source-over';
     }
 
     // A trace returns into the current after the hand has received the signal.
     const returning = seg(t, 6.5, 9.2);
     if (returning > 0 && returning < 1) {
-      ctx.lineWidth = 0.65;
+      ctx.lineWidth = 1.0;
       const radius = returning * L.handLen * 1.05;
-      const envelope = Math.sin(returning * Math.PI) * 0.2;
+      const envelope = Math.sin(returning * Math.PI) * 0.5;
       for (const current of currents) {
         if (!current.narrow || current.rank < 0.35) continue;
         ctx.strokeStyle = color('217,167,119', envelope);
@@ -494,7 +553,7 @@
       }
     }
     if (k.spark > 0.005) {
-      const radius = L.handLen * 0.037;
+      const radius = L.handLen * 0.065;
       const glow = ctx.createRadialGradient(L.cx, L.cy, 0, L.cx, L.cy, radius);
       glow.addColorStop(0, color('255,247,225', k.spark));
       glow.addColorStop(0.12, color('255,222,171', k.spark * 0.7));

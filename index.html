@@ -104,7 +104,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="hero/hands.js?v=2" defer></script>
+<script src="hero/hands.js?v=3" defer></script>
 
 <style>
 /* ─── palette ───
@@ -402,7 +402,7 @@ body::before {
   position: absolute; inset: 0;
   z-index: 1;
   overflow: hidden;
-  background: var(--ink) url(hero/contact-still.webp) no-repeat 72% 50% / cover;
+  background: var(--ink) url(hero/contact-still.webp?v=3) no-repeat 72% 50% / cover;
 }
 .hero-scene canvas {
   position: absolute; inset: 0;
@@ -974,21 +974,22 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 .tag, .eyebrow, .work-meta, .role-date, .hero-location, .publication-kind, .profile-link { font-family: 'JetBrains Mono', monospace; }
 .tag { color: var(--w-60); font-size: .68rem; letter-spacing: .12em; }
 .hero { min-height: 0; height: auto; background: var(--ink); }
-.hero-vignette { background: linear-gradient(90deg,rgba(7,8,10,.94) 0%,rgba(7,8,10,.82) 32%,rgba(7,8,10,.34) 54%,rgba(7,8,10,0) 68%,rgba(7,8,10,0) 89%,rgba(7,8,10,.88) 100%),linear-gradient(0deg,#07080a 0%,rgba(7,8,10,.55) 12%,transparent 30%,transparent 72%,rgba(7,8,10,.42) 100%); }
+.hero-vignette { background: linear-gradient(90deg,rgba(7,8,10,.22) 0%,rgba(7,8,10,.25) 32%,rgba(7,8,10,.14) 54%,rgba(7,8,10,0) 68%,rgba(7,8,10,0) 89%,rgba(7,8,10,.70) 100%),linear-gradient(0deg,#07080a 0%,rgba(7,8,10,.55) 12%,transparent 30%,transparent 72%,rgba(7,8,10,.42) 100%); }
 .hero-content { min-height: 0; height: auto; padding-top: 0; justify-content: center; }
 .hero-center { width: 100%; padding: 7rem 2rem 2.25rem; margin: 0 auto; align-items: flex-start; text-align: left; flex: 0; }
 .eyebrow { font-size: .68rem; letter-spacing: .11em; line-height: 1.8; color: var(--cyan); text-transform: uppercase; }
 .hero-title { font-size: clamp(4.5rem,8vw,7rem); margin: 1.25rem 0 1.5rem; font-weight: 400; letter-spacing: -.065em; line-height: .95; }
 .hero-lead { max-width: 665px; font-size: clamp(1.12rem,1.6vw,1.34rem); color: var(--w-90); line-height: 1.7; letter-spacing: -.02em; }
+.hero-title, .hero-center .eyebrow, .hero-lead, .hero-ctas .text-link, .hero-location, .hero-foot .scroll-hint-inner { text-shadow: 0 1px 2px #07080a, 0 0 8px rgba(7,8,10,.9); }
 @media (min-width: 1024px) { .hero-lead { max-width: min(665px, 56vw); } }
 .hero-ctas { justify-content: flex-start; margin-top: 1.5rem; gap: 1.8rem; align-items: center; }
 .text-link { display: inline-flex; align-items: center; gap: .7rem; font-size: .9rem; padding: .6rem 0; border-bottom: 1px solid var(--w-30); color: var(--w-85); }
 .text-link:hover { color: var(--cyan); border-color: var(--cyan); }
 .text-link svg { width: 16px; height: 16px; }
 .hero-foot { width: 100%; margin: 0 auto; padding: 0 2rem 1.5rem; display: flex; justify-content: space-between; gap: 1rem; color: var(--w-50); }
-.hero-location { font-size: .64rem; line-height: 1.8; letter-spacing: .05em; }
+.hero-location { font-size: .64rem; line-height: 1.8; letter-spacing: .05em; color: var(--w-70); }
 .hero-location span { display: block; }
-.hero-location #heroCoords { color: var(--w-40); font-size: .6rem; }
+.hero-location #heroCoords { color: var(--w-60); font-size: .6rem; }
 .hero-foot .scroll-hint-inner { flex-direction: row; font-size: .62rem; }
 .hero-footer-actions { position: relative; display: flex; align-items: center; gap: .75rem; }
 .hero-motion { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: var(--w-60); border-radius: 50%; }
@@ -1036,15 +1037,15 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 /* below 1024px the copy spans most of the width: the field stays behind everything, and the hand gets a room below the introduction */
 @media (max-width: 1023px) {
   .hero-room { display: block; height: clamp(220px, 58vw, 340px); }
-  .hero-vignette { background: linear-gradient(180deg,rgba(7,8,10,.74) 0%,rgba(7,8,10,.64) 46%,rgba(7,8,10,.16) 62%,rgba(7,8,10,0) 76%,rgba(7,8,10,.86) 100%); }
-  .hero-scene { background-image: url(hero/contact-tablet.webp); background-position: center bottom; }
+  .hero-vignette { background: linear-gradient(180deg,rgba(7,8,10,.25) 0%,rgba(7,8,10,.30) 46%,rgba(7,8,10,.10) 62%,rgba(7,8,10,0) 76%,rgba(7,8,10,.86) 100%); }
+  .hero-scene { background-image: url(hero/contact-tablet.webp?v=3); background-position: center bottom; }
   .nav { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end; border: 0; background: none; }
   .nav a { padding: .45rem .6rem; font-size: .72rem; }
   .has-menu .nav { display: none; }
   .work-row, .split-section, .purposes { gap: 2.5rem; }
 }
 @media (max-width: 719px) {
-  .hero-scene { background-image: url(hero/contact-mobile.webp); }
+  .hero-scene { background-image: url(hero/contact-mobile.webp?v=3); }
   .hero { min-height: 0; }
   .hero-center { padding: 6.5rem 1.4rem 2rem; }
   .hero-title { margin: 1rem 0 1.25rem; font-size: clamp(4.25rem,18vw,5.5rem); }
