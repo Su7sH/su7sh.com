@@ -13,7 +13,7 @@
       "@id": "https://su7sh.com/#profilepage",
       "url": "https://su7sh.com/",
       "name": "Suyash Gunjal — physician, operator and clinical AI lead",
-      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI. Work, research and an open space for writing.",
+      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI.",
       "isPartOf": {
         "@id": "https://su7sh.com/#website"
       },
@@ -27,7 +27,7 @@
       "name": "Suyash Gunjal",
       "alternateName": "Dr. Suyash P. Gunjal",
       "url": "https://su7sh.com/",
-      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI. Work, research and an open space for writing.",
+      "description": "Radiologist with experience in rural healthcare, institutional leadership and clinical AI.",
       "jobTitle": "Expert Team Lead",
       "worksFor": {
         "@id": "https://su7sh.com/#org-xai"

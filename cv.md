@@ -55,7 +55,7 @@ MD, Radiology · MBBS · Executive Education, MPM (Clinician X), Indian School o
 
 Maharashtra Medical Council registration · Member, Royal College of Radiologists · International Member, RSNA · Lifetime Member, IRIA
 
-## Research and published writing
+## Research and publications
 
 - [Echoes of eco-radiology](https://academic.oup.com/radadv/article/2/1/umae033/7979000) — Radiology Advances · Oxford University Press
 - [CheXthought](https://arxiv.org/abs/2604.26288) — arXiv preprint · Stanford AIMI
