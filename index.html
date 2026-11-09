@@ -104,6 +104,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="hero/hands.js?v=2" defer></script>
+
 <style>
 /* ─── palette ───
    ink          #07080a
@@ -396,20 +398,22 @@ body::before {
   overflow: hidden;
   background: #000;
 }
-.hero-video {
+.hero-scene {
+  position: absolute; inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--ink) url(hero/contact-still.webp) no-repeat 72% 50% / cover;
+}
+.hero-scene canvas {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
-  z-index: 1;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.6s ease;
 }
-.hero-fallback {
-  position: absolute; inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(100,206,251,.18), transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(100,206,251,.08), transparent 55%),
-    linear-gradient(135deg, #0a0d12 0%, #07080a 60%);
-}
+.hero-scene.live canvas { opacity: 1; }
+.hero-room { display: none; }
+/* The poster stays beneath the canvas until a successful frame fades in. */
 .hero-vignette {
   position: absolute; inset: 0;
   background: linear-gradient(
@@ -970,13 +974,13 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 .tag, .eyebrow, .work-meta, .role-date, .hero-location, .publication-kind, .profile-link { font-family: 'JetBrains Mono', monospace; }
 .tag { color: var(--w-60); font-size: .68rem; letter-spacing: .12em; }
 .hero { min-height: 0; height: auto; background: var(--ink); }
-.hero-video { opacity: .34; object-position: 66% center; }
-.hero-vignette { background: linear-gradient(90deg,rgba(7,8,10,.92) 0%,rgba(7,8,10,.56) 52%,rgba(7,8,10,.12) 100%),linear-gradient(0deg,#07080a 0%,transparent 40%,rgba(7,8,10,.35) 100%); }
+.hero-vignette { background: linear-gradient(90deg,rgba(7,8,10,.94) 0%,rgba(7,8,10,.82) 32%,rgba(7,8,10,.34) 54%,rgba(7,8,10,0) 68%,rgba(7,8,10,0) 89%,rgba(7,8,10,.88) 100%),linear-gradient(0deg,#07080a 0%,rgba(7,8,10,.55) 12%,transparent 30%,transparent 72%,rgba(7,8,10,.42) 100%); }
 .hero-content { min-height: 0; height: auto; padding-top: 0; justify-content: center; }
 .hero-center { width: 100%; padding: 7rem 2rem 2.25rem; margin: 0 auto; align-items: flex-start; text-align: left; flex: 0; }
 .eyebrow { font-size: .68rem; letter-spacing: .11em; line-height: 1.8; color: var(--cyan); text-transform: uppercase; }
 .hero-title { font-size: clamp(4.5rem,8vw,7rem); margin: 1.25rem 0 1.5rem; font-weight: 400; letter-spacing: -.065em; line-height: .95; }
 .hero-lead { max-width: 665px; font-size: clamp(1.12rem,1.6vw,1.34rem); color: var(--w-90); line-height: 1.7; letter-spacing: -.02em; }
+@media (min-width: 1024px) { .hero-lead { max-width: min(665px, 56vw); } }
 .hero-ctas { justify-content: flex-start; margin-top: 1.5rem; gap: 1.8rem; align-items: center; }
 .text-link { display: inline-flex; align-items: center; gap: .7rem; font-size: .9rem; padding: .6rem 0; border-bottom: 1px solid var(--w-30); color: var(--w-85); }
 .text-link:hover { color: var(--cyan); border-color: var(--cyan); }
@@ -986,6 +990,12 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 .hero-location span { display: block; }
 .hero-location #heroCoords { color: var(--w-40); font-size: .6rem; }
 .hero-foot .scroll-hint-inner { flex-direction: row; font-size: .62rem; }
+.hero-footer-actions { position: relative; display: flex; align-items: center; gap: .75rem; }
+.hero-motion { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: var(--w-60); border-radius: 50%; }
+.hero-motion:hover { color: var(--cyan); background: var(--w-04); }
+.hero-motion svg { width: 14px; height: 14px; }
+.hero-motion .hero-motion-play, .hero-motion[aria-pressed="true"] .hero-motion-pause { display: none; }
+.hero-motion[aria-pressed="true"] .hero-motion-play { display: block; }
 .long-sec { padding: 6rem 2rem; border-color: var(--w-10); }
 .section-head { margin-bottom: 3rem; max-width: 760px; }
 .section-head .display { font-weight: 400; letter-spacing: -.04em; line-height: 1.12; font-size: clamp(2.4rem,4.5vw,3.8rem); }
@@ -1023,20 +1033,25 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 .contact-title { font-size: clamp(3rem,6vw,5rem); font-weight: 400; line-height: 1.12; letter-spacing: -.04em; }
 .contact-sub { max-width: 540px; color: var(--w-65,var(--w-70)); }
 .contact-footer { font-size: .75rem; }
+/* below 1024px the copy spans most of the width: the field stays behind everything, and the hand gets a room below the introduction */
 @media (max-width: 1023px) {
+  .hero-room { display: block; height: clamp(220px, 58vw, 340px); }
+  .hero-vignette { background: linear-gradient(180deg,rgba(7,8,10,.74) 0%,rgba(7,8,10,.64) 46%,rgba(7,8,10,.16) 62%,rgba(7,8,10,0) 76%,rgba(7,8,10,.86) 100%); }
+  .hero-scene { background-image: url(hero/contact-tablet.webp); background-position: center bottom; }
   .nav { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end; border: 0; background: none; }
   .nav a { padding: .45rem .6rem; font-size: .72rem; }
   .has-menu .nav { display: none; }
   .work-row, .split-section, .purposes { gap: 2.5rem; }
 }
 @media (max-width: 719px) {
+  .hero-scene { background-image: url(hero/contact-mobile.webp); }
   .hero { min-height: 0; }
   .hero-center { padding: 6.5rem 1.4rem 2rem; }
   .hero-title { margin: 1rem 0 1.25rem; font-size: clamp(4.25rem,18vw,5.5rem); }
   .hero-lead { font-size: 1.08rem; line-height: 1.75; }
   .eyebrow { font-size: .6rem; letter-spacing: .06em; }
-  .hero-video { object-position: 62% center; opacity: .2; }
   .hero-foot { padding: 0 1.4rem 1.5rem; }
+  .hero-motion { position: absolute; right: 0; bottom: calc(100% + .75rem); }
   .long-sec { padding: 4rem 1.4rem; }
   .work-row, .split-section, .purposes { grid-template-columns: 1fr; gap: 1.6rem; }
   .work-row { padding: 2rem 0; }
@@ -1109,14 +1124,8 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
 
 <!-- ─────────────── HERO ─────────────── -->
 <section class="hero" id="hero">
-  <div class="hero-fallback" aria-hidden="true"></div>
-  <video
-    class="hero-video"
-    id="heroVideo"
-    autoplay loop muted playsinline preload="auto"
-    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260411_104032_69319010-2458-492b-b04d-b40a5dfa4482.mp4"
-    aria-hidden="true"
-  ></video>
+  <!-- the point of contact: a field of pixels gathers into a human gesture -->
+  <div class="hero-scene" id="heroScene" aria-hidden="true"><canvas></canvas></div>
   <div class="hero-vignette" aria-hidden="true"></div>
 
   <div class="hero-content">
@@ -1129,9 +1138,16 @@ section[tabindex="-1"]:focus, #top:focus { outline: none; }
         <a class="text-link" href="#contact">Get in touch</a>
       </div>
     </div>
+    <div class="hero-room" id="heroRoom" aria-hidden="true"></div>
     <div class="hero-foot">
       <p class="hero-location"><span>Maharashtra, India</span><span id="heroCoords">18°40′56″ N · 73°55′11″ E</span></p>
-      <div class="scroll-hint-inner"><span>Scroll to explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></div>
+      <div class="hero-footer-actions">
+        <button class="hero-motion" id="heroMotion" type="button" aria-label="Pause background animation" aria-pressed="false" hidden>
+          <svg class="hero-motion-pause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 3h2v10H4zm6 0h2v10h-2z"/></svg>
+          <svg class="hero-motion-play" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 2.5 13 8l-8 5.5z"/></svg>
+        </button>
+        <div class="scroll-hint-inner"><span>Scroll to explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1325,33 +1341,6 @@ document.addEventListener('keydown', e => {
 });
 menuBtn.hidden = false;
 document.documentElement.classList.add('has-menu');
-
-/* ─── background video — forced play + click-to-play fallback ─── */
-(function initVideo() {
-  const v = document.getElementById('heroVideo');
-  if (!v) return;
-  v.muted = true;
-  const tryPlay = () => {
-    const p = v.play();
-    if (p && typeof p.catch === 'function') {
-      p.catch(() => {
-        const kick = () => { v.play().catch(() => {}); cleanup(); };
-        const cleanup = () => {
-          window.removeEventListener('pointerdown', kick);
-          window.removeEventListener('keydown', kick);
-          window.removeEventListener('touchstart', kick);
-        };
-        window.addEventListener('pointerdown', kick, { once: true });
-        window.addEventListener('keydown', kick, { once: true });
-        window.addEventListener('touchstart', kick, { once: true });
-      });
-    }
-  };
-  if (v.readyState >= 2) tryPlay();
-  else v.addEventListener('loadeddata', tryPlay, { once: true });
-  // if the video fails (expired CDN, offline, etc.), hide it so the gradient fallback shows through
-  v.addEventListener('error', () => { v.style.display = 'none'; });
-})();
 
 /* ─── the seam — the door into the letter ─── */
 const seam = document.getElementById('seam');
